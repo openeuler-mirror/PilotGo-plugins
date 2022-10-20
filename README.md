@@ -9,9 +9,9 @@ PilotGo-plugins contains plugins for PilotGo.
 
 #### 安装教程
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+1.  执行npm run build对前端进行打包
+2.  执行go build -o redisMonitor生成redisMonitor
+3.  将redisMonitor移动到PilotGo的plugins插件目录下
 
 #### 使用说明
 
