@@ -1,8 +1,8 @@
 go 1.19
 
 use (
+	./PilotGo
 	./grafana/
 	./prometheus
 	./sdk
-	./PilotGo
 )

@@ -16,7 +16,9 @@ func main() {
 		Description: "grafana可视化工具支持",
 		Author:      "guozhengxin",
 		Email:       "guozhengxin@kylinos.cn",
+		Url:         "http://localhost:9999/plugin/grafana",
+		ReverseDest: "http://192.168.28.232:3000/",
 	})
 
-	client.Serve()
+	client.Serve(":9999")
 }
