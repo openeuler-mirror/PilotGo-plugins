@@ -16,8 +16,8 @@ type PluginInfo struct {
 	Description string `json:"description"`
 	Author      string `json:"author"`
 	Email       string `json:"email"`
-	IndexUrl    string `json:"index_url"`
-	ManageUrl   string `json:"manage_url"`
+	Url         string `json:"url"`
+	ReverseDest string `json:"reverse_dest"`
 }
 
 type Client struct {
@@ -32,8 +32,12 @@ func InfoHandler(c *gin.Context) {
 }
 
 func ReverseProxyHandler(c *gin.Context) {
-	fmt.Println("reverse to grafana server")
-	remote := "http://10.1.167.104:3000/" //转向的host
+	remote := c.GetString("__internal__reverse_dest")
+	if remote == "" {
+		fmt.Println("get reverse dest failed!")
+		return
+	}
+
 	target, err := url.Parse(remote)
 	if err != nil {
 		return
@@ -47,6 +51,7 @@ func ReverseProxyHandler(c *gin.Context) {
 
 func DefaultClient(desc *PluginInfo) *Client {
 	BaseInfo = desc
+	dest := desc.ReverseDest
 
 	router := gin.Default()
 	mg := router.Group("plugin_manage/")
@@ -54,9 +59,12 @@ func DefaultClient(desc *PluginInfo) *Client {
 		mg.GET("/info", InfoHandler)
 	}
 
-	pg := router.Group("plugin/" + desc.Name)
+	pg := router.Group("/plugin/" + desc.Name)
 	{
-		pg.Any("/*any", ReverseProxyHandler)
+		pg.Any("/*any", func(c *gin.Context) {
+			c.Set("__internal__reverse_dest", dest)
+			ReverseProxyHandler(c)
+		})
 	}
 
 	return &Client{
@@ -64,7 +72,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 	}
 }
 
-func (c *Client) Serve() {
+func (c *Client) Serve(url ...string) {
 	// TODO: 启动http服务
-	c.Router.Run()
+	c.Router.Run(url...)
 }
