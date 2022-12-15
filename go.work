@@ -3,6 +3,6 @@ go 1.19
 use (
 	./PilotGo
 	./grafana/
-	./prometheus
+	./prometheus/server
 	./sdk
 )
