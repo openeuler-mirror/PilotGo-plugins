@@ -39,14 +39,14 @@ export const fromSep = (pack, sep) => pack.split(sep, 2)[0].toLowerCase() + (pac
 
 // Export a static array of all language packs
 export const availablePacks = Object.freeze([
-    // 'de',
+    'de',
     'en',
-    // 'es',
-    // 'fr',
-    // 'ja',
-    // 'pl',
-    // 'ptBR',
-    // 'ru',
-    // 'zhCN',
-    // 'zhTW',
+    'es',
+    'fr',
+    'ja',
+    'pl',
+    'ptBR',
+    'ru',
+    'zhCN',
+    'zhTW',
 ]);
