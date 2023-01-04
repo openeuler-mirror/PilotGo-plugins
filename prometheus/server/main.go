@@ -16,9 +16,9 @@ func main() {
 		Description: "Prometheus开源系统监视和警报工具包",
 		Author:      "zhanghan",
 		Email:       "zhanghan@kylinos.cn",
-		Url:         "http://10.1.167.93:9090/",
-		ReverseDest: "http://10.1.167.93:9090/",
+		Url:         "http://localhost:8090",
+		ReverseDest: "http://localhost:9090",
 	})
 
-	client.Serve(":99090")
+	client.Serve(":8090")
 }

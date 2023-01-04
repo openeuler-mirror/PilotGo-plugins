@@ -22,16 +22,16 @@ func DefaultClient(desc *plugin.PluginInfo) *plugin.Client {
 	pg := router.Group("/plugin/" + desc.Name)
 	{
 		pg.GET("/query", func(c *gin.Context) {
-			c.Set("__internal__reverse_dest", dest)
-			QueryRange(c)
+			c.Set("query", dest)
+			Query(c)
 		})
 		pg.GET("/query_range", func(c *gin.Context) {
-			c.Set("__internal__reverse_dest", dest)
+			c.Set("query_range", dest)
 			QueryRange(c)
 		})
-		pg.GET("/rules", func(c *gin.Context) {
-			c.Set("__internal__reverse_dest", dest)
-			QueryRange(c)
+		pg.GET("/targets", func(c *gin.Context) {
+			c.Set("targets", dest)
+			Targets(c)
 		})
 
 	}
@@ -42,7 +42,7 @@ func DefaultClient(desc *plugin.PluginInfo) *plugin.Client {
 }
 
 func Query(c *gin.Context) {
-	remote := c.GetString("__internal__reverse_dest")
+	remote := c.GetString("query")
 	if remote == "" {
 		fmt.Println("get reverse dest failed!")
 		return
@@ -59,7 +59,7 @@ func Query(c *gin.Context) {
 }
 
 func QueryRange(c *gin.Context) {
-	remote := c.GetString("__internal__reverse_dest")
+	remote := c.GetString("query_range")
 	if remote == "" {
 		fmt.Println("get reverse dest failed!")
 		return
@@ -75,8 +75,8 @@ func QueryRange(c *gin.Context) {
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
 
-func Rules(c *gin.Context) {
-	remote := c.GetString("__internal__reverse_dest")
+func Targets(c *gin.Context) {
+	remote := c.GetString("targets")
 	if remote == "" {
 		fmt.Println("get reverse dest failed!")
 		return
@@ -88,6 +88,6 @@ func Rules(c *gin.Context) {
 
 	proxy := httputil.NewSingleHostReverseProxy(url)
 
-	c.Request.URL.Path = "api/v1/rules" //请求API
+	c.Request.URL.Path = "api/v1/targets" //请求API
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
