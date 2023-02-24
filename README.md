@@ -1,27 +1,25 @@
 # PilotGo-plugins
 
 #### 介绍
-PilotGo-plugins contains plugins for PilotGo.
+PilotGo-plugins包含一组PilotGo运维管理平台项目的插件组件。
 
-#### 软件架构
-软件架构说明
+#### 插件架构
 
-
-#### 安装教程
-
-1.  执行npm run build对前端进行打包
-2.  执行go build -o redisMonitor生成redisMonitor
-3.  将redisMonitor移动到PilotGo的plugins插件目录下
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
+PilotGo插件系统为微服务架构，插件组件通过http接口与PilotGo主服务进行对接。
 
 #### 参与贡献
 
-golang >= 1.18
+环境要求：
+
+ - golang >= 1.18
+ - nodejs >= 18
+
+项目说明：
+
+ - grafana：为PilotGo提供grafana可视化系统的支持
+ - nginx：为PilotGo提供nginx集群配置及管理功能的支持
+ - prometheus：为PilotGo提供prometheus监控基础组件的支持
+ - sdk：提供插件开发的golang sdk
 
 #### 特技
 
