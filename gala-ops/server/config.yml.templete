@@ -1,0 +1,6 @@
+grafana:
+  addr: "localhost:3000"
+  user: ""
+  passwd: ""
+http:
+  addr: "0.0.0.0:7888"
