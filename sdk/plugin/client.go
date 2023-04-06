@@ -73,35 +73,38 @@ func (c *Client) Serve(url ...string) {
 	c.HttpEngine.Run(url...)
 }
 
-func (c *Client) RunScript(batch []string, cmd string) (int, string, string, error) {
+type CmdResult struct {
+	MachineUUID string
+	Code        int
+	Stdout      string
+	Stderr      string
+}
+
+func (c *Client) RunScript(batch []string, cmd string) ([]*CmdResult, error) {
 	url := c.Server + "/api/v1/pluginapi/run_script"
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {
-		return 0, "", "", err
+		return nil, err
 	}
 
 	hc := &http.Client{}
 	resp, err := hc.Do(req)
 	if err != nil {
-		return 0, "", "", err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	bs, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return 0, "", "", err
+		return nil, err
 	}
 
-	res := &struct {
-		Code   int
-		Stdout string
-		Stderr string
-	}{}
-	if err := json.Unmarshal(bs, res); err != nil {
-		return 0, "", "", err
+	res := []*CmdResult{}
+	if err := json.Unmarshal(bs, &res); err != nil {
+		return nil, err
 	}
 
-	return res.Code, res.Stdout, res.Stderr, nil
+	return res, nil
 }
 
 type MachineNode struct {
