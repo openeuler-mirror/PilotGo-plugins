@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
+	"openeuler.org/PilotGo/gala-ops-plugin/httphandler"
 	"openeuler.org/PilotGo/plugin-sdk/plugin"
 )
 
@@ -25,4 +27,17 @@ func main() {
 	})
 
 	client.Serve(":8888")
+
+	registerHandlers(client.HttpEngine)
+
+}
+
+func registerHandlers(engine *gin.Engine) {
+	api := engine.Group("/plugin/gala-ops/api")
+	{
+		// 安装/升级/卸载gala-gopher监控终端
+		api.PUT("/install_gopher", httphandler.InstallGopher)
+		api.PUT("/upgrade_gopher", httphandler.UpgradeGopher)
+		api.DELETE("/uninstall_gopher", httphandler.UninstallGopher)
+	}
 }
