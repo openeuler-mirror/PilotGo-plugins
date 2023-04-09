@@ -212,3 +212,18 @@ func (c *Client) ApplyConfig(batch []string, path, content string) error {
 
 	return nil
 }
+
+func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
+	url := c.Server + "/api/v1/pluginapi/plugins"
+	data, err := utils.Request("GET", url)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &PluginInfo{}
+	if err := json.Unmarshal(data, resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
