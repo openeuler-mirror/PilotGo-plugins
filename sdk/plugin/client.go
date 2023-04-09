@@ -75,6 +75,7 @@ func (c *Client) Serve(url ...string) {
 
 type CmdResult struct {
 	MachineUUID string
+	MachineIP   string
 	Code        int
 	Stdout      string
 	Stderr      string
