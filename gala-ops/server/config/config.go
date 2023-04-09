@@ -28,7 +28,7 @@ type ServerConfig struct {
 	PilotGo *PilotGoConf `yaml:"PilotGo"`
 }
 
-const config_file = "./config.yaml"
+const config_file = "./config.yml"
 
 var global_config ServerConfig
 

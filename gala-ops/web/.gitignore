@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /ismp-monitor-web
+/dist
 
 
 # local env files

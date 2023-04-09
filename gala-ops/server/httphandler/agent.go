@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/gala-ops-plugin/pluginclient"
+	"openeuler.org/PilotGo/gala-ops-plugin/client"
 )
 
 func InstallGopher(ctx *gin.Context) {
@@ -21,7 +21,7 @@ func InstallGopher(ctx *gin.Context) {
 	}
 
 	cmd := "yum install -y gala-gopher && systemctl start gala-gopher"
-	cmdResults, err := pluginclient.Client().RunScript(param.Batch, cmd)
+	cmdResults, err := client.Client().RunScript(param.Batch, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -71,7 +71,7 @@ func UpgradeGopher(ctx *gin.Context) {
 	}
 
 	cmd := "systemctl stop gala-gopher && yum upgrade -y gala-gopher && systemctl start gala-gopher"
-	cmdResults, err := pluginclient.Client().RunScript(param.Batch, cmd)
+	cmdResults, err := client.Client().RunScript(param.Batch, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -119,7 +119,7 @@ func UninstallGopher(ctx *gin.Context) {
 	}
 
 	cmd := "systemctl stop gala-gopher && yum autoremove -y gala-gopher"
-	cmdResults, err := pluginclient.Client().RunScript(param.Batch, cmd)
+	cmdResults, err := client.Client().RunScript(param.Batch, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
