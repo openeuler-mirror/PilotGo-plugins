@@ -13,13 +13,19 @@ type GrafanaConf struct {
 	User   string `yaml:"user"`
 	Passwd string `yaml:"passwd"`
 }
+
 type HttpConf struct {
 	Addr string `yaml:"addr"`
 }
 
+type PilotGoConf struct {
+	Addr string `yaml:"addr"`
+}
+
 type ServerConfig struct {
-	Grafana GrafanaConf `yaml:"grafana"`
-	Http    HttpConf    `yaml:"http"`
+	Grafana *GrafanaConf `yaml:"grafana"`
+	Http    *HttpConf    `yaml:"http"`
+	PilotGo *PilotGoConf `yaml:"PilotGo"`
 }
 
 const config_file = "./config.yaml"

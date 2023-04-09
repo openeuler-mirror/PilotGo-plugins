@@ -4,3 +4,5 @@ grafana:
   passwd: ""
 http:
   addr: "0.0.0.0:7888"
+PilotGo:
+  addr: "localhost:8889"
