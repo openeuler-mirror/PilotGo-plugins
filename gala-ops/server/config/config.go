@@ -22,10 +22,19 @@ type PilotGoConf struct {
 	Addr string `yaml:"addr"`
 }
 
+type MysqlConf struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Database string `yaml:"database"`
+}
+
 type ServerConfig struct {
 	Grafana *GrafanaConf `yaml:"grafana"`
 	Http    *HttpConf    `yaml:"http"`
 	PilotGo *PilotGoConf `yaml:"PilotGo"`
+	Mysql   *MysqlConf   `yaml:"mysql"`
 }
 
 const config_file = "./config.yml"

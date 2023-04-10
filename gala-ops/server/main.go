@@ -2,19 +2,25 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gin-gonic/gin"
 
-	"openeuler.org/PilotGo/gala-ops-plugin/httphandler"
-
 	"openeuler.org/PilotGo/gala-ops-plugin/client"
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
+	"openeuler.org/PilotGo/gala-ops-plugin/database"
+	"openeuler.org/PilotGo/gala-ops-plugin/httphandler"
 )
 
 func main() {
 	fmt.Println("hello gala-ops")
 
 	config.Init()
+
+	if err := database.MysqlInit(config.Config().Mysql); err != nil {
+		fmt.Println("failed to initialize database")
+		os.Exit(-1)
+	}
 
 	engine := client.Client().HttpEngine
 	registerHandlers(engine)
