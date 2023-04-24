@@ -1,4 +1,4 @@
-module openeuler.org/PilotGo/plugin-sdk
+module gitee.com/openeuler/PilotGo-plugins/sdk
 
 go 1.19
 

@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"strings"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils"
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/plugin-sdk/utils"
 )
 
 type Client struct {
