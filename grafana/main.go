@@ -17,7 +17,7 @@ func main() {
 		Author:      "guozhengxin",
 		Email:       "guozhengxin@kylinos.cn",
 		Url:         "http://localhost:9999/plugin/grafana",
-		ReverseDest: "http://192.168.28.232:3000/",
+		ReverseDest: "http://192.168.75.100:3000/",
 	})
 
 	client.Serve(":9999")

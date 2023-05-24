@@ -47,7 +47,7 @@ func ReverseProxyHandler(c *gin.Context) {
 
 func DefaultClient(desc *PluginInfo) *Client {
 	BaseInfo = desc
-	dest := desc.ReverseDest
+	// dest := desc.ReverseDest
 
 	router := gin.Default()
 	mg := router.Group("plugin_manage/")
@@ -55,13 +55,13 @@ func DefaultClient(desc *PluginInfo) *Client {
 		mg.GET("/info", InfoHandler)
 	}
 
-	pg := router.Group("/plugin/" + desc.Name)
-	{
-		pg.Any("/*any", func(c *gin.Context) {
-			c.Set("__internal__reverse_dest", dest)
-			ReverseProxyHandler(c)
-		})
-	}
+	// pg := router.Group("/plugin/" + desc.Name)
+	// {
+	// 	pg.Any("/*any", func(c *gin.Context) {
+	// 		c.Set("__internal__reverse_dest", dest)
+	// 		ReverseProxyHandler(c)
+	// 	})
+	// }
 
 	return &Client{
 		HttpEngine: router,
