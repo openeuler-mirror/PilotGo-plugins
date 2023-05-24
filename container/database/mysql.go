@@ -6,7 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"openeuler.org/PilotGo/gala-ops-plugin/config"
+	"openeuler.org/PilotGo/container-plugin/config"
 )
 
 var globalDB *gorm.DB
