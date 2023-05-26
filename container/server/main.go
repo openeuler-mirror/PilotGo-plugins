@@ -30,6 +30,6 @@ func main() {
 func registerHandlers(engine *gin.Engine) {
 	api := engine.Group("/plugin/container/api")
 	{
-		api.PUT("/deploy_docker", httphandler.DeployDocker)
+		api.POST("/deploy_docker", httphandler.DeployDocker)
 	}
 }
