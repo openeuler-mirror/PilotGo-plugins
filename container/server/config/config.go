@@ -21,8 +21,8 @@ type MysqlConf struct {
 }
 
 type ServerConfig struct {
-	Http    *HttpConf    `yaml:"http"`
-	Mysql   *MysqlConf   `yaml:"mysql"`
+	Http  *HttpConf  `yaml:"http"`
+	Mysql *MysqlConf `yaml:"mysql"`
 }
 
 const config_file = "./config.yml"

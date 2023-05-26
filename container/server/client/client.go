@@ -17,7 +17,7 @@ func init() {
 		Author:      "wangjunqi",
 		Email:       "wangjunqi@kylinos.cn",
 		Url:         "http://192.168.75.100:9999/plugin/container",
-		ReverseDest: "",
+		// ReverseDest: "",
 	})
 }
 
