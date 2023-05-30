@@ -2,7 +2,7 @@
   <div class="cont">
     <div v-show="isChart" class='echart' ref="chartDom"></div>
     <span v-show="!isChart && (type === 'value')" class="text">{{ char_value }}</span>
-    <chart-table class="table" v-show="!isChart && (type==='table')" :columnList="columnList" :tableData="tableData" />
+    <chart-table class="table" v-show="!isChart && (type === 'table')" :columnList="columnList" :tableData="tableData" />
   </div>
 </template>
   
@@ -99,8 +99,9 @@ const filterCurrentData = (item: any, result: any) => {
     case 'table':
       if (result.length != props.query.sqls.length) {
         return false;
+      } else if (result.length > 0) {
+        set_table_type(item, result);
       }
-      set_table_type(item, result)
       break;
     default:
       break;
@@ -114,8 +115,11 @@ const handle_line_data = (values: any, target: string) => {
     let time_text = formatDate(new Date(valueItem[0] * 1000), "YYYY-MM-DD HH:ii:ss")
     let item_value = '';
     switch (target) {
-      case 'byte_series':
-        item_value = handle_byte(valueItem[1], 2);
+      case 'byte2GB_series':
+        item_value = handle_byte(valueItem[1], 2, 'GB');
+        break;
+      case 'byte2KB_series':
+        item_value = handle_byte(valueItem[1], 2, 'KB');
         break;
       case 'percent_series':
         item_value = (parseFloat(valueItem[1]) * 100).toFixed(2);
@@ -165,11 +169,15 @@ const set_value_type = (item: any, result: any) => {
   switch (item.target) {
     case 'value_series':
       // 数值系列
-      char_value.value = result && result.value ? parseFloat(result.value[1]).toFixed(item.float) + item.unit : '0';
+      char_value.value = (result && result.value ? parseFloat(result.value[1]) : 0.00).toFixed(item.float) + item.unit;
       break;
-    case 'byte_series':
-      // 字节系列
-      char_value.value = result && result.value ? handle_byte(result.value[1], item.float) + item.unit : '0';
+    case 'byte2GB_series':
+      // 字节GB系列
+      char_value.value = (result && result.value ? handle_byte(result.value[1], item.float, 'GB') : 0.00) + 'G';
+      break;
+    case 'byte2KB_series':
+      // 字节KB系列
+      char_value.value = (result && result.value ? handle_byte(result.value[1], item.float, 'KB') : 0.00) + 'K';
       break;
 
     default:
@@ -221,7 +229,7 @@ const set_table_type = (item: any, result: any) => {
       cols.forEach(async (vItem: any) => {
         switch (vItem.type) {
           case 'byte':
-            tableItem[vItem.prop] = handle_byte(eval(vItem.value), 2)
+            tableItem[vItem.prop] = handle_byte(eval(vItem.value), 2, 'GB')
             break;
           case 'percent':
             tableItem[vItem.prop] = (parseFloat(eval(vItem.value)) * 100).toFixed(2) + '%'

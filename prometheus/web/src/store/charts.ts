@@ -20,7 +20,7 @@ export const useLayoutStore = defineStore('layoutOption', {
           query: {
             sqls: [{ sql: 'count(count(node_cpu_seconds_total{instance="{macIp}",mode="system"}) by (cpu))' }],
             type: 'value', range: false, isValue: true, interval: 5,
-            target: 'value_series', unit: '', float: 0
+            target: 'value_series', unit: '个', float: 0
           }
         },
         {
@@ -29,13 +29,13 @@ export const useLayoutStore = defineStore('layoutOption', {
           query: {
             sqls: [{ sql: 'node_memory_MemTotal_bytes{instance="{macIp}"}' }],
             type: 'value', range: false, isValue: true, interval: 5,
-            target: 'byte_series', unit: 'GiB', float: 2,
+            target: 'byte2GB_series', unit: 'GiB', float: 2,
 
           }
         },
         {
           x: 4, y: 0, w: 2, h: 4, i: '3',
-          static: true, display: true, title: 'CPU使用率(5m)',
+          static: true, display: true, title: 'CPU总使用率',
           query: {
             sqls: [{ sql: '100 - (avg(irate(node_cpu_seconds_total{instance="{macIp}",mode="idle"}[5m])) * 100)' }],
             type: 'gauge', range: false, isChart: true, interval: 5,
@@ -49,7 +49,7 @@ export const useLayoutStore = defineStore('layoutOption', {
         },
         {
           x: 6, y: 0, w: 2, h: 4, i: '4',
-          static: true, display: true, title: 'CPU iowait(5m)',
+          static: true, display: true, title: 'CPU iowait',
           query: {
             sqls: [{ sql: 'avg(irate(node_cpu_seconds_total{instance="{macIp}",mode="iowait"}[5m])) * 100' }],
             type: 'gauge', range: false, isChart: true, interval: 5,
@@ -81,7 +81,7 @@ export const useLayoutStore = defineStore('layoutOption', {
           query: {
             sqls: [{ sql: 'node_filefd_allocated{instance="{macIp}"}' }],
             type: 'gauge', range: false, isChart: true, interval: 5,
-            target: 'num_series', unit: '', float: 2, min: 0, max: 9,
+            target: 'num_series', unit: 'K', float: 2, min: 0, max: 9,
             color: [
               [0.6, '#67e0e3'],
               [0.9, '#E6A23C'],
@@ -114,19 +114,19 @@ export const useLayoutStore = defineStore('layoutOption', {
                 sql: 'node_load1{instance="{macIp}"}',
                 start: startTime,
                 end: endTime,
-                series_name: 'load_1m'
+                series_name: '1分钟'
               },
               {
                 sql: 'node_load5{instance="{macIp}"}',
                 start: startTime,
                 end: endTime,
-                series_name: 'load_5m'
+                series_name: '5分钟'
               },
               {
                 sql: 'node_load15{instance="{macIp}"}',
                 start: startTime,
                 end: endTime,
-                series_name: 'load_15m'
+                series_name: '15分钟'
               },
             ],
           }
@@ -184,7 +184,7 @@ export const useLayoutStore = defineStore('layoutOption', {
         },
         {
           x: 0, y: 11, w: 10, h: 7, i: '11',
-          static: false, display: true, title: 'cpu使用率、磁盘每秒的I/O操作耗费时间 (%)',
+          static: false, display: true, title: 'cpu使用率',
           query: {
             type: 'line', range: true, isChart: true,
             target: 'percent_series', unit: '%', float: 2, min: 0, max: null,
@@ -194,36 +194,36 @@ export const useLayoutStore = defineStore('layoutOption', {
                 start: startTime,
                 end: endTime,
                 step: 15,
-                series_name: 'system',
+                series_name: '系统cpu使用率',
               },
               {
                 sql: 'avg(irate(node_cpu_seconds_total{instance="{macIp}",mode="user"}[1m])) by (instance)',
                 start: startTime,
                 end: endTime,
                 step: 15,
-                series_name: 'user',
+                series_name: '用户cpu使用率',
               },
               {
                 sql: 'avg(irate(node_cpu_seconds_total{instance="{macIp}",mode="idle"}[1m])) by (instance)',
                 start: startTime,
                 end: endTime,
                 step: 15,
-                series_name: 'idle',
+                series_name: '单核cpu空闲率',
               },
               {
                 sql: 'avg(irate(node_cpu_seconds_total{instance="{macIp}",mode="iowait"}[1m])) by (instance)',
                 start: startTime,
                 end: endTime,
                 step: 15,
-                series_name: 'iowait',
+                series_name: '磁盘io使用率',
               },
-              {
+              /* {
                 sql: 'irate(node_disk_io_time_seconds_total{instance="{macIp}",}[1m])',
                 start: startTime,
                 end: endTime,
                 step: 15,
                 series_name: '',
-              },
+              }, */
             ]
           }
         },
@@ -232,7 +232,7 @@ export const useLayoutStore = defineStore('layoutOption', {
           static: false, display: true, title: '内存信息',
           query: {
             type: 'line', range: true, isChart: true,
-            target: 'byte_series', unit: 'GiB', float: 2, min: 0, max: null,
+            target: 'byte2GB_series', unit: 'GiB', float: 2, min: 0, max: null,
             sqls: [
               {
                 sql: 'node_memory_MemTotal_bytes{instance="{macIp}"}',
@@ -261,13 +261,13 @@ export const useLayoutStore = defineStore('layoutOption', {
         },
         {
           x: 0, y: 18, w: 8, h: 7, i: '13',
-          static: false, display: true, title: '磁盘读取速率(IOPS)',
+          static: false, display: true, title: '磁盘读取容量',
           query: {
             type: 'line', range: true, isChart: true,
-            target: 'speed_series', unit: 'io/s', float: 2, min: 0, max: null,
+            target: 'byte2KB_series', unit: 'kB/s', float: 2, min: 0, max: null,
             sqls: [
               {
-                sql: 'irate(node_disk_reads_completed_total{instance="{macIp}"}[1m])',
+                sql: 'rate(node_disk_read_bytes_total{instance="{macIp}"}[1m])',
                 start: startTime,
                 end: endTime,
                 step: 15,
@@ -280,13 +280,13 @@ export const useLayoutStore = defineStore('layoutOption', {
         },
         {
           x: 8, y: 18, w: 8, h: 7, i: '14',
-          static: false, display: true, title: '磁盘写入速率(IOPS)',
+          static: false, display: true, title: '磁盘写入容量',
           query: {
             type: 'line', range: true, isChart: true,
-            target: 'speed_series', unit: 'io/s', float: 2, min: 0, max: null,
+            target: 'byte2KB_series', unit: 'kB/s', float: 2, min: 0, max: null,
             sqls: [
               {
-                sql: 'irate(node_disk_writes_completed_total{instance="{macIp}"}[1m])',
+                sql: 'rate(node_disk_written_bytes_total{instance="{macIp}"}[1m])',
                 start: startTime,
                 end: endTime,
                 step: 15,
@@ -351,6 +351,12 @@ export const useLayoutStore = defineStore('layoutOption', {
       ],
     };
   },
+  /* persist: {
+    enabled: true, // 开启存储
+    strategies: [
+      { storage: localStorage, paths: ["layout_option"] },
+    ]
+  }, */
   getters: {},
   actions: {
     initLayout(layout: any) {
