@@ -3,11 +3,12 @@ package httphandler
 import (
 	"log"
 
+	"github.com/docker/docker/client"
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/gin-gonic/gin"
 )
 
-func GetContainerList(ctx *gin.Context) {
+func ContainerList(ctx *gin.Context) {
 	client, err := docker.NewClient("tcp://127.0.0.1:2375")
 	if err != nil {
 		log.Fatal(err)
@@ -24,6 +25,11 @@ func GetContainerList(ctx *gin.Context) {
 }
 
 func RunContainer(ctx *gin.Context) {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		panic(err)
+	}
+	defer cli.Close()
 
 }
 
