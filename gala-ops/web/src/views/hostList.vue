@@ -75,7 +75,20 @@
       <el-table-column prop="operatingSystem" label="操作系统信息" />
       <el-table-column prop="version" label="版本" width="220" />
       <el-table-column prop="architecture" label="CPU架构" width="220" />
-      <el-table-column prop="monitorVersion" label="监控组件版本" width="260" />
+      <el-table-column prop="monitorVersion" label="gala-gopher版本" width="260" />
+      <el-table-column prop="agentStatus" label="agent状态" width="160">
+        <template #default="scope">
+          <span style="display:flex;align-items: center; justify-content: center;">
+            <el-icon v-if="scope.row.agentStatus === '连接'" color="#67c23a">
+              <SuccessFilled />
+            </el-icon>
+            <el-icon v-else color="#ff0000">
+              <CircleCloseFilled />
+            </el-icon>
+            <span style="margin:0 4px;">{{ scope.row.agentStatus }}</span>
+          </span>
+        </template>
+      </el-table-column>
       <el-table-column prop='registTime' sortable label="监控组件注册时间" />
     </el-table>
     <div class="pagination">
@@ -162,8 +175,8 @@ const handleClose = (closeType: string) => {
 
 // 获取主机列表
 const getHostList = () => {
-  loading.value = true;
-  getExporterList({ page: page.currentPage, size: page.pageSize }).then(res => {
+  loading.value = false;
+  /* getExporterList({ page: page.currentPage, size: page.pageSize }).then(res => {
     if (res.data && res.data.code === 200) {
       loading.value = false;
       tableData.value = res.data.data;
@@ -175,7 +188,11 @@ const getHostList = () => {
       currentNum.value = 0;
       page.total = 0;
     }
-  })
+  }) */
+  let result = { "code": 200, "data": [{ "hostId": 1, "ip": "172.30.23.32", "deptName": "平台", "operatingSystem": "银河麒麟高级服务器操作系统", "version": "V10(SP1)", "architecture": "aarch64", "monitorVersion": "1.0", "registTime": "2023-04-18 14:20:22", "agentStatus": "连接" }], "ok": true, "page": 1, "size": 20, "total": 1 }
+  tableData.value = result.data;
+  currentNum.value = result.data.length;
+  page.total = result.total;
 }
 
 // 输入回车事件 

@@ -16,8 +16,22 @@ export const deepClone = (res: any) => {
 }
 
 // 处理字节类型数据
-export const handle_byte = (value: string, float: number) => {
-  return (parseFloat(value) / 1024 / 1024 / 1024).toFixed(float)
+export const handle_byte = (value: string, float: number, unit: string) => {
+  let value2unit: string = '0.00';
+  switch (unit) {
+    case 'GB':
+      value2unit = (parseFloat(value) / 1024 / 1024 / 1024).toFixed(float);
+      break;
+    case 'KB':
+      value2unit = (parseFloat(value) / 1024).toFixed(float);
+      break;
+
+    default:
+      // MB
+      value2unit = (parseFloat(value) / 1024 / 1024).toFixed(float);
+      break;
+  }
+  return value2unit;
 }
 
 // echart颜色表
