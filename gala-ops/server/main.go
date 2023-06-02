@@ -28,6 +28,11 @@ func main() {
 }
 
 func registerHandlers(engine *gin.Engine) {
+	manager := engine.Group("/plugin_manage")
+	{
+		manager.GET("/info", httphandler.PluginInfo)
+	}
+
 	api := engine.Group("/plugin/gala-ops/api")
 	{
 		// 脚本执行结果接口

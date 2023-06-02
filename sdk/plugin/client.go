@@ -18,6 +18,7 @@ type Client struct {
 	HttpEngine *gin.Engine
 	Server     string
 	PluginName string
+	Plugin     *PluginInfo
 }
 
 var BaseInfo *PluginInfo
@@ -65,6 +66,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 
 	return &Client{
 		HttpEngine: router,
+		Plugin:     BaseInfo,
 	}
 }
 
