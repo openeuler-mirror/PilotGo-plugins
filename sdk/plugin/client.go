@@ -8,8 +8,10 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -23,10 +25,10 @@ type Client struct {
 
 var BaseInfo *PluginInfo
 
-func InfoHandler(c *gin.Context) {
+// func InfoHandler(c *gin.Context) {
 
-	c.JSON(http.StatusOK, BaseInfo)
-}
+// 	c.JSON(http.StatusOK, BaseInfo)
+// }
 
 func ReverseProxyHandler(c *gin.Context) {
 	remote := c.GetString("__internal__reverse_dest")
@@ -46,15 +48,20 @@ func ReverseProxyHandler(c *gin.Context) {
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
 
-func DefaultClient(desc *PluginInfo) *Client {
+func DefaultClient(desc *PluginInfo, logConf *logger.LogOpts) *Client {
+	if err := logger.Init(logConf); err != nil {
+		fmt.Printf("logger init failed, please check the config file: %s", err)
+		os.Exit(-1)
+	}
+
 	BaseInfo = desc
 	// dest := desc.ReverseDest
 
 	router := gin.Default()
-	mg := router.Group("plugin_manage/")
-	{
-		mg.GET("/info", InfoHandler)
-	}
+	// mg := router.Group("plugin_manage/")
+	// {
+	// 	mg.GET("/info", InfoHandler)
+	// }
 
 	// pg := router.Group("/plugin/" + desc.Name)
 	// {

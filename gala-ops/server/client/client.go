@@ -18,7 +18,7 @@ func init() {
 		Email:       "guozhengxin@kylinos.cn",
 		Url:         "http://192.168.48.163:9999/plugin/gala-ops",
 		// ReverseDest: "http://192.168.48.163:3000/",
-	})
+	}, config.Config().Logopts)
 }
 
 func Client() *splugin.Client {
