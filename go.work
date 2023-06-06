@@ -1,9 +1,8 @@
 go 1.19
 
 use (
-	./PilotGo
-	./gala-ops/server
 	./container/server
+	./gala-ops/server
 	./grafana/
 	./prometheus/server
 	./sdk

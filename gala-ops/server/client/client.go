@@ -1,16 +1,16 @@
 package client
 
 import (
-	splugin "gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
 )
 
 const Version = "0.0.1"
 
-var globalClient *splugin.Client
+var globalClient *client.Client
 
 func init() {
-	globalClient = splugin.DefaultClient(&splugin.PluginInfo{
+	globalClient = client.DefaultClient(&client.PluginInfo{
 		Name:        "gala-ops",
 		Version:     Version,
 		Description: "gala-ops智能运维工具",
@@ -21,7 +21,7 @@ func init() {
 	}, config.Config().Logopts)
 }
 
-func Client() *splugin.Client {
+func Client() *client.Client {
 	return globalClient
 }
 

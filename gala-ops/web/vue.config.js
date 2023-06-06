@@ -1,8 +1,8 @@
 module.exports = {
-  // devServer: {
-  //   headers: {
-  //     'Access-Control-Allow-Origin': '*',
-  //   },
+  devServer: {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   //   proxy: {
   //     '/api': {
   //       target: 'http://172.30.23.106:8088',
@@ -15,7 +15,7 @@ module.exports = {
   //   },
   //   port: 8080,
   //   host: '0.0.0.0',
-  // },
+  },
 
   // 静态资源
   publicPath: "./",
