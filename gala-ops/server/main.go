@@ -15,7 +15,7 @@ import (
 func main() {
 	fmt.Println("hello gala-ops")
 
-	config.Init()
+	// config.Init()
 
 	if err := database.MysqlInit(config.Config().Mysql); err != nil {
 		fmt.Println("failed to initialize database")

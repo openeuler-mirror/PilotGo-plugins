@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -31,17 +32,18 @@ type MysqlConf struct {
 }
 
 type ServerConfig struct {
-	Grafana *GrafanaConf `yaml:"grafana"`
-	Http    *HttpConf    `yaml:"http"`
-	PilotGo *PilotGoConf `yaml:"PilotGo"`
-	Mysql   *MysqlConf   `yaml:"mysql"`
+	Grafana *GrafanaConf    `yaml:"grafana"`
+	Http    *HttpConf       `yaml:"http"`
+	PilotGo *PilotGoConf    `yaml:"PilotGo"`
+	Mysql   *MysqlConf      `yaml:"mysql"`
+	Logopts *logger.LogOpts `yaml:"log"`
 }
 
 const config_file = "./config.yml"
 
 var global_config ServerConfig
 
-func Init() {
+func init() {
 	err := readConfig(config_file, &global_config)
 	if err != nil {
 		fmt.Printf("")
