@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"openeuler.org/PilotGo/plugin-sdk/plugin"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
 	Router "openeuler.org/PilotGo/prometheus-plugin/router"
 )
 

@@ -5,8 +5,8 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/plugin-sdk/plugin"
 )
 
 func DefaultClient(desc *plugin.PluginInfo) *plugin.Client {
