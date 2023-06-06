@@ -15,7 +15,7 @@ import (
 func main() {
 	fmt.Println("hello container")
 
-	config.Init()
+	// config.Init()
 
 	if err := database.MysqlInit(config.Config().Mysql); err != nil {
 		fmt.Println("failed to initialize database")
@@ -28,6 +28,11 @@ func main() {
 }
 
 func registerHandlers(engine *gin.Engine) {
+	manager := engine.Group("/plugin_manage")
+	{
+		manager.GET("/info", httphandler.PluginInfo)
+	}
+	
 	api := engine.Group("/plugin/container/api")
 	{
 		api.POST("/deploy_docker", httphandler.DeployDocker)

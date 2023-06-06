@@ -16,7 +16,7 @@ func init() {
 		Description: "gala-ops智能运维工具",
 		Author:      "guozhengxin",
 		Email:       "guozhengxin@kylinos.cn",
-		Url:         "http://192.168.48.163:9999/plugin/gala-ops",
+		Url:         "http://192.168.75.100:9999/plugin/gala-ops",
 		// ReverseDest: "http://192.168.48.163:3000/",
 	}, config.Config().Logopts)
 }

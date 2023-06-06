@@ -2,9 +2,9 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gopkg.in/yaml.v3"
 )
 
@@ -21,15 +21,16 @@ type MysqlConf struct {
 }
 
 type ServerConfig struct {
-	Http  *HttpConf  `yaml:"http"`
-	Mysql *MysqlConf `yaml:"mysql"`
+	Http    *HttpConf       `yaml:"http"`
+	Mysql   *MysqlConf      `yaml:"mysql"`
+	Logopts *logger.LogOpts `yaml:"log"`
 }
 
 const config_file = "./config.yml"
 
 var global_config ServerConfig
 
-func Init() {
+func init() {
 	err := readConfig(config_file, &global_config)
 	if err != nil {
 		fmt.Printf("")
@@ -42,7 +43,7 @@ func Config() *ServerConfig {
 }
 
 func readConfig(file string, config interface{}) error {
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := os.ReadFile(file)
 	if err != nil {
 		fmt.Printf("open %s failed! err = %s\n", file, err.Error())
 		return err
