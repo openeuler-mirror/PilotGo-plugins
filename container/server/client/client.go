@@ -16,9 +16,9 @@ func init() {
 		Description: "Container management plugin",
 		Author:      "wangjunqi",
 		Email:       "wangjunqi@kylinos.cn",
-		Url:         "http://192.168.75.100:9999/plugin/container",
+		Url:         "http://192.168.75.100:9998/plugin/container",
 		// ReverseDest: "",
-	})
+	}, config.Config().Logopts)
 }
 
 func Client() *splugin.Client {

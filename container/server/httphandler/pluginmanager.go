@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/gala-ops-plugin/client"
+	"openeuler.org/PilotGo/container-plugin/client"
 )
 
 func PluginInfo(ctx *gin.Context) {
