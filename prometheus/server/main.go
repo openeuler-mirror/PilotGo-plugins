@@ -2,23 +2,31 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
-	Router "openeuler.org/PilotGo/prometheus-plugin/router"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+	"openeuler.org/PilotGo/prometheus-plugin/config"
+	"openeuler.org/PilotGo/prometheus-plugin/plugin"
+	"openeuler.org/PilotGo/prometheus-plugin/router"
 )
 
 func main() {
 	fmt.Println("hello prometheus")
 
-	client := Router.DefaultClient(&plugin.PluginInfo{
-		Name:        "Prometheus",
-		Version:     "Version",
-		Description: "Prometheus开源系统监视和警报工具包",
-		Author:      "zhanghan",
-		Email:       "zhanghan@kylinos.cn",
-		Url:         "http://localhost:8090",
-		ReverseDest: "http://localhost:9090",
-	})
+	config.Init()
 
-	client.Serve(":8090")
+	if err := logger.Init(&config.Config().Logopts); err != nil {
+		fmt.Printf("logger init failed, please check the config file: %s", err)
+		os.Exit(-1)
+	}
+
+	server := router.InitRouter()
+
+	client := client.DefaultClient(plugin.Init(config.Config().Prometheus))
+	client.RegisterHandlers(server)
+
+	if err := server.Run(config.Config().Http.Addr); err != nil {
+		logger.Fatal("failed to run server")
+	}
 }
