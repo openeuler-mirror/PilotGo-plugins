@@ -2,14 +2,12 @@ package httphandler
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/api"
-	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
+	prome "github.com/prometheus/client_golang/api/prometheus/v1"
 )
 
 type Plugin struct {
@@ -24,7 +22,7 @@ type Plugin struct {
 	Status      string `json:"status"`
 }
 
-func PrometheusAPI(URL string) (v1.API, error) {
+func PrometheusAPI(URL string) (prome.API, error) {
 	// 创建一个HTTP客户端
 	client, err := api.NewClient(api.Config{
 		Address: "http://" + URL,
@@ -35,11 +33,11 @@ func PrometheusAPI(URL string) (v1.API, error) {
 	}
 
 	// 创建一个API客户端
-	v1api := v1.NewAPI(client)
-	return v1api, nil
+	promeapi := prome.NewAPI(client)
+	return promeapi, nil
 }
 
-func PrometheusMetrics(ctx *gin.Context, client *client.Client) {
+func PrometheusMetrics(ctx *gin.Context, promeclient prome.API) {
 	// bs, err := utils.Request("GET", client.Server+"plugins")
 	// if err != nil {
 	// 	logger.Error("faild to get plugin list: ", err)
@@ -55,19 +53,9 @@ func PrometheusMetrics(ctx *gin.Context, client *client.Client) {
 	// 		Prometheus_addr = p.Url
 	// 	}
 	// }
-	plugin, err := client.GetPluginInfo("prometheus")
-	if err != nil {
-		logger.Error("failed to get plugin info from pilotgoserver: ", err)
-		return
-	}
-
-	promAPI, err := PrometheusAPI(strings.Split(plugin.Url, "/")[2])
-	if err != nil {
-		logger.Error("failed to create prometheus api: ", err)
-	}
 
 	// 查询所有metrics列表
-	result, warnings, err := promAPI.Query(ctx, "up", time.Now())
+	result, warnings, err := promeclient.Query(ctx, "up", time.Now())
 
 	if err != nil {
 		logger.Error("failed to query prometheus: ", err)
