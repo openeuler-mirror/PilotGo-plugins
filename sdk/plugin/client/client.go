@@ -9,14 +9,21 @@ type Client struct {
 	PluginInfo *PluginInfo
 }
 
+var global_client *Client
 var BaseInfo *PluginInfo
 
 func DefaultClient(desc *PluginInfo) *Client {
 	BaseInfo = desc
 
-	return &Client{
+	global_client = &Client{
 		PluginInfo: desc,
 	}
+
+	return global_client
+}
+
+func GetClient() *Client {
+	return global_client
 }
 
 // RegisterHandlers 注册一些插件标准的API接口，清单如下：
