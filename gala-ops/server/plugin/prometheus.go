@@ -11,8 +11,8 @@ func addTargets(targets []string, url string) error {
 	return nil
 }
 
-func MonitorTargets(targets []string, client *client.Client) error {
-	plugin, err := client.GetPluginInfo("prometheus")
+func MonitorTargets(targets []string) error {
+	plugin, err := client.GetClient().GetPluginInfo("prometheus")
 	if err != nil {
 		return err
 	}

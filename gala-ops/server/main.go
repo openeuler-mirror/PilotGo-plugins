@@ -14,8 +14,6 @@ import (
 
 const Version = "0.0.1"
 
-var GlobalClient *client.Client
-
 var PluginInfo = &client.PluginInfo{
 	Name:        "gala-ops",
 	Version:     Version,
@@ -63,14 +61,8 @@ func InitRouter(router *gin.Engine) {
 		// api.PUT("/run_script_result", httphandler.RunScriptResult)
 
 		// 安装/升级/卸载gala-gopher监控终端
-		api.PUT("/install_gopher", func(ctx *gin.Context) {
-			httphandler.InstallGopher(ctx, GlobalClient)
-		})
-		api.PUT("/upgrade_gopher", func(ctx *gin.Context) {
-			httphandler.UpgradeGopher(ctx, GlobalClient)
-		})
-		api.DELETE("/uninstall_gopher", func(ctx *gin.Context) {
-			httphandler.UninstallGopher(ctx, GlobalClient)
-		})
+		api.PUT("/install_gopher", httphandler.InstallGopher)
+		api.PUT("/upgrade_gopher", httphandler.UpgradeGopher)
+		api.DELETE("/uninstall_gopher", httphandler.UninstallGopher)
 	}
 }

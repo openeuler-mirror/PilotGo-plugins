@@ -9,7 +9,7 @@ import (
 	"openeuler.org/PilotGo/gala-ops-plugin/plugin"
 )
 
-func InstallGopher(ctx *gin.Context, client *client.Client) {
+func InstallGopher(ctx *gin.Context) {
 	// TODO
 	param := &struct {
 		Batch []string
@@ -22,7 +22,7 @@ func InstallGopher(ctx *gin.Context, client *client.Client) {
 	}
 
 	cmd := "yum install -y gala-gopher && systemctl start gala-gopher"
-	cmdResults, err := client.RunScript(param.Batch, cmd)
+	cmdResults, err := client.GetClient().RunScript(param.Batch, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -55,7 +55,7 @@ func InstallGopher(ctx *gin.Context, client *client.Client) {
 
 		ret = append(ret, d)
 	}
-	err = plugin.MonitorTargets(monitorTargets, client)
+	err = plugin.MonitorTargets(monitorTargets)
 	if err != nil {
 		fmt.Println("error: failed to add gala-gopher to prometheus monitor targets")
 	}
@@ -67,7 +67,7 @@ func InstallGopher(ctx *gin.Context, client *client.Client) {
 	})
 }
 
-func UpgradeGopher(ctx *gin.Context, client *client.Client) {
+func UpgradeGopher(ctx *gin.Context) {
 	// TODO
 	param := &struct {
 		Batch []string
@@ -80,7 +80,7 @@ func UpgradeGopher(ctx *gin.Context, client *client.Client) {
 	}
 
 	cmd := "systemctl stop gala-gopher && yum upgrade -y gala-gopher && systemctl start gala-gopher"
-	cmdResults, err := client.RunScript(param.Batch, cmd)
+	cmdResults, err := client.GetClient().RunScript(param.Batch, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -115,7 +115,7 @@ func UpgradeGopher(ctx *gin.Context, client *client.Client) {
 	})
 }
 
-func UninstallGopher(ctx *gin.Context, client *client.Client) {
+func UninstallGopher(ctx *gin.Context) {
 	// TODO
 	param := &struct {
 		Batch []string
@@ -128,7 +128,7 @@ func UninstallGopher(ctx *gin.Context, client *client.Client) {
 	}
 
 	cmd := "systemctl stop gala-gopher && yum autoremove -y gala-gopher"
-	cmdResults, err := client.RunScript(param.Batch, cmd)
+	cmdResults, err := client.GetClient().RunScript(param.Batch, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
