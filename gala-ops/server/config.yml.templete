@@ -3,7 +3,7 @@ grafana:
   user: ""
   passwd: ""
 http:
-  addr: "0.0.0.0:7888"
+  addr: "0.0.0.0:9999"
 PilotGo:
   addr: "localhost:8889"
 mysql:

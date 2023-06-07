@@ -1,17 +1,15 @@
 package httphandler
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/utils"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
-	"openeuler.org/PilotGo/gala-ops-plugin/client"
 )
 
 type Plugin struct {
@@ -41,24 +39,29 @@ func PrometheusAPI(URL string) (v1.API, error) {
 	return v1api, nil
 }
 
-func PrometheusMetrics(ctx *gin.Context) {
-	bs, err := utils.Request("GET", client.Client().Server+"plugins")
+func PrometheusMetrics(ctx *gin.Context, client *client.Client) {
+	// bs, err := utils.Request("GET", client.Server+"plugins")
+	// if err != nil {
+	// 	logger.Error("faild to get plugin list: ", err)
+	// }
+	// plugins := &[]*Plugin{}
+	// err = json.Unmarshal(bs, plugins)
+	// if err != nil {
+	// 	logger.Error("unmarshal request plugin info error:%s", err.Error())
+	// }
+	// var Prometheus_addr string
+	// for _, p := range *plugins {
+	// 	if p.Name == "gala-ops" {
+	// 		Prometheus_addr = p.Url
+	// 	}
+	// }
+	plugin, err := client.GetPluginInfo("prometheus")
 	if err != nil {
-		logger.Error("faild to get plugin list: ", err)
-	}
-	plugins := &[]*Plugin{}
-	err = json.Unmarshal(bs, plugins)
-	if err != nil {
-		logger.Error("unmarshal request plugin info error:%s", err.Error())
-	}
-	var Prometheus_addr string
-	for _, p := range *plugins {
-		if p.Name == "gala-ops" {
-			Prometheus_addr = p.Url
-		}
+		logger.Error("failed to get plugin info from pilotgoserver: ", err)
+		return
 	}
 
-	promAPI, err := PrometheusAPI(strings.Split(Prometheus_addr, "/")[2])
+	promAPI, err := PrometheusAPI(strings.Split(plugin.Url, "/")[2])
 	if err != nil {
 		logger.Error("failed to create prometheus api: ", err)
 	}
