@@ -1,45 +1,59 @@
-package plugin
+package router
 
 import (
 	"fmt"
+	"net/http"
 	"net/http/httputil"
 	"net/url"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
 
-func DefaultClient(desc *plugin.PluginInfo) *plugin.Client {
-	plugin.BaseInfo = desc
-	dest := desc.ReverseDest
+func InitRouter() *gin.Engine {
+	gin.SetMode(gin.ReleaseMode)
+	router := gin.New()
+	router.Use(logger.LoggerDebug())
+	router.Use(gin.Recovery())
 
-	router := gin.Default()
-	mg := router.Group("plugin_manage/")
-	{
-		mg.GET("/info", plugin.InfoHandler)
-	}
-
-	pg := router.Group("/plugin/" + desc.Name)
-	{
-		pg.GET("/query", func(c *gin.Context) {
-			c.Set("query", dest)
-			Query(c)
-		})
-		pg.GET("/query_range", func(c *gin.Context) {
-			c.Set("query_range", dest)
-			QueryRange(c)
-		})
-		pg.GET("/targets", func(c *gin.Context) {
-			c.Set("targets", dest)
-			Targets(c)
-		})
-
-	}
-
-	return &plugin.Client{
-		Router: router,
-	}
+	registerAPIs(router)
+	return router
 }
+func registerAPIs(router *gin.Engine) {
+	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
+}
+
+// func DefaultClient(desc *splugin.PluginInfo) *splugin.Client {
+// 	splugin.BaseInfo = desc
+// 	dest := desc.ReverseDest
+
+// 	router := gin.Default()
+// 	mg := router.Group("plugin_manage/")
+// 	{
+// 		mg.GET("/info", splugin.InfoHandler)
+// 	}
+
+// 	pg := router.Group("/plugin/" + desc.Name)
+// 	{
+// 		pg.GET("/query", func(c *gin.Context) {
+// 			c.Set("query", dest)
+// 			Query(c)
+// 		})
+// 		pg.GET("/query_range", func(c *gin.Context) {
+// 			c.Set("query_range", dest)
+// 			QueryRange(c)
+// 		})
+// 		pg.GET("/targets", func(c *gin.Context) {
+// 			c.Set("targets", dest)
+// 			Targets(c)
+// 		})
+
+// 	}
+
+// 	return &splugin.Client{
+// 		Router: router,
+// 	}
+// }
 
 func Query(c *gin.Context) {
 	remote := c.GetString("query")

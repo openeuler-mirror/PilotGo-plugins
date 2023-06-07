@@ -9,24 +9,16 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type PluginInfo struct {
-	Name        string `yaml:"name"`
-	Version     string `yaml:"version"`
-	Description string `yaml:"description"`
-	Author      string `yaml:"author"`
-	Email       string `yaml:"email"`
-}
-type Plugin struct {
+type Prometheus struct {
 	URL         string `yaml:"url"`
 	ReverseDest string `yaml:"reverseDest"`
 }
 type HttpConf struct {
-	Port string `yaml:"port"`
+	Addr string `yaml:"addr"`
 }
 
 type ServerConfig struct {
-	PluginInfo *PluginInfo    `yaml:"pluginInfo"`
-	Plugin     *Plugin        `yaml:"plugin"`
+	Prometheus *Prometheus    `yaml:"prometheus"`
 	Http       *HttpConf      `yaml:"http"`
 	Logopts    logger.LogOpts `yaml:"log"`
 }

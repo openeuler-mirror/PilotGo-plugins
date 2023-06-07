@@ -1,14 +1,8 @@
-pluginInfo:
-  name: "Prometheus"
-  version: "0.0.1" 
-  description: "Prometheus开源系统监视和警报工具包"
-  author: "zhanghan"
-  email: "zhanghan@kylinos.cn"
-plugin:
+prometheus:
   url: "http://localhost:8090/plugin/prometheus"
   reverseDest: "http://localhost:9090"
 http:
-  port: "8090"
+  addr: "0.0.0.0:8090"
 log:
   level: debug
   driver: stdout    #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。
