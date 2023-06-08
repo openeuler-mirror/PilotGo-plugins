@@ -8,6 +8,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/prometheus-plugin/global"
 )
 
 func InitRouter() *gin.Engine {
@@ -16,44 +17,30 @@ func InitRouter() *gin.Engine {
 	router.Use(logger.LoggerDebug())
 	router.Use(gin.Recovery())
 
-	registerAPIs(router)
 	return router
 }
-func registerAPIs(router *gin.Engine) {
+
+func RegisterAPIs(router *gin.Engine) {
+	global.GlobalClient.RegisterHandlers(router)
+
+	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
+	{
+		pg.GET("/query", func(c *gin.Context) {
+			c.Set("query", global.GlobalClient.PluginInfo.ReverseDest)
+			Query(c)
+		})
+		pg.GET("/query_range", func(c *gin.Context) {
+			c.Set("query_range", global.GlobalClient.PluginInfo.ReverseDest)
+			QueryRange(c)
+		})
+		pg.GET("/targets", func(c *gin.Context) {
+			c.Set("targets", global.GlobalClient.PluginInfo.ReverseDest)
+			Targets(c)
+		})
+
+	}
 	router.GET("/ping", func(c *gin.Context) { c.String(http.StatusOK, "pong") })
 }
-
-// func DefaultClient(desc *splugin.PluginInfo) *splugin.Client {
-// 	splugin.BaseInfo = desc
-// 	dest := desc.ReverseDest
-
-// 	router := gin.Default()
-// 	mg := router.Group("plugin_manage/")
-// 	{
-// 		mg.GET("/info", splugin.InfoHandler)
-// 	}
-
-// 	pg := router.Group("/plugin/" + desc.Name)
-// 	{
-// 		pg.GET("/query", func(c *gin.Context) {
-// 			c.Set("query", dest)
-// 			Query(c)
-// 		})
-// 		pg.GET("/query_range", func(c *gin.Context) {
-// 			c.Set("query_range", dest)
-// 			QueryRange(c)
-// 		})
-// 		pg.GET("/targets", func(c *gin.Context) {
-// 			c.Set("targets", dest)
-// 			Targets(c)
-// 		})
-
-// 	}
-
-// 	return &splugin.Client{
-// 		Router: router,
-// 	}
-// }
 
 func Query(c *gin.Context) {
 	remote := c.GetString("query")
