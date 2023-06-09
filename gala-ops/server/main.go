@@ -6,20 +6,16 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
-	prome "github.com/prometheus/client_golang/api/prometheus/v1"
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
 	"openeuler.org/PilotGo/gala-ops-plugin/database"
 	"openeuler.org/PilotGo/gala-ops-plugin/httphandler"
 )
 
 const Version = "0.0.1"
-
-var PromeClient prome.API
 
 var PluginInfo = &client.PluginInfo{
 	Name:        "gala-ops",
@@ -50,24 +46,18 @@ func main() {
 	InitRouter(router)
 
 	// 临时自定义获取prometheus地址方式
-	PromePlugin, err := getpromeplugininfo(GlobalClient.Server)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	// promeplugin, err := getpromeplugininfo(GlobalClient.Server)
+	// if err != nil {
+	// 	logger.Error(err.Error())
+	// 	os.Exit(1)
+	// }
+	// var PromeURL string = promeplugin["Url"].(string)
 
 	// PromePlugin, err := client.GetClient().GetPluginInfo("prometheus")
 	// if err != nil {
 	// 	logger.Error("failed to get plugin info from pilotgoserver: ", err)
 	// 	os.Exit(1)
 	// }
-
-	promeclient, err := httphandler.PrometheusAPI(strings.Split(PromePlugin["url"].(string), "/")[2])
-	if err != nil {
-		logger.Error("failed to create prometheus api: ", err)
-		os.Exit(1)
-	}
-	PromeClient = promeclient
 
 	if err := router.Run(config.Config().Http.Addr); err != nil {
 		logger.Fatal("failed to run server")
@@ -91,10 +81,12 @@ func InitRouter(router *gin.Engine) {
 		api.PUT("/install_gopher", httphandler.InstallGopher)
 		api.PUT("/upgrade_gopher", httphandler.UpgradeGopher)
 		api.DELETE("/uninstall_gopher", httphandler.UninstallGopher)
+	}
 
-		// 从prometheus中获取监控数据
-		api.GET("/metrics", func(ctx *gin.Context) {
-			httphandler.PrometheusMetrics(ctx, PromeClient)
+	metrics := router.Group("plugin/gala-ops/api/metrics")
+	{
+		metrics.GET("/targets_list", func(ctx *gin.Context) {
+			httphandler.TargetsList(ctx)
 		})
 	}
 }
@@ -117,7 +109,7 @@ func getpromeplugininfo(pilotgoserver string) (map[string]interface{}, error) {
 	}
 	var PromePlugin map[string]interface{}
 	for _, p := range data["data"].([]interface{}) {
-		if p.(map[string]interface{})["name"] == "prometheus" {
+		if p.(map[string]interface{})["name"] == "Prometheus" {
 			PromePlugin = p.(map[string]interface{})
 		}
 	}
