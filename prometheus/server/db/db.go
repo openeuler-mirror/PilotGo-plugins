@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm/schema"
 	"openeuler.org/PilotGo/prometheus-plugin/config"
 	"openeuler.org/PilotGo/prometheus-plugin/global"
+	"openeuler.org/PilotGo/prometheus-plugin/httphandler/service"
 )
 
 var Url string
@@ -32,6 +33,8 @@ func MysqldbInit(conf *config.MysqlDBInfo) error {
 	if err != nil {
 		return err
 	}
+
+	global.GlobalDB.AutoMigrate(&service.PrometheusTarget{})
 
 	return nil
 }
