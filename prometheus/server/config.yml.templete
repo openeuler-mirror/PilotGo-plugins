@@ -1,5 +1,5 @@
 prometheus:
-  url: "http://localhost:8090/plugin/prometheus"
+  url: "http://localhost:8090/plugin/Prometheus"
   reverseDest: "http://localhost:9090"
 http:
   addr: "0.0.0.0:8090"
