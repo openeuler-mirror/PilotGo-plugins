@@ -19,7 +19,7 @@ func InitRouter() *gin.Engine {
 func RegisterAPIs(router *gin.Engine) {
 	global.GlobalClient.RegisterHandlers(router)
 
-	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
+	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name + "/api/v1")
 	{
 		pg.GET("/query", func(c *gin.Context) {
 			c.Set("query", global.GlobalClient.PluginInfo.ReverseDest)
