@@ -39,26 +39,28 @@ func main() {
 
 	router := gin.Default()
 
-	GlobalClient := client.DefaultClient(PluginInfo)
+	PluginClient := client.DefaultClient(PluginInfo)
 	// 临时给server赋值
-	GlobalClient.Server = "http://192.168.75.100:8888"
-	GlobalClient.RegisterHandlers(router)
-	InitRouter(router)
-
+	PluginClient.Server = "http://192.168.75.100:8888"
 	// 临时自定义获取prometheus地址方式
-	// promeplugin, err := getpromeplugininfo(GlobalClient.Server)
-	// if err != nil {
-	// 	logger.Error(err.Error())
-	// 	os.Exit(1)
-	// }
-	// var PromeURL string = promeplugin["Url"].(string)
-
+	promeplugin, err := getpromeplugininfo(PluginClient.Server)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 	// PromePlugin, err := client.GetClient().GetPluginInfo("prometheus")
 	// if err != nil {
 	// 	logger.Error("failed to get plugin info from pilotgoserver: ", err)
 	// 	os.Exit(1)
 	// }
 
+	httphandler.Galaops = &httphandler.Opsclient{
+		Sdkmethod:   PluginClient,
+		PromePlugin: promeplugin,
+	}
+
+	httphandler.Galaops.Sdkmethod.RegisterHandlers(router)
+	InitRouter(router)
 	if err := router.Run(config.Config().Http.Addr); err != nil {
 		logger.Fatal("failed to run server")
 	}
