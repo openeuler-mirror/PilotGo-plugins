@@ -13,6 +13,7 @@ import (
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
 	"openeuler.org/PilotGo/gala-ops-plugin/database"
 	"openeuler.org/PilotGo/gala-ops-plugin/httphandler"
+	"openeuler.org/PilotGo/gala-ops-plugin/router"
 )
 
 const Version = "0.0.1"
@@ -37,7 +38,7 @@ func main() {
 
 	InitLogger()
 
-	router := gin.Default()
+	engine := gin.Default()
 
 	PluginClient := client.DefaultClient(PluginInfo)
 	// 临时给server赋值
@@ -59,9 +60,9 @@ func main() {
 		PromePlugin: promeplugin,
 	}
 
-	httphandler.Galaops.Sdkmethod.RegisterHandlers(router)
-	InitRouter(router)
-	if err := router.Run(config.Config().Http.Addr); err != nil {
+	httphandler.Galaops.Sdkmethod.RegisterHandlers(engine)
+	router.InitRouter(engine)
+	if err := engine.Run(config.Config().Http.Addr); err != nil {
 		logger.Fatal("failed to run server")
 	}
 }
@@ -70,26 +71,6 @@ func InitLogger() {
 	if err := logger.Init(config.Config().Logopts); err != nil {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(1)
-	}
-}
-
-func InitRouter(router *gin.Engine) {
-	api := router.Group("/plugin/gala-ops/api")
-	{
-		// 脚本执行结果接口
-		// api.PUT("/run_script_result", httphandler.RunScriptResult)
-
-		// 安装/升级/卸载gala-gopher监控终端
-		api.PUT("/install_gopher", httphandler.InstallGopher)
-		api.PUT("/upgrade_gopher", httphandler.UpgradeGopher)
-		api.DELETE("/uninstall_gopher", httphandler.UninstallGopher)
-	}
-
-	metrics := router.Group("plugin/gala-ops/api/metrics")
-	{
-		metrics.GET("/targets_list", func(ctx *gin.Context) {
-			httphandler.TargetsList(ctx)
-		})
 	}
 }
 
