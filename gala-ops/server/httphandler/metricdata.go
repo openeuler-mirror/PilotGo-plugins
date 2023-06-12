@@ -24,3 +24,9 @@ func TargetsList(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, data)
 }
+
+
+
+
+
+
