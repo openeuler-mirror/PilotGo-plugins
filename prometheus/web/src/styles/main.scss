@@ -68,20 +68,17 @@ a {
 }
 // 头部设置
 .el-table thead {
-  background-color: rgb(32, 34, 38);
-  color: #26d0ce;
+  background-color: #f9f9f9;//rgb(32, 34, 38);
+  color: #222;
 }
 /* 表格内背景颜色 */
-.el-table th,
-.el-table tr,
-.el-table td {
-  background-color: transparent !important;
-  // border: 0 !important; //去除表格
+.el-table th {
+  background-color: #FAFAFA !important;
   text-align: center !important; // 文字居中
 }
 .el-table td {
-  color: #ccc;
-  //  border-bottom: 1px solid #444 !important; //去除表格
+  text-align: center !important;
+  color: #222;
 }
 
 /*去除底部灰条.el-table::before*/

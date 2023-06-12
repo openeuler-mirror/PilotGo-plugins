@@ -7,10 +7,10 @@
 </template>
   
 <script setup lang='ts' scoped>
-import { inject, ref, onMounted, reactive, watch, markRaw, nextTick } from 'vue'
+import { inject, ref, onMounted, reactive, watch, markRaw, nextTick, computed } from 'vue'
 import { getPromeCurrent, getPromeRange } from '@/api/prometheus';
 import ChartTable from './chartTable.vue';
-import { filterProm, deepClone, handle_byte, startTime, endTime, line_opt, gauge_opt } from './index';
+import { filterProm, deepClone, handle_byte, line_opt, gauge_opt } from './index';
 import { formatDate } from '@/utils/dateFormat';
 import { useMacStore } from '@/store/mac';
 let macIp = ref('');
@@ -22,7 +22,7 @@ const char_value = ref('0.00');
 const line_arr = ref([] as any[]); // 存放多请求的折线图数据集合
 let line_option = reactive(deepClone(line_opt));
 let gauge_option = reactive(deepClone(gauge_opt));
-
+let seriesCount = 0;
 interface tableItem {
   prop: string,
   label: string
@@ -34,6 +34,16 @@ const props = defineProps({
     type: Object,
     default: {},
     required: true
+  },
+  startTime: {
+    type: Number,
+    default: (new Date() as any) / 1000 - 60 * 60 * 2,
+    required: false,
+  },
+  endTime: {
+    type: Number,
+    default: (new Date() as any) / 1000,
+    required: false,
   },
 })
 const search_step = 15; // 查询区间数据的步长
@@ -56,7 +66,7 @@ const getPromeData = (item: any) => {
       // 1.使用new promise来进行异步处理,避免乱序
       proms.push(
         new Promise((resolve, reject) => {
-          getPromeRange({ query: sqlItem.sql.replace(/{macIp}/g, macIp.value), start: sqlItem.start || '', end: sqlItem.end || endTime, step: sqlItem.step || search_step }).then(res => {
+          getPromeRange({ query: sqlItem.sql.replace(/{macIp}/g, macIp.value), start: props.startTime, end: props.endTime, step: sqlItem.step || search_step }).then(res => {
             return resolve(filterProm(res) && filterProm(res))
           }).catch(err => {
             return reject(err)
@@ -89,22 +99,24 @@ const getPromeData = (item: any) => {
 
 // 过滤基础数据类型
 const filterCurrentData = (item: any, result: any) => {
-  switch (item.type) {
-    case 'value':
-      set_value_type(item, result[0]);
-      break;
-    case 'gauge':
-      set_gauge_type(item, result[0]);
-      break;
-    case 'table':
-      if (result.length != props.query.sqls.length) {
-        return false;
-      } else if (result.length > 0) {
-        set_table_type(item, result);
-      }
-      break;
-    default:
-      break;
+  if (result[0]) {
+    switch (item.type) {
+      case 'value':
+        set_value_type(item, result[0]);
+        break;
+      case 'gauge':
+        set_gauge_type(item, result[0]);
+        break;
+      case 'table':
+        if (result.length != props.query.sqls.length) {
+          return false;
+        } else if (result.length > 0) {
+          set_table_type(item, result);
+        }
+        break;
+      default:
+        break;
+    }
   }
 }
 
@@ -141,6 +153,9 @@ const handle_line_data = (values: any, target: string) => {
 
 // 设置折线类型的数据
 const set_line_type = (item: any, result: any) => {
+  seriesCount = 0;
+  let value_unit = item.unit;
+  line_option = reactive(deepClone(line_opt));
   line_option.yAxis.axisLabel.formatter = '{value}' + item.unit;
   let series = {
     name: '', type: 'line', smooth: false, showSymbol: false,
@@ -149,18 +164,82 @@ const set_line_type = (item: any, result: any) => {
   line_arr.value.forEach((line: any, lineIndex: number) => {
     let legendName = deepClone(item.sqls[lineIndex].series_name);
     if (line instanceof Array) {
-      // 如果是数组
-      line.forEach(lineItem => {
-        series.name = lineItem.metric && deepClone(lineItem.metric.device) || '';
-        series.data = deepClone(handle_line_data(lineItem.values, item.target));
+      // 1.如果是数组
+      if (line.length > 0) {
+        // 数组有数据
+        line.forEach(lineItem => {
+
+          let init_series: string = lineItem.metric && deepClone(lineItem.metric.device) || '';
+          // 针对此应用折现图系列名字进行汉化操作
+          switch (init_series) {
+            case 'dm-0':
+              series.name = '/';
+              break;
+            case 'dm-1':
+              series.name = 'swap';
+              break;
+            case 'dm-2':
+              break;
+            case 'sr0':
+              series.name = '光驱';
+              break;
+            default:
+              if (init_series.includes('sd')) {
+                series.name = '硬盘' + init_series;
+              } else if (init_series.includes('vd')) {
+                series.name = '磁盘' + init_series;
+              }
+              break;
+          }
+          if (init_series != 'dm-2') {
+            // 针对监控插件含有dm-2特殊处理
+            seriesCount++;
+            series.data = deepClone(handle_line_data(lineItem.values, item.target));
+            line_option.series.push(deepClone(series))
+          }
+        })
+      } else {
+        seriesCount++;
+        let time_text = formatDate(new Date(), "YYYY-MM-DD HH:ii:ss")
+        series.name = '系列' + (lineIndex + 1)
+        series.data = [{ time: (new Date() as any) / 1000, value: [time_text, 0.00] }];
         line_option.series.push(deepClone(series))
-      })
+      }
     } else {
-      series.name = legendName;
-      series.data = deepClone(handle_line_data(line.values, item.target));
-      line_option.series.push(deepClone(series))
+      // 2.如果是对象
+      if (line.values && line.values.length > 0) {
+        seriesCount++;
+        series.name = legendName;
+        series.data = deepClone(handle_line_data(line.values, item.target));
+        line_option.series.push(deepClone(series))
+      }
     }
   })
+
+  // 配置提示框的样式和数据
+  let tipWidth = seriesCount < 4 ? 180 : Math.ceil(seriesCount / 4) * 180;
+  line_option.tooltip.extraCssText += `width:${tipWidth}px;`;
+  line_option.tooltip.formatter = (data: any) => {
+    let result = '';
+    let content = '';
+    let startDiv = `<div style='height:100px; width:100%; background-color:transparent; display:flex; 
+      flex-direction:column;flex-wrap:wrap;justify-content:flex-start;align-items:start; display:-moz-flex; '>`;
+    let endDiv = '</div>';
+    data.map((item: any, index: number) => {
+      if (item.data.empty) {
+        result = ''
+      } else {
+        content +=
+          `<span style='font-size:10px;width:144px;  display:flex;justify-content:space-between;'>
+                  <span style='display:inline-block; width:70%; text-align:left;'>${item.marker} ${item.seriesName}</span>
+                  <span style='display:inline-block; width:30%; text-align:center;'>${item.data.value[1]}${value_unit}</span> 
+                </span>`
+        result = `<span style='font-size:12px;float:left;'>${item.axisValueLabel}</span> <br/>${startDiv}${content}${endDiv}`;
+      }
+    })
+    return result;
+  }
+
   option.value = line_option;
 }
 
@@ -179,6 +258,14 @@ const set_value_type = (item: any, result: any) => {
       // 字节KB系列
       char_value.value = (result && result.value ? handle_byte(result.value[1], item.float, 'KB') : 0.00) + 'K';
       break;
+    case 'num_series':
+      // 数值描述符
+      let num = (result && result.value ? parseFloat(result.value[1]) : 0) / 1000;
+      if (num <= 1) {
+        char_value.value = num * 1000 + '';
+      } else {
+        char_value.value = num.toFixed(item.float);
+      }
 
     default:
       break;
@@ -272,12 +359,24 @@ onMounted(() => {
   window.addEventListener('resize', resize)
 })
 
+const timeChange = computed(() => {
+  return props.startTime + '' + props.endTime;
+})
+
 watch(() => option.value, (new_option) => {
   if (myChart.value.getOption()) {
     myChart.value.dispose();
     myChart.value = markRaw(echarts.init(chartDom.value))
   }
   myChart.value.setOption(new_option, true)
+}, {
+  deep: true
+})
+
+watch(() => timeChange, (newVal) => {
+  if (newVal) {
+    getPromeData(props.query);
+  }
 }, {
   deep: true
 })
@@ -313,7 +412,7 @@ defineExpose({
     align-items: center;
     font-weight: bold;
     font-size: 20px;
-    color: #67e0e3;
+    color: #222;
     user-select: none;
   }
 }

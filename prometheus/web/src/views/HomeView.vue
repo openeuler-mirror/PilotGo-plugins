@@ -1,35 +1,32 @@
 <template>
-  <div style="width: 100%; height: 100%; overflow: auto; background-color: #0b0c0e;">
-    <el-select v-model="macIp" @change="handleChangeIp">
-      <el-option v-for="item in macIps" :key="item.labels.instance" :label="item.labels.instance"
-        :value="item.labels.instance"></el-option>
-    </el-select>
+  <div style="width: 100%; height: 100%; overflow: auto;">
+    <el-form ref="form" :inline="true" class="flex">
+      <el-form-item label="机器 IP:">
+        <!-- ip选择器 -->
+        <el-select v-model="macIp" @change="handleChangeIp">
+          <el-option v-for="item in macIps" :key="item.labels.instance" :label="item.labels.instance"
+            :value="item.labels.instance"></el-option>
+        </el-select></el-form-item>
+      <!-- 时间选择器 -->
+      <el-form-item label="监控时间:">
+        <el-config-provider :locale="zhCn">
+          <el-date-picker v-model="dateRange" type="datetimerange" :shortcuts="pickerOptions" range-separator="至"
+            start-placeholder="开始日期" end-placeholder="结束日期" @change="changeDate">
+          </el-date-picker></el-config-provider>
+      </el-form-item>
+    </el-form>
     <grid-layout :col-num="16" :is-draggable="grid.draggable" :is-resizable="grid.resizable" :layout="layout"
-      :row-height="30" :use-css-transforms="true" :vertical-compact="true" drag-allow-from=".drag"
-      drag-ignore-from=".noDrag">
+      :row-height="30" :use-css-transforms="true" :vertical-compact="true">
       <template v-for="(item, indexVar) in layout">
         <grid-item :key="indexVar" :h="item.h" :i="item.i" :static="item.static" :w="item.w" :x="item.x" :y="item.y"
           :min-w="2" :min-h="2" @resize="SizeAutoChange(item.i, item.query.isChart)" @resized="SizeAutoChange"
-          v-if="item.display">
+          drag-allow-from=".drag" drag-ignore-from=".noDrag" v-if="item.display">
           <div class="drag">
             <span class="drag-title">{{ item.title }}</span>
-            <!-- 下拉选择 -->
-            <!-- <el-dropdown class="drag-more">
-              <el-icon>
-                <ArrowDown />
-              </el-icon>
-              <template #dropdown>
-                <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item @click.native="handleEdit(item, indexVar)" :icon="Edit">Edit</el-dropdown-item>
-                  <el-dropdown-item @click.native="handleDelete(indexVar)" :icon="Delete">Delete
-                  </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown> -->
           </div>
           <div class="noDrag">
-            <my-echarts :ref="el => { if (el) chart[indexVar] = el }" :query="item.query"
-              style="width:100%;height:100%;">
+            <my-echarts :ref="(el: any) => { if (el) chart[indexVar] = el }" :query="item.query" :startTime="startTime"
+              :endTime="endTime" style="width:100%;height:100%;">
             </my-echarts>
           </div>
 
@@ -41,17 +38,23 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
-import { Delete, Plus, Edit, ArrowDown } from '@element-plus/icons-vue';
 import MyEcharts from '@/components/MyEcharts.vue';
-import { getMacIp, getPromRules } from '@/api/prometheus';
+import { getPromRules } from '@/api/prometheus';
 import { useMacStore } from '@/store/mac';
 import { useLayoutStore } from '@/store/charts';
+import { pickerOptions } from '../utils/datePicker';
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 
 const layoutStore = useLayoutStore();
 let layout = reactive(layoutStore.layout_option);
 const macIp = ref('');
 const macIps = ref([] as any)
 const chart = ref([] as any);
+let dateRange = ref([new Date() as any - 2 * 60 * 60 * 1000, new Date() as any - 0])
+const startTime = ref(0);
+const endTime = ref(0);
+startTime.value = (new Date() as any) / 1000 - 60 * 60 * 2;
+endTime.value = (new Date() as any) / 1000;
 const grid = reactive({
   draggable: true,
   resizable: true,
@@ -63,25 +66,11 @@ const dialog = reactive({
   type: '',
   display: false
 })
-// 关闭dialog 
-const handleCancle = (type?: string) => {
-  dialog.type = '';
-  dialog.title = '';
-  dialog.display = false;
-  if (type === 'success') {
-    getMacIp();
-  }
-}
 
-/* getMacIp().then(res => {
-  if (res.data.url != '') {
-    useMacStore().setMacIp('10.1.167.93:9100'); //res.data.reverse_dest.split('//')[1]
-  }
-})
-getMacIp(); */
 getPromRules().then(res => {
   if (res.data.status === 'success') {
     macIps.value = res.data.data && res.data.data.activeTargets;
+    macIp.value = macIps.value[0];
     // 默认显示数组第一个的监控数据
     useMacStore().setMacIp(macIps.value[0].labels.instance)
   }
@@ -94,27 +83,22 @@ const handleChangeIp = (ip: string) => {
   }
 }
 
+// 选择展示时间范围
+const changeDate = (value: number[]) => {
+  if (value) {
+    startTime.value = (new Date(value[0]) as any) / 1000;
+    endTime.value = (new Date(value[1]) as any) / 1000;
+  } else {
+    startTime.value = (new Date() as any) / 1000 - 60 * 60 * 2;
+    endTime.value = (new Date() as any) / 1000;
+  }
+}
+
 // echarts大小随grid改变
 const SizeAutoChange = (i: string, isChart?: boolean) => {
   if (isChart) {
     chart.value[i].resize();
   }
-}
-
-// 新增echart
-const handleAdd = () => {
-  dialog.type = 'add';
-  dialog.title = '新增图表';
-  dialog.display = true;
-}
-
-// 编辑echart
-const handleEdit = (item: any, index: number) => {
-
-}
-// 删除echart
-const handleDelete = (index: number) => {
-  layout[index].display = false;
 }
 
 onMounted(() => {
@@ -135,10 +119,10 @@ onMounted(() => {
 
   .vue-grid-item {
     box-sizing: border-box;
-    background-color: rgb(20, 22, 25);
-    border: 1px solid rgb(32, 34, 38);
+    background-color: #fff;
+    // border: 1px solid rgb(32, 34, 38);
     border-radius: 4px;
-
+    box-shadow: 0 1px 5px rgba(45, 47, 51, 0.1);
 
     .drag {
       width: 100%;
@@ -157,13 +141,12 @@ onMounted(() => {
         user-select: none;
         width: 88%;
         height: 100%;
-        color: rgb(187, 208, 217);
+        color: #303133; //rgb(187, 208, 217);
         font-size: 12px;
         font-weight: bold;
 
         &:hover {
-          color: #fff;
-          cursor: pointer;
+          cursor: move;
         }
       }
 
@@ -178,11 +161,9 @@ onMounted(() => {
       }
 
       &:hover {
-        background: rgba(32,
-            34,
-            38);
-
-
+        background: rgba(253,
+            186,
+            74, .6)
       }
     }
 
