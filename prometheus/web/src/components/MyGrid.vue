@@ -6,13 +6,13 @@
       <grid-item v-for="(item, indexVar) in layout" :key="indexVar" :h="item.h" :i="item.i" :static="item.static"
         :w="item.w" :x="item.x" :y="item.y" @resize="SizeAutoChange" @resized="SizeAutoChange">
         <div class="drag">
-          <span class="title">{{item.title}}</span>
+          <span class="title">{{ item.title }}</span>
         </div>
         <div class="noDrag">
-          <my-echarts v-if="item.isChart" :ref="el => { if (el) chart[indexVar] = el }" :options="item.option"
+          <my-echarts v-if="item.isChart" :ref="(el: any) => { if (el) chart[indexVar] = el }" :options="item.option"
             style="padding-top: 30px;">
           </my-echarts>
-          <span v-else class="noDrag-text">{{item.value}}</span>
+          <span v-else class="noDrag-text">{{ item.value }}</span>
         </div>
 
       </grid-item>
@@ -97,8 +97,8 @@ const layoutConfig = {
 
 .vue-grid-item {
   box-sizing: border-box;
-  background-color: rgb(20, 22, 25);
-  border: 1px solid rgb(32, 34, 38);
+  background-color: rgb(249, 251, 255);
+  border: 1px solid rgb(251, 252, 255);
   border-radius: 4px;
 
 
@@ -117,7 +117,7 @@ const layoutConfig = {
       width: 30%;
       margin: 0 auto;
       height: 100%;
-      color: rgb(187, 208, 217);
+      color: rgb(0, 0, 0);
       font-size: 16px;
       font-weight: bold;
 

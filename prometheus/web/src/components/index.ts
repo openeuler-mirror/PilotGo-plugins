@@ -63,34 +63,58 @@ export const bar_opt = {
 export const line_opt = {
   color: e_colors,
   tooltip: {
+    show: true,
     trigger: 'axis',
-    position: [10, 60],
-    formatter: function (params: any) {
-      params = params[0];
-      return (
-        params.value[0] + ' ' +
-        params.value[1]
-      );
-    },
+    transitionDuration: 0.4,
+    backgroundColor: 'rgba(255,255,255,1)',
+    extraCssText: 'min-height:130px;',
+    formatter: () => { },
     axisPointer: {
       animation: false
     }
   },
   legend: {
     show: true,
-    orient: 'vertical',
+    orient: 'horizontal',
     right: 10,
-    top: 20,
+    top: 0,
     textStyle: {
       color: '#888'
     },
-    icon: 'roundRect',
+    icon: 'circle',
   },
+  dataZoom: [
+    {
+      show: true,
+      type: 'slider',
+      realtime: true,
+      start: 65,
+      end: 100,
+      height: 18,
+      showDetail: false,
+      backgroundColor: "#fff",
+      borderColor: "#DDE0E7",
+      brushSelect: false,
+      dataBackground: {
+        lineStyle: {
+          color: '#000'
+        }
+      },
+      handleSize: "90%",
+      // 长方形： path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z
+      // 圆形带横条：M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z
+      // 小圆形：path://M512,512m-448,0a448,448,0,1,0,896,0a448,448,0,1,0,-896,0Z
+      handleIcon: "path://M306.1,413c0,2.2-1.8,4-4,4h-59.8c-2.2,0-4-1.8-4-4V200.8c0-2.2,1.8-4,4-4h59.8c2.2,0,4,1.8,4,4V413z", //icon图标
+      handleStyle: {
+        // color: '#B9C2CB',
+      }
+    }
+  ],
   grid: {
-    top: '4%',
+    top: '12%',
     left: '2%',
-    right: '20%',
-    bottom: '2%',
+    right: '2%',
+    bottom: '18%',
     containLabel: true
   },
   xAxis: {
@@ -104,7 +128,7 @@ export const line_opt = {
     splitLine: {
       show: true,
       lineStyle: {
-        color: ['#333']
+        color: ['#eee']
       }
     },
     min: 0,
@@ -121,7 +145,7 @@ export const line_opt = {
     z: 1,
     zlevel: 1,
     lineStyle: {
-      width: 1
+      width: 2
     },
     areaStyle: {
       opacity: 0.1,
@@ -134,32 +158,46 @@ export const gauge_opt = {
   series: [
     {
       type: 'gauge',
-      center: ['50%', '60%'],
+      center: ['50%', '70%'],
       radius: '110%',
-      startAngle: 200,
-      endAngle: -20,
+      startAngle: 180,
+      endAngle: 0,
       min: 0,
       max: 100,
       tooltip: {
 
       },
       progress: {
-        show: false,
+        show: true,
+        roundCap: true,
+        width: 10,
+        itemStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [{
+              offset: 0, color: '#2988f1' // 0% 处的颜色#6bccff
+            }, {
+              offset: 1, color: '#6bccff' // 100% 处的颜色
+            }],
+            global: false // 缺省为 false
+          }
+        }
       },
       pointer: {
-        show: true,
+        show: false,
         itemStyle: {
           color: 'inherit'
         }
       },
       axisLine: {
+        show: true,
+        roundCap: true,
         lineStyle: {
-          width: 6,
-          color: [
-            [0.3, '#67e0e3'],
-            [0.7, '#E6A23C'],
-            [1, '#fd666d']
-          ]
+          width: 10,
         }
       },
       axisTick: {
@@ -179,11 +217,11 @@ export const gauge_opt = {
       },
       detail: {
         valueAnimation: true,
-        offsetCenter: [0, '50%'],
+        offsetCenter: [0, 0],
         fontSize: 20,
         fontWeight: 'bolder',
         formatter: '{value}',
-        color: 'inherit'
+        color: '#222'
       },
       data: [
         {
