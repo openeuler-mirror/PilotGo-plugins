@@ -1,8 +1,13 @@
 package httphandler
 
 import (
+	"encoding/json"
+	"io"
+	"net/http"
+	"net/url"
 	"time"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 )
 
@@ -22,3 +27,31 @@ func (o *Opsclient) UnixTimeStartandEnd(timerange time.Duration) (int64, int64) 
 	return timestamp, now.Unix()
 }
 
+func (o *Opsclient) QueryMetric(endpoint string, querymethod string, param string) (interface{}, error) {
+	ustr := endpoint + "/api/v1/" + querymethod + param
+	u, err := url.Parse(ustr)
+	if err != nil {
+		return nil, err
+	}
+	u.RawQuery = u.Query().Encode()
+
+	httpClient := &http.Client{Timeout: 10 * time.Second}
+	resp, err := httpClient.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	bs, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var data interface{}
+
+	err = json.Unmarshal(bs, &data)
+	if err != nil {
+		logger.Error("unmarshal cpu usage rate error:%s", err.Error())
+	}
+	return data, nil
+}
