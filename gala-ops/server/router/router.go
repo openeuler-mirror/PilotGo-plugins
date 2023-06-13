@@ -19,8 +19,8 @@ func InitRouter(router *gin.Engine) {
 
 	metrics := router.Group("plugin/gala-ops/api/metrics")
 	{
-		// url?job=prometheusHOST
+		metrics.GET("/labels_list", httphandler.LabelsList)
 		metrics.GET("/targets_list", httphandler.TargetsList)
-		metrics.GET("/cpu_usage_rate", httphandler.CPUusagerate)
+		metrics.GET("/cpu_usage_rate", httphandler.CPUusagerate) // url?job=gala-gopher host ip
 	}
 }
