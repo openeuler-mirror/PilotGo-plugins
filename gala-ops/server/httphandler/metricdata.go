@@ -8,6 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// prometheus plugin add /api/v1/labels handler
+func LabelsList(ctx *gin.Context) {
+	promurl := Galaops.PromePlugin["url"].(string)
+
+	data, err := Galaops.QueryMetric(promurl, "labels", "")
+	if err != nil {
+		logger.Error("faild to querymetric from prometheus: ", err)
+	}
+	ctx.JSON(http.StatusOK, data)
+}
+
 func TargetsList(ctx *gin.Context) {
 	// 查询prometheus监控对象列表
 	promurl := Galaops.PromePlugin["url"].(string)
