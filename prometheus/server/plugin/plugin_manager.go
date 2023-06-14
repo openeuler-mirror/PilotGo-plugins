@@ -13,6 +13,7 @@ func Init(conf *config.Prometheus) *client.PluginInfo {
 		Author:      "zhanghan",
 		Email:       "zhanghan@kylinos.cn",
 		Url:         conf.URL,
+		PluginType:  conf.PluginType,
 		ReverseDest: conf.ReverseDest,
 	}
 
