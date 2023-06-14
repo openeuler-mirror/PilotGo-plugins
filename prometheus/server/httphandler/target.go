@@ -6,6 +6,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/prometheus-plugin/httphandler/service"
 )
@@ -13,10 +14,7 @@ import (
 func DBTargets(c *gin.Context) {
 	targets, err := service.GetPrometheusTarget()
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": http.StatusBadRequest,
-			"data": nil,
-			"msg":  err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
 
