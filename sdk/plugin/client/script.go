@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 )
 
 type CmdResult struct {
@@ -14,7 +16,7 @@ type CmdResult struct {
 	Stderr      string
 }
 
-func (c *Client) RunScript(batch []string, cmd string) ([]*CmdResult, error) {
+func (c *Client) RunScript(batch *common.Batch, cmd string) ([]*CmdResult, error) {
 	url := c.Server + "/api/v1/pluginapi/run_script"
 	req, err := http.NewRequest("POST", url, nil)
 	if err != nil {

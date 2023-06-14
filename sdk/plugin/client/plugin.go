@@ -3,7 +3,7 @@ package client
 import (
 	"encoding/json"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/utils"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
 
 type PluginInfo struct {
@@ -18,7 +18,7 @@ type PluginInfo struct {
 
 func (c *Client) GetPluginInfo(name string) (*PluginInfo, error) {
 	url := c.Server + "/api/v1/pluginapi/plugins"
-	data, err := utils.Request("GET", url)
+	data, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, err
 	}
