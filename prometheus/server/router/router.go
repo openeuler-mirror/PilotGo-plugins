@@ -19,25 +19,34 @@ func InitRouter() *gin.Engine {
 func RegisterAPIs(router *gin.Engine) {
 	global.GlobalClient.RegisterHandlers(router)
 
-	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name + "/api/v1")
+	// prometheus配置文件http方式获取监控target
+	DBTarget := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
-		pg.GET("/query", func(c *gin.Context) {
+		DBTarget.GET("target", httphandler.DBTargets)
+	}
+
+	// prometheus api代理
+	prometheus := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name + "/api/v1")
+	{
+		prometheus.GET("/query", func(c *gin.Context) {
 			c.Set("query", global.GlobalClient.PluginInfo.ReverseDest)
 			httphandler.Query(c)
 		})
-		pg.GET("/query_range", func(c *gin.Context) {
+		prometheus.GET("/query_range", func(c *gin.Context) {
 			c.Set("query_range", global.GlobalClient.PluginInfo.ReverseDest)
 			httphandler.QueryRange(c)
 		})
-		pg.GET("/targets", func(c *gin.Context) {
+		prometheus.GET("/targets", func(c *gin.Context) {
 			c.Set("targets", global.GlobalClient.PluginInfo.ReverseDest)
 			httphandler.PrometheusAPITargets(c)
 		})
 
 	}
 
-	target := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
+	//prometheus target crud
+	targetManager := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
-		target.GET("target", httphandler.DBTargets)
+		targetManager.POST("addTarget", httphandler.AddPrometheusTarget)
+		targetManager.DELETE("delTarget", httphandler.DeletePrometheusTarget)
 	}
 }
