@@ -11,6 +11,7 @@ import (
 
 type Prometheus struct {
 	URL         string `yaml:"url"`
+	PluginType  string `yaml:"plugin_type"`
 	ReverseDest string `yaml:"reverseDest"`
 }
 type HttpConf struct {

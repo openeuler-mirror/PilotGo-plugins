@@ -13,6 +13,7 @@ type PluginInfo struct {
 	Author      string `json:"author"`
 	Email       string `json:"email"`
 	Url         string `json:"url"`
+	PluginType  string `json:"plugin_type"`
 	ReverseDest string `json:"reverse_dest"`
 }
 
