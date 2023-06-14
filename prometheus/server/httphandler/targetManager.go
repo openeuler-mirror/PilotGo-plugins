@@ -1,8 +1,7 @@
 package httphandler
 
 import (
-	"net/http"
-
+	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/prometheus-plugin/httphandler/service"
 )
@@ -11,46 +10,28 @@ import (
 func AddPrometheusTarget(c *gin.Context) {
 	var target service.PrometheusTarget
 	if err := c.BindJSON(&target); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": http.StatusBadRequest,
-			"data": nil,
-			"msg":  err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	err := service.AddPrometheusTarget(target)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": http.StatusBadRequest,
-			"data": nil,
-			"msg":  err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": nil,
-		"msg":  "添加成功"})
+	response.Success(c, nil, "添加成功")
 }
 
 // 将监控target从prometheus插件db中删除
 func DeletePrometheusTarget(c *gin.Context) {
 	var target service.PrometheusTarget
 	if err := c.BindJSON(&target); err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": http.StatusBadRequest,
-			"data": nil,
-			"msg":  err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	err := service.DeletePrometheusTarget(target)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code": http.StatusBadRequest,
-			"data": nil,
-			"msg":  err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"data": nil,
-		"msg":  "删除成功"})
+	response.Success(c, nil, "删除成功")
 }
