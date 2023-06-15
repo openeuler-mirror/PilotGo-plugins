@@ -38,7 +38,11 @@ func RegisterAPIs(router *gin.Engine) {
 		})
 		prometheus.GET("/targets", func(c *gin.Context) {
 			c.Set("targets", global.GlobalClient.PluginInfo.ReverseDest)
-			httphandler.PrometheusAPITargets(c)
+			httphandler.Targets(c)
+		})
+		prometheus.GET("/alerts", func(c *gin.Context) {
+			c.Set("alerts", global.GlobalClient.PluginInfo.ReverseDest)
+			httphandler.Alerts(c)
 		})
 
 	}
