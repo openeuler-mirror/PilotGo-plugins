@@ -8,7 +8,6 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/gala-ops-plugin/plugin"
 )
 
 func InstallGopher(ctx *gin.Context) {
@@ -37,7 +36,6 @@ func InstallGopher(ctx *gin.Context) {
 	}
 
 	ret := []interface{}{}
-	monitorTargets := []string{}
 	for _, result := range cmdResults {
 		d := struct {
 			MachineUUID   string
@@ -53,17 +51,9 @@ func InstallGopher(ctx *gin.Context) {
 		if result.RetCode != 0 {
 			d.InstallStatus = "error"
 			d.Error = result.Stderr
-		} else {
-			// TODO: add gala-gopher to prometheus monitor target here
-			// default exporter port :8888
-			monitorTargets = append(monitorTargets, result.MachineIP+":8888")
 		}
 
 		ret = append(ret, d)
-	}
-	err = plugin.MonitorTargets(monitorTargets, Galaops.PromePlugin["url"].(string))
-	if err != nil {
-		fmt.Println("error: failed to add gala-gopher to prometheus monitor targets")
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
