@@ -1,6 +1,8 @@
 package plugin
 
-import "gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+import (
+	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+)
 
 // 请求prometheus插件接口，将gala-ops targets添加到监控清单当中
 func addTargets(targets []string, url string) error {
@@ -11,13 +13,13 @@ func addTargets(targets []string, url string) error {
 	return nil
 }
 
-func MonitorTargets(targets []string) error {
-	plugin, err := client.GetClient().GetPluginInfo("prometheus")
-	if err != nil {
-		return err
-	}
+func MonitorTargets(targets []string, promeurl string) error {
+	// plugin, err := client.GetClient().GetPluginInfo("prometheus")
+	// if err != nil {
+	// 	return err
+	// }
 
-	if err := addTargets(targets, plugin.Url); err != nil {
+	if err := addTargets(targets, promeurl); err != nil {
 		return err
 	}
 

@@ -61,7 +61,7 @@ func InstallGopher(ctx *gin.Context) {
 
 		ret = append(ret, d)
 	}
-	err = plugin.MonitorTargets(monitorTargets)
+	err = plugin.MonitorTargets(monitorTargets, Galaops.PromePlugin["url"].(string))
 	if err != nil {
 		fmt.Println("error: failed to add gala-gopher to prometheus monitor targets")
 	}
