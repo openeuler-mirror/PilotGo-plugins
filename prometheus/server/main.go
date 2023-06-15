@@ -9,12 +9,18 @@ import (
 	"openeuler.org/PilotGo/prometheus-plugin/config"
 	"openeuler.org/PilotGo/prometheus-plugin/db"
 	"openeuler.org/PilotGo/prometheus-plugin/global"
+	"openeuler.org/PilotGo/prometheus-plugin/httphandler/service"
 	"openeuler.org/PilotGo/prometheus-plugin/plugin"
 	"openeuler.org/PilotGo/prometheus-plugin/router"
 )
 
 func main() {
 	fmt.Println("hello prometheus")
+
+	if err := service.CheckPrometheus(); err != nil {
+		fmt.Printf("Please confirm if prometheus is installed first: %s", err)
+		os.Exit(-1)
+	}
 
 	config.Init()
 
