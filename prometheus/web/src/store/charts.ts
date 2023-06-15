@@ -9,9 +9,9 @@ export const useLayoutStore = defineStore('layoutOption', {
           x: 0, y: 0, w: 1, h: 4, i: '0',
           static: true, display: true, title: '运行时间',
           query: {
-            sqls: [{ sql: '(time()-node_boot_time_seconds{instance="{macIp}"})/(60*60)' }],
+            sqls: [{ sql: '(time()-node_boot_time_seconds{instance="{macIp}"})/(60*60*24)' }],
             type: 'value', range: false, isValue: true, interval: 5,
-            target: 'value_series', unit: 'h', float: 2
+            target: 'value_series', unit: '天', float: 2
           }
         },
         {
