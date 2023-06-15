@@ -40,7 +40,6 @@ func main() {
 	PluginClient := client.DefaultClient(PluginInfo)
 	// 临时给server赋值
 	PluginClient.Server = "http://192.168.75.100:8888"
-
 	httphandler.Galaops = &httphandler.Opsclient{
 		Sdkmethod:   PluginClient,
 		PromePlugin: nil,
@@ -53,7 +52,14 @@ func main() {
 		os.Exit(1)
 	}
 	httphandler.Galaops.PromePlugin = promeplugin
-	
+
+	// 向prometheus插件发送可视化插件json模板
+	_, err = httphandler.Galaops.SendJsonMode("")
+	if err != nil {
+		logger.Error("failed to sendjsonmode to prometheus plugin: ", err)
+	}
+
+	// 设置router
 	httphandler.Galaops.Sdkmethod.RegisterHandlers(engine)
 	router.InitRouter(engine)
 	if err := engine.Run(config.Config().Http.Addr); err != nil {
