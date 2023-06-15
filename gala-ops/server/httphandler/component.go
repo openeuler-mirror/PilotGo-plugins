@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
@@ -56,4 +58,22 @@ func (o *Opsclient) QueryMetric(endpoint string, querymethod string, param strin
 		return nil, fmt.Errorf("unmarshal cpu usage rate error:%s", err.Error())
 	}
 	return data, nil
+}
+
+func (o *Opsclient) ReadLocalShell(path string) ([]byte, error) {
+	// 打开本地文件
+	file, err := os.Open(path)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	defer file.Close()
+
+	// 读取文件内容
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return content, nil
 }
