@@ -3,17 +3,16 @@ package httphandler
 import (
 	"fmt"
 	"net/http"
+	"os"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/gala-ops-plugin/plugin"
 )
 
 func InstallGopher(ctx *gin.Context) {
-	// TODO
-	param := &struct {
-		Batch []string
-	}{}
+	param := &common.Batch{}
 	if err := ctx.BindJSON(param); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -21,8 +20,15 @@ func InstallGopher(ctx *gin.Context) {
 		})
 	}
 
-	cmd := "yum install -y gala-gopher && systemctl start gala-gopher"
-	cmdResults, err := client.GetClient().RunScript(param.Batch, cmd)
+	script, err := os.ReadFile("../sh-script/deploy_gopher")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":   -1,
+			"status": fmt.Sprintf("read deploy script error:%s", err),
+		})
+	}
+
+	cmdResults, err := Galaops.Sdkmethod.RunScript(param, string(script))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -44,7 +50,7 @@ func InstallGopher(ctx *gin.Context) {
 			Error:         "",
 		}
 
-		if result.Code != 0 {
+		if result.RetCode != 0 {
 			d.InstallStatus = "error"
 			d.Error = result.Stderr
 		} else {
@@ -69,9 +75,7 @@ func InstallGopher(ctx *gin.Context) {
 
 func UpgradeGopher(ctx *gin.Context) {
 	// TODO
-	param := &struct {
-		Batch []string
-	}{}
+	param := &common.Batch{}
 	if err := ctx.BindJSON(param); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -80,7 +84,7 @@ func UpgradeGopher(ctx *gin.Context) {
 	}
 
 	cmd := "systemctl stop gala-gopher && yum upgrade -y gala-gopher && systemctl start gala-gopher"
-	cmdResults, err := client.GetClient().RunScript(param.Batch, cmd)
+	cmdResults, err := client.GetClient().RunCommand(param, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -100,7 +104,7 @@ func UpgradeGopher(ctx *gin.Context) {
 			Error:           "",
 		}
 
-		if result.Code != 0 {
+		if result.RetCode != 0 {
 			d.UninstallStatus = "error"
 			d.Error = result.Stderr
 		}
@@ -117,9 +121,7 @@ func UpgradeGopher(ctx *gin.Context) {
 
 func UninstallGopher(ctx *gin.Context) {
 	// TODO
-	param := &struct {
-		Batch []string
-	}{}
+	param := &common.Batch{}
 	if err := ctx.BindJSON(param); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -128,7 +130,7 @@ func UninstallGopher(ctx *gin.Context) {
 	}
 
 	cmd := "systemctl stop gala-gopher && yum autoremove -y gala-gopher"
-	cmdResults, err := client.GetClient().RunScript(param.Batch, cmd)
+	cmdResults, err := client.GetClient().RunCommand(param, cmd)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
@@ -148,7 +150,7 @@ func UninstallGopher(ctx *gin.Context) {
 			Error:           "",
 		}
 
-		if result.Code != 0 {
+		if result.RetCode != 0 {
 			d.UninstallStatus = "error"
 			d.Error = result.Stderr
 		}
