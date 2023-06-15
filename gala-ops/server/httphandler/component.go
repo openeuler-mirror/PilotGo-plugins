@@ -7,10 +7,16 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
+	"path"
+	"path/filepath"
+	"runtime"
+	"strings"
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
 
 type Opsclient struct {
@@ -91,4 +97,42 @@ func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[
 		return nil, fmt.Errorf("pilotgo server not add prometheus plugin")
 	}
 	return PromePlugin, nil
+}
+
+func (o *Opsclient) SendJsonMode(jsonmodeURL string) (string, error) {
+	url := Galaops.PromePlugin["url"].(string) + jsonmodeURL
+
+	_, thisfile, _, _ := runtime.Caller(0)
+	dirpath := filepath.Dir(thisfile)
+	files := make(map[string]string)
+	err := filepath.Walk(path.Join(dirpath, "..", "gui-json-mode"), func(jsonfilepath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.Mode().IsRegular() {
+			return nil
+		}
+
+		data, err := os.ReadFile(jsonfilepath)
+		if err != nil {
+			return err
+		}
+
+		_, jsonfilename := filepath.Split(jsonfilepath)
+		files[strings.Split(jsonfilename, ".")[0]] = string(data)
+
+		return nil
+	})
+	if err != nil {
+		return "", err
+	}
+
+	bs, err := httputils.Post(url, &httputils.Params{
+		Body: files,
+	})
+	if err != nil {
+		return "", err
+	}
+	return string(bs), nil
 }
