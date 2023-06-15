@@ -53,7 +53,6 @@ func (o *Opsclient) QueryMetric(endpoint string, querymethod string, param strin
 
 	err = json.Unmarshal(bs, &data)
 	if err != nil {
-		logger.Error("unmarshal cpu usage rate error:%s", err.Error())
 		return nil, fmt.Errorf("unmarshal cpu usage rate error:%s", err.Error())
 	}
 	return data, nil
