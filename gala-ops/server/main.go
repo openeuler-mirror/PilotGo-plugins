@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"os"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
@@ -43,12 +40,7 @@ func main() {
 	PluginClient := client.DefaultClient(PluginInfo)
 	// 临时给server赋值
 	PluginClient.Server = "http://192.168.75.100:8888"
-	// 临时自定义获取prometheus地址方式
-	promeplugin, err := getpromeplugininfo(PluginClient.Server)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+
 	// PromePlugin, err := client.GetClient().GetPluginInfo("prometheus")
 	// if err != nil {
 	// 	logger.Error("failed to get plugin info from pilotgoserver: ", err)
@@ -57,9 +49,17 @@ func main() {
 
 	httphandler.Galaops = &httphandler.Opsclient{
 		Sdkmethod:   PluginClient,
-		PromePlugin: promeplugin,
+		PromePlugin: nil,
 	}
 
+	// 临时自定义获取prometheus地址方式
+	promeplugin, err := httphandler.Galaops.Getplugininfo(PluginClient.Server, "Prometheus")
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+	httphandler.Galaops.PromePlugin = promeplugin
+	
 	httphandler.Galaops.Sdkmethod.RegisterHandlers(engine)
 	router.InitRouter(engine)
 	if err := engine.Run(config.Config().Http.Addr); err != nil {
@@ -72,32 +72,4 @@ func InitLogger() {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(1)
 	}
-}
-
-func getpromeplugininfo(pilotgoserver string) (map[string]interface{}, error) {
-	resp, err := http.Get(pilotgoserver + "/api/v1/plugins")
-	if err != nil {
-		logger.Error("faild to get plugin list: ", err)
-	}
-	bs, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
-	data := map[string]interface{}{
-		"code": nil,
-		"data": nil,
-		"msg":  nil,
-	}
-	err = json.Unmarshal(bs, &data)
-	if err != nil {
-		logger.Error("unmarshal request plugin info error:%s", err.Error())
-	}
-	var PromePlugin map[string]interface{}
-	for _, p := range data["data"].([]interface{}) {
-		if p.(map[string]interface{})["name"] == "Prometheus" {
-			PromePlugin = p.(map[string]interface{})
-		}
-	}
-	if len(PromePlugin) == 0 {
-		return nil, fmt.Errorf("pilotgo server not add prometheus plugin")
-	}
-	return PromePlugin, nil
 }

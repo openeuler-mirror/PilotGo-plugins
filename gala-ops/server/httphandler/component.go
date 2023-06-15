@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
@@ -60,20 +59,30 @@ func (o *Opsclient) QueryMetric(endpoint string, querymethod string, param strin
 	return data, nil
 }
 
-func (o *Opsclient) ReadLocalShell(path string) ([]byte, error) {
-	// 打开本地文件
-	file, err := os.Open(path)
+func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[string]interface{}, error) {
+	resp, err := http.Get(pilotgoserver + "/api/v1/plugins")
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		logger.Error("faild to get plugin list: ", err)
 	}
-	defer file.Close()
-
-	// 读取文件内容
-	content, err := ioutil.ReadAll(file)
+	bs, _ := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	data := map[string]interface{}{
+		"code": nil,
+		"data": nil,
+		"msg":  nil,
+	}
+	err = json.Unmarshal(bs, &data)
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		logger.Error("unmarshal request plugin info error:%s", err.Error())
 	}
-	return content, nil
+	var PromePlugin map[string]interface{}
+	for _, p := range data["data"].([]interface{}) {
+		if p.(map[string]interface{})["name"] == pluginname {
+			PromePlugin = p.(map[string]interface{})
+		}
+	}
+	if len(PromePlugin) == 0 {
+		return nil, fmt.Errorf("pilotgo server not add prometheus plugin")
+	}
+	return PromePlugin, nil
 }
