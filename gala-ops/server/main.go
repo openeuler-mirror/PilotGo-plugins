@@ -41,12 +41,6 @@ func main() {
 	// 临时给server赋值
 	PluginClient.Server = "http://192.168.75.100:8888"
 
-	// PromePlugin, err := client.GetClient().GetPluginInfo("prometheus")
-	// if err != nil {
-	// 	logger.Error("failed to get plugin info from pilotgoserver: ", err)
-	// 	os.Exit(1)
-	// }
-
 	httphandler.Galaops = &httphandler.Opsclient{
 		Sdkmethod:   PluginClient,
 		PromePlugin: nil,
