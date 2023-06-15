@@ -352,10 +352,12 @@ onMounted(() => {
   if (props.query.isChart) {
     myChart.value.setOption(option.value, true)
   }
-  setTimeout(() => {
+  macIp.value = useMacStore().newIp + ':9100';
+  getPromeData(props.query);
+  /* setTimeout(() => {
     macIp.value = useMacStore().macIp;
     getPromeData(props.query);
-  }, 8)
+  }, 8) */
   window.addEventListener('resize', resize)
 })
 
@@ -389,6 +391,14 @@ watch(() => line_arr.value, (new_line_arr) => {
 }, {
   deep: true
 })
+
+watch(() => useMacStore().newIp, (new_macIp, old_macIp) => {
+  if (new_macIp) {
+    macIp.value = new_macIp + ':9100';
+    getPromeData(props.query);
+  }
+}, { deep: true })
+
 defineExpose({
   resize
 })
