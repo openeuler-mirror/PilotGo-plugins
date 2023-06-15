@@ -1,10 +1,10 @@
 package httphandler
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
@@ -64,17 +64,24 @@ func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[
 	if err != nil {
 		logger.Error("faild to get plugin list: ", err)
 	}
-	bs, _ := ioutil.ReadAll(resp.Body)
-	resp.Body.Close()
+	defer resp.Body.Close()
+
+	var buf bytes.Buffer
+	_, erriocopy := io.Copy(&buf, resp.Body)
+	if erriocopy != nil {
+		return nil, erriocopy
+	}
+
 	data := map[string]interface{}{
 		"code": nil,
 		"data": nil,
 		"msg":  nil,
 	}
-	err = json.Unmarshal(bs, &data)
+	err = json.Unmarshal(buf.Bytes(), &data)
 	if err != nil {
-		logger.Error("unmarshal request plugin info error:%s", err.Error())
+		return nil, fmt.Errorf("unmarshal request plugin info error:%s", err.Error())
 	}
+
 	var PromePlugin map[string]interface{}
 	for _, p := range data["data"].([]interface{}) {
 		if p.(map[string]interface{})["name"] == pluginname {
