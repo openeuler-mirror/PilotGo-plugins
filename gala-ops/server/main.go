@@ -49,14 +49,19 @@ func main() {
 	promeplugin, err := httphandler.Galaops.Getplugininfo(PluginClient.Server, "Prometheus")
 	if err != nil {
 		logger.Error(err.Error())
-		os.Exit(1)
 	}
 	httphandler.Galaops.PromePlugin = promeplugin
 
-	// 向prometheus插件发送可视化插件json模板
+	// 检查prometheus插件是否在运行
+	promepluginstatus, _ := httphandler.Galaops.CheckPrometheusPlugin()
+	if !promepluginstatus {
+		logger.Error("prometheus plugin is not running")
+	}
+
+	// 向prometheus插件发送可视化插件json模板    TODO: prometheus plugin 注册接收jsonmode的路由
 	respbody, retcode, err := httphandler.Galaops.SendJsonMode("/abc")
 	if err != nil || retcode != 201 {
-		logger.Error("failed to sendjsonmode to prometheus plugin: ", respbody, retcode, err)
+		logger.Error("failed to send jsonmode to prometheus plugin: ", respbody, retcode, err)
 	}
 
 	// 设置router

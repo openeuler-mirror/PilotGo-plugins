@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 )
@@ -67,7 +66,7 @@ func (o *Opsclient) QueryMetric(endpoint string, querymethod string, param strin
 func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[string]interface{}, error) {
 	resp, err := http.Get(pilotgoserver + "/api/v1/plugins")
 	if err != nil {
-		logger.Error("faild to get plugin list: ", err)
+		return nil, fmt.Errorf("faild to get plugin list: %s", err.Error())
 	}
 	defer resp.Body.Close()
 
@@ -134,4 +133,13 @@ func (o *Opsclient) SendJsonMode(jsonmodeURL string) (string, int, error) {
 		return string(resp.Body), resp.StatusCode, nil
 	}
 	return "the target web server does not exist", -1, err
+}
+
+func (o *Opsclient) CheckPrometheusPlugin() (bool, error) {
+	url := Galaops.PromePlugin["url"].(string) + "aaa"
+	resp, err := httputils.Get(url, nil)
+	if resp == nil {
+		return false, err
+	}
+	return true, err
 }
