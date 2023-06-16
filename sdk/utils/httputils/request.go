@@ -65,9 +65,7 @@ func request(method, url string, param *Params) (*Response, error) {
 	hc := &http.Client{}
 	resp, err := hc.Do(req)
 	if err != nil {
-		return &Response{
-			StatusCode: resp.StatusCode,
-		}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
