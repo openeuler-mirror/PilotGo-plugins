@@ -54,9 +54,9 @@ func main() {
 	httphandler.Galaops.PromePlugin = promeplugin
 
 	// 向prometheus插件发送可视化插件json模板
-	_, err = httphandler.Galaops.SendJsonMode("")
-	if err != nil {
-		logger.Error("failed to sendjsonmode to prometheus plugin: ", err)
+	respbody, retcode, err := httphandler.Galaops.SendJsonMode("/abc")
+	if err != nil || retcode != 201 {
+		logger.Error("failed to sendjsonmode to prometheus plugin: ", respbody, retcode, err)
 	}
 
 	// 设置router

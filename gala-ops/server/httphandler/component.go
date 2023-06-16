@@ -99,7 +99,7 @@ func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[
 	return PromePlugin, nil
 }
 
-func (o *Opsclient) SendJsonMode(jsonmodeURL string) (string, error) {
+func (o *Opsclient) SendJsonMode(jsonmodeURL string) (string, int, error) {
 	url := Galaops.PromePlugin["url"].(string) + jsonmodeURL
 
 	_, thisfile, _, _ := runtime.Caller(0)
@@ -109,30 +109,29 @@ func (o *Opsclient) SendJsonMode(jsonmodeURL string) (string, error) {
 		if err != nil {
 			return err
 		}
-
 		if !info.Mode().IsRegular() {
 			return nil
 		}
-
 		data, err := os.ReadFile(jsonfilepath)
 		if err != nil {
 			return err
 		}
-
 		_, jsonfilename := filepath.Split(jsonfilepath)
 		files[strings.Split(jsonfilename, ".")[0]] = string(data)
-
 		return nil
 	})
 	if err != nil {
-		return "", err
+		return "", -1, err
 	}
 
-	bs, err := httputils.Post(url, &httputils.Params{
+	resp, err := httputils.Post(url, &httputils.Params{
 		Body: files,
 	})
-	if err != nil {
-		return "", err
+	if resp != nil {
+		if err != nil || resp.StatusCode != 201 {
+			return "", resp.StatusCode, err
+		}
+		return string(resp.Body), resp.StatusCode, nil
 	}
-	return string(bs), nil
+	return "the target web server does not exist", -1, err
 }
