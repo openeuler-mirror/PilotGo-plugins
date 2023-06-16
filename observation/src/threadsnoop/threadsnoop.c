@@ -46,6 +46,34 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
+static int handle_event(void *ctx, void *data, size_t data_sz)
+{
+	const struct event *e = data;
+	char ts[16];
+	struct syms_cache *syms_cache = *((struct syms_cache **)ctx);
+	const struct syms *syms;
+	const struct sym *sym = NULL;
+
+	syms = syms_cache__get_syms(syms_cache, e->pid);
+	if (syms)
+		sym = syms__map_addr(syms, e->function_addr);
+
+	strftime_now(ts, sizeof(ts), "%H:%M:%S");
+	printf("%-10s %-6d %-16s ", ts, e->pid, e->comm);
+
+	return 0;
+}
+
+static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
+{
+	warning("Lost %llu events on cpu #%d\n", lost_cnt, cpu);
+}
+
 static int attach_uprobes(struct threadsnoop_bpf *obj, struct bpf_link **link)
 {
 	char *pthread_lib_path;
@@ -125,6 +153,18 @@ int main(int argc, char *argv[])
 	err = attach_uprobes(obj, &link);
 	if (err) {
 		warning("Failed to attach BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = bpf_buffer__open(buf, handle_event, handle_lost_events, &syms_cache);
+	if (err) {
+		warning("Failed to open ring/perf buffer: %d\n", err);
+		goto cleanup;
+	}
+
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Can't set signal handler: %s\n", strerror(errno));
+		err = 1;
 		goto cleanup;
 	}
 
