@@ -16,6 +16,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
+	"openeuler.org/PilotGo/gala-ops-plugin/database"
 )
 
 type Opsclient struct {
@@ -142,4 +143,19 @@ func (o *Opsclient) CheckPrometheusPlugin() (bool, error) {
 		return false, err
 	}
 	return true, err
+}
+
+func (o *Opsclient) GetMachineList() ([]*database.AopsDepolyStatus, error) {
+	url := Galaops.Sdkmethod.Server + "/pluginapi/machine_list"
+	r, err := httputils.Get(url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get machine list: %s", err.Error())
+	}
+
+	results := []*database.AopsDepolyStatus{}
+	if err := json.Unmarshal(r.Body, &results); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal in deploystatuscheck(): %s", err.Error())
+	}
+
+	return results, nil
 }
