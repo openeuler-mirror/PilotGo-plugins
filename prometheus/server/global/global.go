@@ -6,6 +6,7 @@ import (
 )
 
 var (
-	GlobalClient *client.Client
-	GlobalDB     *gorm.DB
+	GlobalClient        *client.Client
+	GlobalDB            *gorm.DB
+	GlobalPrometheusYml string
 )
