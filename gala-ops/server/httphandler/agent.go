@@ -9,7 +9,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
 )
-
+// TODO: 接收到pilotgo server部署aops组件请求后直接响应部署脚本
 func InstallGopher(ctx *gin.Context) {
 	param := &common.Batch{}
 	if err := ctx.BindJSON(param); err != nil {

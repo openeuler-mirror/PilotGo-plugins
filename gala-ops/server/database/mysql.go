@@ -9,7 +9,7 @@ import (
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
 )
 
-var globalDB *gorm.DB
+var GlobalDB *gorm.DB
 
 func MysqlInit(conf *config.MysqlConf) error {
 	url := fmt.Sprintf("%s:%s@(%s:%d)/%s?charset=utf8mb4&parseTime=true",
@@ -27,7 +27,7 @@ func MysqlInit(conf *config.MysqlConf) error {
 	if err != nil {
 		return err
 	}
-	globalDB = gdb
+	GlobalDB = gdb
 
 	db, err := gdb.DB()
 	if err != nil {
@@ -37,9 +37,11 @@ func MysqlInit(conf *config.MysqlConf) error {
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
 
+	GlobalDB.AutoMigrate(&AopsDepolyStatus{})
+
 	return nil
 }
 
 func DB() *gorm.DB {
-	return globalDB
+	return GlobalDB
 }
