@@ -10,3 +10,7 @@ var (
 	GlobalDB            *gorm.DB
 	GlobalPrometheusYml string
 )
+
+const (
+	GlobalPrometheusYmlInit = "../scripts/init_prometheus_yml.sh"
+)
