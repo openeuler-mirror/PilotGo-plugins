@@ -8,7 +8,9 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/gala-ops-plugin/agentmanager"
 )
+
 // TODO: 接收到pilotgo server部署aops组件请求后直接响应部署脚本
 func InstallGopher(ctx *gin.Context) {
 	param := &common.Batch{}
@@ -27,7 +29,7 @@ func InstallGopher(ctx *gin.Context) {
 		})
 	}
 
-	cmdResults, err := Galaops.Sdkmethod.RunScript(param, string(script))
+	cmdResults, err := agentmanager.Galaops.Sdkmethod.RunScript(param, string(script))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":   -1,
