@@ -18,7 +18,6 @@ type HttpConf struct {
 	Addr string `yaml:"addr"`
 }
 
-// redis的密码怎么添加至配置文件？
 type ServerConfig struct {
 	Redis   *Redis          `yaml:"redis"`
 	Http    *HttpConf       `yaml:"http"`
