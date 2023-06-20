@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
@@ -23,6 +24,7 @@ import (
 type Opsclient struct {
 	Sdkmethod   *client.Client
 	PromePlugin map[string]interface{}
+	agentMap sync.Map
 }
 
 var Galaops *Opsclient
@@ -146,14 +148,14 @@ func (o *Opsclient) CheckPrometheusPlugin() (bool, error) {
 	return true, err
 }
 
-func (o *Opsclient) GetMachineList() ([]*database.AopsDepolyStatus, error) {
+func (o *Opsclient) GetMachineList() ([]*database.Agent, error) {
 	url := Galaops.Sdkmethod.Server + "/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get machine list: %s", err.Error())
 	}
 
-	results := []*database.AopsDepolyStatus{}
+	results := []*database.Agent{}
 	if err := json.Unmarshal(r.Body, &results); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal in deploystatuscheck(): %s", err.Error())
 	}

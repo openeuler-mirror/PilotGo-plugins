@@ -37,7 +37,7 @@ func MysqlInit(conf *config.MysqlConf) error {
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
 
-	GlobalDB.AutoMigrate(&AopsDepolyStatus{})
+	GlobalDB.AutoMigrate(&Agent{})
 
 	return nil
 }
