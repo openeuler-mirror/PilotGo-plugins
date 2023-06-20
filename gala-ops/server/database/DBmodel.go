@@ -1,6 +1,6 @@
 package database
 
-type AopsDepolyStatus struct {
+type Agent struct {
 	ID             uint   `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	UUID           string `gorm:"not null" json:"uuid"`
 	IP             string `gorm:"not null" json:"ip"`

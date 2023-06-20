@@ -10,7 +10,7 @@ import (
 )
 
 // 获取业务机集群gala-gopher版本信息
-func GetPackageVersion(machines []*database.AopsDepolyStatus, batch *common.Batch, cmd string) ([]*database.AopsDepolyStatus, error) {
+func GetPackageVersion(machines []*database.Agent, batch *common.Batch, cmd string) ([]*database.Agent, error) {
 	cmdresults, err := Galaops.Sdkmethod.RunCommand(batch, cmd)
 	if err == nil {
 		for _, result := range cmdresults {
