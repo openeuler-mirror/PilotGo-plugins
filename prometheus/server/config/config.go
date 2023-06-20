@@ -13,7 +13,6 @@ type Prometheus struct {
 	URL         string `yaml:"url"`
 	PluginType  string `yaml:"plugin_type"`
 	ReverseDest string `yaml:"reverseDest"`
-	AlertYaml   string `yaml:"alertYaml"`
 }
 type HttpConf struct {
 	Addr string `yaml:"addr"`

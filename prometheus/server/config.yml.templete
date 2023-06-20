@@ -2,7 +2,6 @@ prometheus:
   url: "http://localhost:8090/plugin/Prometheus"
   plugin_type: "micro-app"
   reverseDest: "http://localhost:9090"
-  alertYaml: "/etc/prometheus/rules.yaml"
 http:
   addr: "0.0.0.0:8090"
 log:
