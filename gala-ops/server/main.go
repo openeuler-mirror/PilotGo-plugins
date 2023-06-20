@@ -45,6 +45,12 @@ func main() {
 		PromePlugin: nil,
 	}
 
+	// 业务机集群aops组件状态自检
+	err := agentmanager.Galaops.DeployStatusCheck()
+	if err != nil {
+		logger.Error(err.Error())
+	}
+
 	// 临时自定义获取prometheus地址方式
 	promeplugin, err := agentmanager.Galaops.Getplugininfo(PluginClient.Server, "Prometheus")
 	if err != nil {
@@ -58,7 +64,7 @@ func main() {
 		logger.Error("prometheus plugin is not running")
 	}
 
-	// 向prometheus插件发送可视化插件json模板    TODO: prometheus plugin 注册接收jsonmode的路由
+	// 向prometheus插件发送可视化插件json模板    TODO: prometheus plugin 实现接收jsonmode的接口
 	respbody, retcode, err := agentmanager.Galaops.SendJsonMode("/abc")
 	if err != nil || retcode != 201 {
 		logger.Error("failed to send jsonmode to prometheus plugin: ", respbody, retcode, err)
