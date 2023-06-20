@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 	"openeuler.org/PilotGo/gala-ops-plugin/database"
@@ -158,4 +159,30 @@ func (o *Opsclient) GetMachineList() ([]*database.AopsDepolyStatus, error) {
 	}
 
 	return results, nil
+}
+
+func (o *Opsclient) DeployStatusCheck() error {
+	machines, err := Galaops.GetMachineList()
+	if err != nil {
+		return err
+	}
+
+	batch := &common.Batch{}
+	for _, m := range machines {
+		batch.MachineUUIDs = append(batch.MachineUUIDs, m.UUID)
+	}
+
+	// 获取业务机集群gala-gopher版本信息
+	machines, err = GetPackageVersion(machines, batch, "rpm -qi gala-gopher")
+	if err != nil {
+		return err
+	}
+
+	// 更新DB中业务机集群的信息
+	dberr := database.GlobalDB.Save(&machines).Error
+	if dberr != nil {
+		return fmt.Errorf("failed to update table: %s", dberr.Error())
+	}
+
+	return nil
 }
