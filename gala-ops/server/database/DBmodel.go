@@ -5,7 +5,7 @@ type AopsDepolyStatus struct {
 	UUID           string `gorm:"not null" json:"uuid"`
 	IP             string `gorm:"not null" json:"ip"`
 	Port           string `gorm:"not null" json:"port"`
-	Department     string `gorm:"not null" json:"department"`
+	Department     string `json:"department"`
 	Statu          string `gorm:"not null" json:"state"`
 	Gopher_deploy  bool   // ture:installed false:uninstalled
 	Gopher_running bool   // true:running false:not running

@@ -7,9 +7,9 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/gala-ops-plugin/agentmanager"
 	"openeuler.org/PilotGo/gala-ops-plugin/config"
 	"openeuler.org/PilotGo/gala-ops-plugin/database"
-	"openeuler.org/PilotGo/gala-ops-plugin/httphandler"
 	"openeuler.org/PilotGo/gala-ops-plugin/router"
 )
 
@@ -40,32 +40,32 @@ func main() {
 	PluginClient := client.DefaultClient(PluginInfo)
 	// 临时给server赋值
 	PluginClient.Server = "http://192.168.75.100:8888"
-	httphandler.Galaops = &httphandler.Opsclient{
+	agentmanager.Galaops = &agentmanager.Opsclient{
 		Sdkmethod:   PluginClient,
 		PromePlugin: nil,
 	}
 
 	// 临时自定义获取prometheus地址方式
-	promeplugin, err := httphandler.Galaops.Getplugininfo(PluginClient.Server, "Prometheus")
+	promeplugin, err := agentmanager.Galaops.Getplugininfo(PluginClient.Server, "Prometheus")
 	if err != nil {
 		logger.Error(err.Error())
 	}
-	httphandler.Galaops.PromePlugin = promeplugin
+	agentmanager.Galaops.PromePlugin = promeplugin
 
 	// 检查prometheus插件是否在运行
-	promepluginstatus, _ := httphandler.Galaops.CheckPrometheusPlugin()
+	promepluginstatus, _ := agentmanager.Galaops.CheckPrometheusPlugin()
 	if !promepluginstatus {
 		logger.Error("prometheus plugin is not running")
 	}
 
 	// 向prometheus插件发送可视化插件json模板    TODO: prometheus plugin 注册接收jsonmode的路由
-	respbody, retcode, err := httphandler.Galaops.SendJsonMode("/abc")
+	respbody, retcode, err := agentmanager.Galaops.SendJsonMode("/abc")
 	if err != nil || retcode != 201 {
 		logger.Error("failed to send jsonmode to prometheus plugin: ", respbody, retcode, err)
 	}
 
 	// 设置router
-	httphandler.Galaops.Sdkmethod.RegisterHandlers(engine)
+	agentmanager.Galaops.Sdkmethod.RegisterHandlers(engine)
 	router.InitRouter(engine)
 	if err := engine.Run(config.Config().Http.Addr); err != nil {
 		logger.Fatal("failed to run server")

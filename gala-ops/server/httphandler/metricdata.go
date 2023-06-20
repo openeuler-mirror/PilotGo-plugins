@@ -6,13 +6,14 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/gala-ops-plugin/agentmanager"
 )
 
 // prometheus plugin add /api/v1/labels handler
 func LabelsList(ctx *gin.Context) {
-	promurl := Galaops.PromePlugin["url"].(string)
+	promurl := agentmanager.Galaops.PromePlugin["url"].(string)
 
-	data, err := Galaops.QueryMetric(promurl, "labels", "")
+	data, err := agentmanager.Galaops.QueryMetric(promurl, "labels", "")
 	if err != nil {
 		logger.Error("faild to querymetric from prometheus: ", err)
 	}
@@ -21,14 +22,14 @@ func LabelsList(ctx *gin.Context) {
 
 func TargetsList(ctx *gin.Context) {
 	// 查询prometheus监控对象列表
-	promurl := Galaops.PromePlugin["url"].(string)
+	promurl := agentmanager.Galaops.PromePlugin["url"].(string)
 
 	param := map[string]string{
 		"query": "up",
 	}
 
 	urlparam := fmt.Sprintf("?query=%v", param["query"])
-	data, err := Galaops.QueryMetric(promurl, "query", urlparam)
+	data, err := agentmanager.Galaops.QueryMetric(promurl, "query", urlparam)
 	if err != nil {
 		logger.Error("faild to querymetric from prometheus: ", err)
 	}
@@ -36,8 +37,8 @@ func TargetsList(ctx *gin.Context) {
 }
 
 func CPUusagerate(ctx *gin.Context) {
-	promurl := Galaops.PromePlugin["url"].(string)
-	start, end := Galaops.UnixTimeStartandEnd(-5)
+	promurl := agentmanager.Galaops.PromePlugin["url"].(string)
+	start, end := agentmanager.Galaops.UnixTimeStartandEnd(-5)
 	job := ctx.Query("job")
 	if job == "" {
 		logger.Error("need job parameter in url: cpuusagerate")
@@ -52,7 +53,7 @@ func CPUusagerate(ctx *gin.Context) {
 	}
 
 	urlparam := fmt.Sprintf("?query=%v&start=%v&end=%v&step=%v", param["query"], param["start"], param["end"], param["step"])
-	data, err := Galaops.QueryMetric(promurl, "query_range", urlparam)
+	data, err := agentmanager.Galaops.QueryMetric(promurl, "query_range", urlparam)
 	if err != nil {
 		logger.Error("faild to querymetric from prometheus: ", err)
 	}
