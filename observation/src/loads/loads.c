@@ -101,3 +101,36 @@ static int open_and_attach_perf_event(struct bpf_program *prog, struct bpf_link 
 
 	return 0;
 }
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+						   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !env.verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
+static void print_loads(struct loads_bpf__bss *bss)
+{
+	__u64 load1 = __atomic_load_n(&bss->loads[0], __ATOMIC_RELAXED);
+	__u64 load5 = __atomic_load_n(&bss->loads[1], __ATOMIC_RELAXED);
+	__u64 load15 = __atomic_load_n(&bss->loads[2], __ATOMIC_RELAXED);
+
+	if (env.timestamp)
+	{
+		char ts[32];
+
+		strftime_now(ts, sizeof(ts), "%H:%M:%S");
+		printf("%s ", ts);
+	}
+
+	printf("load averages: %lld.%03lld %lld.%03lld %lld.%03lld\n",
+		   load1 >> 11, ((load1 & ((1 << 11) - 1)) * 1000) >> 11,
+		   load5 >> 11, ((load5 & ((1 << 11) - 1)) * 1000) >> 11,
+		   load15 >> 11, ((load15 & ((1 << 11) - 1)) * 1000) >> 11);
+}
