@@ -54,6 +54,25 @@ static __always_inline bool filter_port(__u16 port)
         return true;
 }
 
+static __always_inline int
+enter_tcp_connect(struct sock *sk)
+{
+        __u64 pid_tgid = bpf_get_current_pid_tgid();
+        __u32 pid = pid_tgid >> 32;
+        __u32 tid = pid_tgid;
+        __u32 uid;
+
+        if (filter_pid && pid != filter_pid)
+                return 0;
+
+        uid = bpf_get_current_uid_gid();
+        if (filter_uid != (uid_t)-1 && uid != filter_uid)
+                return 0;
+
+        bpf_map_update_elem(&sockets, &tid, &sk, BPF_ANY);
+        return 0;
+}
+
 static __always_inline void
 count_v4(struct sock *sk, __u16 sport, __u16 dport)
 {
@@ -134,4 +153,95 @@ trace_v6(void *ctx, pid_t pid, struct sock *sk, __u16 sport, __u16 dport)
 
         submit_buf(ctx, event, sizeof(*event));
 }
+
+static __always_inline int
+exit_tcp_connect(void *ctx, int ip_version)
+{
+        __u64 pid_tgid = bpf_get_current_pid_tgid();
+        __u32 pid = pid_tgid >> 32;
+        __u32 tid = pid_tgid;
+        struct sock **skpp;
+        struct sock *sk;
+        __u16 sport = 0;
+        __u16 dport;
+
+        skpp = bpf_map_lookup_and_delete_elem(&sockets, &tid);
+        if (!skpp)
+                return 0;
+
+        sk = *skpp;
+
+        if (source_port)
+                BPF_CORE_READ_INTO(&sport, sk, __sk_common.skc_num);
+        BPF_CORE_READ_INTO(&dport, sk, __sk_common.skc_dport);
+
+        bpf_printk("enent.dport:%d\n",dport);
+
+        if (filter_port(dport))
+                return 0;
+
+        if (do_count) {
+                if (ip_version == 4)
+                        count_v4(sk, sport, dport);
+                else
+                        count_v6(sk, sport, dport);
+        } else {
+                if (ip_version == 4)
+                        trace_v4(ctx, pid, sk, sport, dport);
+                else
+                        trace_v6(ctx, pid, sk, sport, dport);
+        }
+
+        return 0;
+}
+
+SEC("fentry/tcp_v4_connect")
+int BPF_PROG(tcp_v4_connect, struct sock *sk)
+{
+        return enter_tcp_connect(sk);
+}
+
+SEC("kprobe/tcp_v4_connect")
+int BPF_KPROBE(tcp_v4_connect_kprobe, struct sock *sk)
+{
+        return enter_tcp_connect(sk);
+}
+
+SEC("fexit/tcp_v4_connect")
+int BPF_PROG(tcp_v4_connect_ret)
+{
+        return exit_tcp_connect(ctx, 4);
+}
+
+SEC("kretprobe/tcp_v4_connect")
+int BPF_KRETPROBE(tcp_v4_connect_ret_kprobe)
+{
+        return exit_tcp_connect(ctx, 4);
+}
+
+SEC("fentry/tcp_v6_connect")
+int BPF_PROG(tcp_v6_connect, struct sock *sk)
+{
+        return enter_tcp_connect(sk);
+}
+
+SEC("kprobe/tcp_v6_connect")
+int BPF_KPROBE(tcp_v6_connect_kprobe, struct sock *sk)
+{
+        return enter_tcp_connect(sk);
+}
+
+SEC("fexit/tcp_v6_connect")
+int BPF_PROG(tcp_v6_connect_ret)
+{
+        return exit_tcp_connect(ctx, 6);
+}
+
+SEC("kretprobe/tcp_v6_connect")
+int BPF_KRETPROBE(tcp_v6_connect_ret_kprobe)
+{
+        return exit_tcp_connect(ctx, 6);
+}
+
+char LICENSE[] SEC("license") = "GPL";
 
