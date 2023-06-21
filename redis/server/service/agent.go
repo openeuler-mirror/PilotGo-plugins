@@ -8,7 +8,7 @@ import (
 	"openeuler.org/PilotGo/redis-plugin/plugin"
 )
 
-func FormatData(cmdResults []*client.CmdResult, sign int) ([]interface{}, error) {
+func FormatData(cmdResults []*client.CmdResult) ([]string, []interface{}, error) {
 	ret := []interface{}{}
 	monitorTargets := []string{}
 	for _, result := range cmdResults {
@@ -35,20 +35,7 @@ func FormatData(cmdResults []*client.CmdResult, sign int) ([]interface{}, error)
 
 		ret = append(ret, d)
 	}
-	var err error
-	//分情况，也有删除
-	if sign == 1 {
-		//添加配置
-		err = plugin.MonitorTargets(monitorTargets)
-	}
-	if sign == 0 {
-		//删除配置
-		err = plugin.MonitorTargets(monitorTargets)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return ret, nil
+	return monitorTargets, ret, nil
 }
 
 func Install(param *common.Batch) ([]interface{}, error) {
@@ -59,7 +46,11 @@ func Install(param *common.Batch) ([]interface{}, error) {
 		return nil, err
 	}
 
-	ret, err := FormatData(cmdResults, 1)
+	monitorTargets, ret, err := FormatData(cmdResults)
+	if err != nil {
+		return nil, err
+	}
+	err = plugin.MonitorTargets(monitorTargets)
 	if err != nil {
 		return nil, err
 	}
@@ -72,9 +63,23 @@ func UnInstall(param *common.Batch) ([]interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	ret, err := FormatData(cmdResults, 0)
+	monitorTargets, ret, err := FormatData(cmdResults)
+	if err != nil {
+		return nil, err
+	}
+	err = plugin.MonitorTargets(monitorTargets)
 	if err != nil {
 		return nil, err
 	}
 	return ret, nil
+}
+
+func Restart(param *common.Batch) error {
+	cmd := "systemctl restart redis_exporter && systemctl status redis_exporter"
+	cmdResults, err := global.GlobalClient.RunScript(param, cmd)
+	if err != nil {
+		return err
+	}
+	_, _, err = FormatData(cmdResults)
+	return nil
 }
