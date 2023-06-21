@@ -56,3 +56,22 @@ int BPF_KPROBE(vfs_create, void *arg0, void *arg1, void *arg2)
 	else
 		return probe_create(arg1);
 }
+
+SEC("kprobe/vfs_open")
+int BPF_KPROBE(vfs_open, struct path *path, struct file *file)
+{
+	struct dentry *dentry = BPF_CORE_READ(path, dentry);
+	int fmode = BPF_CORE_READ(file, f_mode);
+
+	if (!(fmode & FMODE_CREATED))
+		return 0;
+
+	return probe_create(dentry);
+}
+
+SEC("kprobe/security_inode_create")
+int BPF_KPROBE(security_inode_create, struct inode *dir,
+	       struct dentry *dentry)
+{
+	return probe_create(dentry);
+}
