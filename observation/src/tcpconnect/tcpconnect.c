@@ -111,3 +111,113 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
         return 0;
 }
 
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+                           va_list args)
+{
+        if (level == LIBBPF_DEBUG && !env.verbose)
+                return 0;
+        return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+        exiting = true;
+}
+
+static void print_count_ipv4(int map_fd)
+{
+        static struct ipv4_flow_key keys[MAX_ENTRIES];
+        __u32 value_size = sizeof(__u64);
+        __u32 key_size = sizeof(keys[0]);
+        static struct ipv4_flow_key zero;
+        static __u64 counts[MAX_ENTRIES];
+        char s[INET_ADDRSTRLEN];
+        char d[INET_ADDRSTRLEN];
+        __u32 n = MAX_ENTRIES;
+        struct in_addr src, dst;
+
+        if (dump_hash(map_fd, keys, key_size, counts, value_size, &n, &zero)) {
+                warning("Dump_hash: %s", strerror(errno));
+                return;
+        }
+
+        for (int i = 0; i < n; i++) {
+                src.s_addr = keys[i].saddr;
+                dst.s_addr = keys[i].daddr;
+
+                printf("%-25s %-25s",
+                       inet_ntop(AF_INET, &src, s, sizeof(s)),
+                       inet_ntop(AF_INET, &dst, d, sizeof(d)));
+                if (env.source_port)
+                        printf(" %-20d", keys[i].sport);
+                printf(" %-20d", ntohs(keys[i].dport));
+                printf(" %-10llu", counts[i]);
+                printf("\n");
+        }
+}
+
+static void print_count_ipv6(int map_fd)
+{
+        static struct ipv6_flow_key keys[MAX_ENTRIES];
+        __u32 value_size = sizeof(__u64);
+        __u32 key_size = sizeof(keys[0]);
+        static struct ipv6_flow_key zero;
+        static __u64 counts[MAX_ENTRIES];
+        char s[INET6_ADDRSTRLEN];
+        char d[INET6_ADDRSTRLEN];
+        struct in6_addr src, dst;
+        __u32 n = MAX_ENTRIES;
+
+        if (dump_hash(map_fd, keys, key_size, counts, value_size, &n, &zero)) {
+                warning("dump_hash: %s\n", strerror(errno));
+                return;
+        }
+
+        for (int i = 0; i < n; i++) {
+                memcpy(src.s6_addr, keys[i].saddr, sizeof(src.s6_addr));
+                memcpy(dst.s6_addr, keys[i].daddr, sizeof(dst.s6_addr));
+
+                printf("%-25s %-25s",
+                       inet_ntop(AF_INET6, &src, s, sizeof(s)),
+                       inet_ntop(AF_INET6, &dst, d, sizeof(d)));
+                if (env.source_port)
+                        printf(" %-20d", keys[i].sport);
+                printf(" %-20d", ntohs(keys[i].dport));
+                printf(" %-10llu", counts[i]);
+                printf("\n");
+        }
+}
+
+static void print_count_header(void)
+{
+        printf("\n%-25s %-25s", "LADDR", "RADDR");
+        if (env.source_port)
+                printf(" %-20s", "LPORT");
+        printf(" %-20s", "RPORT");
+        printf(" %-10s", "CONNECTS");
+        printf("\n");
+}
+
+static void print_count(int map_fd_ipv4, int map_fd_ipv6)
+{
+        while (!exiting)
+                pause();
+
+        print_count_header();
+        print_count_ipv4(map_fd_ipv4);
+        print_count_ipv6(map_fd_ipv6);
+}
+
+static void print_events_headers(void)
+{
+        if (env.print_timestamp)
+                printf("%-9s ", "TIME(s)");
+        if (env.print_uid)
+                printf("%-6s ", "UID");
+        printf("%-6s %-16s %-2s %-25s %-25s",
+               "PID", "COMM", "IP", "SADDR", "DADDR");
+        if (env.source_port)
+                printf(" %-5s", "SPORT");
+        printf(" %-5s\n", "DPORT");
+}
+
