@@ -14,6 +14,33 @@ const volatile pid_t target_pid = 0;
 const volatile bool ignore_errors = true;
 const volatile bool filter_by_port = false;
 
+struct {
+	__uint(type, BPF_MAP_TYPE_CGROUP_ARRAY);
+	__type(key, u32);
+	__type(value, u32);
+	__uint(max_entries, 1);
+} cgroup_map SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, __u32);
+	__type(value, struct socket *);
+} sockets SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_PORTS);
+	__type(key, __u16);
+	__type(value, __u16);
+} ports SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
+	__type(key, __u32);
+	__type(value, __u32);
+} events SEC(".maps");
+
 static int probe_entry(struct pt_regs *ctx, struct socket *socket)
 {
 	__u64 pid_tgid = bpf_get_current_pid_tgid();
