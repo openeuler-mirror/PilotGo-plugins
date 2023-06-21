@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 	"openeuler.org/PilotGo/gala-ops-plugin/database"
@@ -186,10 +187,17 @@ func (o *Opsclient) DeployStatusCheck() error {
 		batch.MachineUUIDs = append(batch.MachineUUIDs, m.UUID)
 	}
 
+	// 获取业务机集群gala-gopher安装部署情况
+
 	// 获取业务机集群gala-gopher版本信息
 	machines, err = GetPkgVersion(machines, batch, "gala-gopher")
 	if err != nil {
 		return err
+	}
+
+	// 添加业务机集群信息至opsclient.agentmap
+	for _, m := range machines {
+		o.AddAgent(m)
 	}
 
 	// 更新DB中业务机集群的信息
