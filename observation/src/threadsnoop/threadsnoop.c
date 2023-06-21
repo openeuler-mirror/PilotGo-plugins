@@ -46,9 +46,39 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static int attach_uprobes(struct threadsnoop_bpf *obj, struct bpf_link **link)
+{
+	char *pthread_lib_path;
+	off_t func_off;
+	int err = 0;
+
+	pthread_lib_path = find_library_so("/usr/bin/ls", "/libpthread.so");
+	func_off = get_elf_func_offset(pthread_lib_path, "pthread_create");
+	if (func_off < 0) {
+		warning("Could not find pthread_create in %s\n", pthread_lib_path);
+		err = 1;
+		goto cleanup;
+	}
+
+	*link = bpf_program__attach_uprobe(obj->progs.pthread_create, false,
+					   -1, pthread_lib_path, func_off);
+	if (!*link) {
+		warning("Failed to attach pthread_create: %d\n", -errno);
+		err = 1;
+		goto cleanup;
+	}
+
+cleanup:
+	free(pthread_lib_path);
+	return err != 0;
+}
+
 int main(int argc, char *argv[])
 {
 	struct syms_cache *syms_cache = NULL;
+	struct threadsnoop_bpf *obj;
+	struct bpf_buffer *buf = NULL;
+	struct bpf_link *link = NULL;
 	static const struct argp argp = {
 		.options = opts,
 		.parser = parse_arg,
@@ -69,6 +99,32 @@ int main(int argc, char *argv[])
 	if (!syms_cache) {
 		warning("Failed to to create syms cache\n");
 		err = -ENOMEM;
+		goto cleanup;
+	}
+	
+	obj = threadsnoop_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		err = 1;
+		goto cleanup;
+	}
+
+	buf = bpf_buffer__new(obj->maps.events, obj->maps.heap);
+	if (!buf) {
+		warning("Failed to create ring/perf buffer\n");
+		err = 1;
+		goto cleanup;
+	}
+
+	err = threadsnoop_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+	
+	err = attach_uprobes(obj, &link);
+	if (err) {
+		warning("Failed to attach BPF object: %d\n", err);
 		goto cleanup;
 	}
 
