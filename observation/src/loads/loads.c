@@ -40,3 +40,64 @@ static const struct argp_option opts[] = {
 	{"timestamp", 'T', NULL, 0, "Include timestamp on output"},
 	{NULL, 'h', NULL, OPTION_HIDDEN, "SHow the full help"},
 	{}};
+
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+	switch (key)
+	{
+	case 'h':
+		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+		break;
+	case 'v':
+		env.verbose = true;
+		break;
+	case 'T':
+		env.timestamp = true;
+		break;
+	case 't':
+		env.times = argp_parse_long(key, arg, state);
+		break;
+	case 'i':
+		env.interval = argp_parse_long(key, arg, state);
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+	return 0;
+}
+
+static int nr_cpus;
+
+static int open_and_attach_perf_event(struct bpf_program *prog, struct bpf_link *link[])
+{
+	for (int i = 0; i < nr_cpus; i++)
+	{
+		struct perf_event_attr attr = {
+			.type = PERF_TYPE_SOFTWARE,
+			.config = PERF_COUNT_SW_CPU_CLOCK,
+			.sample_period = 1 / env.interval,
+			.freq = 1,
+		};
+
+		int fd = syscall(SYS_perf_event_open, &attr, -1, i, -1, 0);
+		if (fd < 0)
+		{
+			/* Ignore CPU that is offline */
+			if (errno == ENODEV)
+				continue;
+
+			warning("Failed to init perf sampling: %s\n", strerror(errno));
+			return -1;
+		}
+
+		link[i] = bpf_program__attach_perf_event(prog, fd);
+		if (!link[i])
+		{
+			warning("Failed to attach perf event on CPU#0\n");
+			close(fd);
+			return 1;
+		}
+	}
+
+	return 0;
+}
