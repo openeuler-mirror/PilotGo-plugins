@@ -24,10 +24,12 @@ import (
 type Opsclient struct {
 	Sdkmethod   *client.Client
 	PromePlugin map[string]interface{}
-	agentMap sync.Map
+	agentMap    sync.Map
 }
 
 var Galaops *Opsclient
+
+/*******************************************************访问prometheus数据库*******************************************************/
 
 func (o *Opsclient) UnixTimeStartandEnd(timerange time.Duration) (int64, int64) {
 	now := time.Now()
@@ -67,6 +69,8 @@ func (o *Opsclient) QueryMetric(endpoint string, querymethod string, param strin
 	return data, nil
 }
 
+/*******************************************************prometheus插件相关*******************************************************/
+
 func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[string]interface{}, error) {
 	resp, err := http.Get(pilotgoserver + "/api/v1/plugins")
 	if err != nil {
@@ -97,7 +101,7 @@ func (o *Opsclient) Getplugininfo(pilotgoserver string, pluginname string) (map[
 		}
 	}
 	if len(PromePlugin) == 0 {
-		return nil, fmt.Errorf("pilotgo server not add prometheus plugin")
+		return nil, fmt.Errorf("pilotgo server not add %s plugin", pluginname)
 	}
 	return PromePlugin, nil
 }
@@ -148,6 +152,8 @@ func (o *Opsclient) CheckPrometheusPlugin() (bool, error) {
 	return true, err
 }
 
+/*******************************************************插件启动自检*******************************************************/
+
 func (o *Opsclient) GetMachineList() ([]*database.Agent, error) {
 	url := Galaops.Sdkmethod.Server + "/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)
@@ -175,7 +181,7 @@ func (o *Opsclient) DeployStatusCheck() error {
 	}
 
 	// 获取业务机集群gala-gopher版本信息
-	machines, err = GetPackageVersion(machines, batch, "rpm -qi gala-gopher")
+	machines, err = GetPkgVersion(machines, batch, "gala-gopher")
 	if err != nil {
 		return err
 	}
