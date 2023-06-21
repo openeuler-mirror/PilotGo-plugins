@@ -1,35 +1,40 @@
 package httphandler
 
 import (
-	"net/http"
-
 	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/redis-plugin/service"
 )
 
 // 安装运行
-func InstallRedisExporter(ctx *gin.Context) {
+func InstallRedisExporter(c *gin.Context) {
 	// TODOs
 	var param *common.Batch
 
-	if err := ctx.BindJSON(param); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":   -1,
-			"status": err,
-		})
+	if err := c.BindJSON(param); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
 	}
 
 	ret, err := service.Install(param)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":   -1,
-			"status": err,
-		})
+		response.Fail(c, nil, err.Error())
+		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{
-		"code":   0,
-		"status": "ok",
-		"data":   ret,
-	})
+	response.Success(c, ret, "安装成功")
+}
+
+func UnInstallRedisExporter(c *gin.Context) {
+	var param *common.Batch
+	if err := c.BindJSON(param); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	ret, err := service.UnInstall(param)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, ret, "卸载成功")
 }
