@@ -23,3 +23,18 @@ struct {
 	__uint(key_size, sizeof(u32));
 	__uint(value_size, sizeof(u32));
 } events SEC(".maps");
+
+static __always_inline int probe_create(struct dentry *dentry)
+{
+	u64 id = bpf_get_current_pid_tgid();
+	u32 tgid = id >> 32;
+	u64 ts;
+
+	if (target_tgid && target_tgid != tgid)
+		return 0;
+
+	ts = bpf_ktime_get_ns();
+	bpf_map_update_elem(&start, &dentry, &ts, BPF_ANY);
+
+	return 0;
+}
