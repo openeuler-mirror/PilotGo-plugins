@@ -52,3 +52,17 @@ struct {
 	__type(key, pid_t);
 	__type(value, struct print_value);
 } prints SEC(".maps");
+
+/* Filter filename */
+static __always_inline bool filename_matched(const char *filename)
+{
+	if (!filter_filename)
+		return true;
+
+	for (int i = 0; i < target_filename_sz && i < FSFILENAME_MAX ; i++) {
+		if (filename[i] != target_filename[i])
+			return false;
+	}
+
+	return true;
+}
