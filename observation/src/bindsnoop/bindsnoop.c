@@ -114,3 +114,41 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static void handle_event(void *ctx, int cpu, void *data, __u32 data_sz)
+{
+	struct bind_event *e = data;
+	char addr[48];
+	char opts[] = { 'F', 'T', 'N', 'R', 'r', '\0' };
+	const char *proto;
+	int i = 0;
+
+	if (env.emit_timestamp) {
+		char ts[32];
+
+		strftime_now(ts, sizeof(ts), "%H:%M:%S");
+		printf("%8s ", ts);
+	}
+
+	if (e->proto == IPPROTO_TCP)
+		proto = "TCP";
+	else if (e->proto == IPPROTO_UDP)
+		proto = "UDP";
+	else
+		proto = "UNK";
+
+	while (opts[i]) {
+		if (!((1 << i) & e->opts)) {
+			opts[i] = '.';
+		}
+		i++;
+	}
+
+	if (e->ver == 4)
+		inet_ntop(AF_INET, &e->addr, addr, sizeof(addr));
+	else
+		inet_ntop(AF_INET6, &e->addr, addr, sizeof(addr));
+
+	printf("%-7d %-16s %-3d %-5s %-5s %-4d %-5d %-48s\n",
+	       e->pid, e->task, e->ret, proto, opts, e->bound_dev_if, e->port, addr);
+}
