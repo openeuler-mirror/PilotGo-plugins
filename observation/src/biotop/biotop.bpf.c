@@ -30,4 +30,17 @@ struct {
 	__type(value, struct val_t);
 } counts SEC(".maps");
 
+SEC("kprobe")
+int BPF_KPROBE(blk_account_io_start, struct request *req)
+{
+	struct who_t who = {};
+
+	/* cache PID and comm by request */
+	bpf_get_current_comm(&who.name, sizeof(who.name));
+	who.pid = bpf_get_current_pid_tgid() >> 32;
+	bpf_map_update_elem(&whobyreq, &req, &who, BPF_ANY);
+
+	return 0;
+}
+
 char LICENSE[] SEC("license") = "GPL";
