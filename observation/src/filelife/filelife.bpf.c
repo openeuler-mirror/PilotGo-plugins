@@ -38,3 +38,21 @@ static __always_inline int probe_create(struct dentry *dentry)
 
 	return 0;
 }
+
+/*
+ * In different kernel versions, function vfs_create() has two declarations,
+ * and their parameter lists are as follows:
+ *
+ * int vfs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
+ *		  bool want_excl);
+ * int vfs_create(struct user_namespace *mnt_userns, struct inode *dir,
+ *		  struct dentry *dentry, umode_t mode, bool want_excl);
+ */
+SEC("kprobe/vfs_create")
+int BPF_KPROBE(vfs_create, void *arg0, void *arg1, void *arg2)
+{
+	if (renamedata_has_old_mnt_userns_field())
+		return probe_create(arg2);
+	else
+		return probe_create(arg1);
+}
