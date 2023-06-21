@@ -27,6 +27,33 @@ static volatile sig_atomic_t exiting;
 
 const char *argp_program_version = "biolatency 0.1";
 const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+"Summarize block device I/O latency as a histogram.\n"
+"\n"
+"USAGE: biolatency [--help] [-T] [-m] [-Q] [-D] [-F] [-d DISK] [-c CG] [interval] [count]\n"
+"\n"
+"EXAMPLES:\n"
+"    biolatency              # summarize block I/O latency as a histogram\n"
+"    biolatency 1 10         # print 1 second summaries, 10 times\n"
+"    biolatency -mT 1        # 1s summaries, milliseconds, and timestamps\n"
+"    biolatency -Q           # include OS queued time in I/O time\n"
+"    biolatency -D           # show each disk device separately\n"
+"    biolatency -F           # show I/O flags separately\n"
+"    biolatency -d sdc       # Trace sdc only\n"
+"    biolatency -c CG        # Trace process under cgroupsPath CG\n";
+
+static const struct argp_option opts[] = {
+	{ "timestamp", 'T', NULL, 0, "Include timestamp on output" },
+	{ "milliseonds", 'm', NULL, 0, "Millisecond histogram" },
+	{ "queued", 'Q', NULL, 0, "Include OS queued time in I/O time" },
+	{ "disk", 'D', NULL, 0, "Print a histogram per disk device" },
+	{ "flag", 'F', NULL, 0, "Print a histogram per set of I/O flags" },
+	{ "disk", 'd', "DISK", 0, "Trace this disk only" },
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ "cgroup", 'c', "/sys/fs/cgroup/unified", 0, "Trace process in cgroup path" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{},
+};
 
 static error_t parse_arg(int key, char *arg, struct argp_state *state)
 {
