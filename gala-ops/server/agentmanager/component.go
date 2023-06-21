@@ -159,6 +159,14 @@ func (o *Opsclient) AddAgent(a *database.Agent) {
 	o.agentMap.Store(a.UUID, a)
 }
 
+func (o *Opsclient) GetAgent(uuid string) *database.Agent {
+	agent, ok := o.agentMap.Load(uuid)
+	if ok {
+		return agent.(*database.Agent)
+	}
+	return nil
+}
+
 /*******************************************************插件启动自检*******************************************************/
 
 func (o *Opsclient) GetMachineList() ([]*database.Agent, error) {
