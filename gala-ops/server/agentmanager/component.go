@@ -152,6 +152,12 @@ func (o *Opsclient) CheckPrometheusPlugin() (bool, error) {
 	return true, err
 }
 
+/*******************************************************agentmanager*******************************************************/
+
+func (o *Opsclient) AddAgent(a *database.Agent) {
+	o.agentMap.Store(a.UUID, a)
+}
+
 /*******************************************************插件启动自检*******************************************************/
 
 func (o *Opsclient) GetMachineList() ([]*database.Agent, error) {
