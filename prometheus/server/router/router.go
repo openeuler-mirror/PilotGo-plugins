@@ -17,6 +17,7 @@ func InitRouter() *gin.Engine {
 }
 
 func RegisterAPIs(router *gin.Engine) {
+	logger.Debug("router register")
 	global.GlobalClient.RegisterHandlers(router)
 
 	// prometheus配置文件http方式获取监控target
