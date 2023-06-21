@@ -17,3 +17,17 @@ const volatile int target_op = F_ALL;
 #define MAX_ENTRIES	1024
 
 char target_filename[FSFILENAME_MAX] = {};
+
+struct key_t {
+	pid_t tid;
+	int   fd;
+};
+
+struct fsfilename {
+	char name[FSFILENAME_MAX];
+};
+
+struct print_value {
+	struct key_t key;
+	struct fsfilename *filename;
+};
