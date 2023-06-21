@@ -152,3 +152,128 @@ static void handle_event(void *ctx, int cpu, void *data, __u32 data_sz)
 	printf("%-7d %-16s %-3d %-5s %-5s %-4d %-5d %-48s\n",
 	       e->pid, e->task, e->ret, proto, opts, e->bound_dev_if, e->port, addr);
 }
+
+static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
+{
+	warning("lost %llu events on CPU #%d!\n", lost_cnt, cpu);
+}
+
+int main(int argc, char *argv[])
+{
+	LIBBPF_OPTS(bpf_object_open_opts, open_opts);
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct perf_buffer *pb = NULL;
+	struct bindsnoop_bpf *obj;
+	int err;
+	int cgfd = -1;
+
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	err = ensure_core_btf(&open_opts);
+	if (err) {
+		warning("Failed to fetch necessary BTF for CO-RE: %s\n", strerror(-err));
+		return 1;
+	}
+
+	obj = bindsnoop_bpf__open_opts(&open_opts);
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	obj->rodata->filter_memcg = env.cg;
+	obj->rodata->target_pid = env.target_pid;
+	obj->rodata->ignore_errors = env.ignore_errors;
+	obj->rodata->filter_by_port = env.target_ports != NULL;
+
+	err = bindsnoop_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	/* update cgroup path fd to map */
+	if (env.cg) {
+		int idx = 0;
+		int cg_map_fd = bpf_map__fd(obj->maps.cgroup_map);
+
+		cgfd = open(env.cgroupspath, O_RDONLY);
+		if (cgfd < 0) {
+			warning("Failed opening Cgroup path: %s", env.cgroupspath);
+			goto cleanup;
+		}
+
+		if (bpf_map_update_elem(cg_map_fd, &idx, &cgfd, BPF_ANY)) {
+			warning("Failed adding target cgroup to map");
+			goto cleanup;
+		}
+	}
+
+	if (env.target_ports) {
+		int port_map_fd = bpf_map__fd(obj->maps.ports);
+		char *port = strtok(env.target_ports, ",");
+
+		while (port) {
+			int port_num = strtol(port, NULL, 10);
+
+			bpf_map_update_elem(port_map_fd, &port_num, &port_num, BPF_ANY);
+			port = strtok(NULL, ",");
+		}
+	}
+
+	err = bindsnoop_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF programs: %d\n", err);
+		goto cleanup;
+	}
+
+	pb = perf_buffer__new(bpf_map__fd(obj->maps.events), PERF_BUFFER_PAGES,
+			      handle_event, handle_lost_events, NULL, NULL);
+	if (!pb) {
+		err = -errno;
+		warning("Failed to open perf buffer: %d\n", err);
+		goto cleanup;
+	}
+
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Can't set signal handler: %s\n", strerror(errno));
+		err = 1;
+		goto cleanup;
+	}
+
+	if (env.emit_timestamp)
+		printf("%-8s ", "TIME(s)");
+	printf("%-7s %-16s %-3s %-5s %-5s %-4s %-5s %-48s\n",
+	       "PID", "COMM", "RET", "PROTO", "OPTS", "IF", "PORT", "ADDR");
+
+	while (!exiting) {
+		err = perf_buffer__poll(pb, PERF_POLL_TIMEOUT_MS);
+		if (err < 0 && err != -EINTR) {
+			warning("Error polling perf buffer: %s\n", strerror(-err));
+			goto cleanup;
+		}
+
+		/* reset err to return 0 if exiting */
+		err = 0;
+	}
+
+cleanup:
+	perf_buffer__free(pb);
+	bindsnoop_bpf__destroy(obj);
+	cleanup_core_btf(&open_opts);
+	if (cgfd > 0)
+		close(cgfd);
+
+	return err != 0;
+}
