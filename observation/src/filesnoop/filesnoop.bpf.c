@@ -31,3 +31,24 @@ struct print_value {
 	struct key_t key;
 	struct fsfilename *filename;
 };
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, struct key_t);
+	__type(value, struct fsfilename);
+} files SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, pid_t);
+	__type(value, struct fsfilename);
+} opens SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, pid_t);
+	__type(value, struct print_value);
+} prints SEC(".maps");
