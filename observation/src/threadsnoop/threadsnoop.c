@@ -51,6 +51,32 @@ static void sig_handler(int sig)
 	exiting = 1;
 }
 
+static const char *demangling_cplusplus_function(const char *name)
+{
+	char command[256] = {};
+	FILE *f;
+	char buf[128] = {};
+	const char *ret;
+
+	if (strncmp(name, "_Z", 2) && strncmp(name, "____Z", 5))
+		return name;
+
+	sprintf(command, "c++filt %s", name);
+	f = popen(command, "r");
+	if (!f)
+		return name;
+
+	if (fgets(buf, 128, f) != NULL) {
+		/* drop '\n' */
+		buf[strlen(buf) - 1] = 0;
+		ret = strdup(buf);
+	} else
+		ret = name;
+
+	pclose(f);
+	return ret;
+}
+
 static int handle_event(void *ctx, void *data, size_t data_sz)
 {
 	const struct event *e = data;
@@ -65,6 +91,11 @@ static int handle_event(void *ctx, void *data, size_t data_sz)
 
 	strftime_now(ts, sizeof(ts), "%H:%M:%S");
 	printf("%-10s %-6d %-16s ", ts, e->pid, e->comm);
+        
+	if (sym)
+		printf("%s\n", demangling_cplusplus_function(sym->name));
+	else
+		printf("0x%llx [unknown]\n", e->function_addr);
 
 	return 0;
 }
@@ -167,6 +198,8 @@ int main(int argc, char *argv[])
 		err = 1;
 		goto cleanup;
 	}
+	
+	printf("%-10s %-6s %-16s %s\n", "TIME(ms)", "PID", "COMM", "FUNC");
 
 cleanup:
 	bpf_buffer__free(buf);
