@@ -10,12 +10,12 @@ import (
 )
 
 // 获取业务机集群gala-gopher版本信息
-func GetPackageVersion(machines []*database.Agent, batch *common.Batch, cmd string) ([]*database.Agent, error) {
-	cmdresults, err := Galaops.Sdkmethod.RunCommand(batch, cmd)
+func GetPkgVersion(machines []*database.Agent, batch *common.Batch, pkgname string) ([]*database.Agent, error) {
+	cmdresults, err := Galaops.Sdkmethod.RunCommand(batch, "rpm -qi"+pkgname)
 	if err == nil {
 		for _, result := range cmdresults {
 			if result.RetCode == 1 && strings.Contains(result.Stdout, "is not installed") && result.Stderr == "" {
-				logger.Error("%s not installed happened when getpackageversion: %s, %s, %s; ", "gala-gopher", result.MachineUUID, result.MachineIP, result.Stderr)
+				logger.Error("%s not installed happened when getpackageversion: %s, %s, %s; ", pkgname, result.MachineUUID, result.MachineIP, result.Stderr)
 				continue
 			} else if result.RetCode == 127 && result.Stdout == "" && strings.Contains(result.Stderr, "command not found") {
 				logger.Error("rpm not installed when getpackageversion: %s, %s, %s", result.MachineUUID, result.MachineIP, result.Stderr)
@@ -33,7 +33,7 @@ func GetPackageVersion(machines []*database.Agent, batch *common.Batch, cmd stri
 					}
 				}
 			} else {
-				logger.Error("failed to run command: %s in %s, %s, %s when getpackageversion", "rpm -qi gala-gopher", result.MachineUUID, result.MachineIP, result.Stderr)
+				logger.Error("failed to run command: rpm -qi %s in %s, %s, %s when getpackageversion", pkgname, result.MachineUUID, result.MachineIP, result.Stderr)
 				continue
 			}
 		}
