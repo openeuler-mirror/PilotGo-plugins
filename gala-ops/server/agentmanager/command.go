@@ -29,7 +29,10 @@ func GetPkgVersion(machines []*database.Agent, batch *common.Batch, pkgname stri
 				}
 				for _, m := range machines {
 					if m.UUID == result.MachineUUID {
-						m.Gopher_version = v
+						switch pkgname {
+						case "gala-gopher":
+							m.Gopher_version = v
+						}
 					}
 				}
 			} else {
