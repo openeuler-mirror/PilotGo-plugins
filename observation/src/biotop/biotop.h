@@ -19,4 +19,20 @@ struct who_t {
 	char	name[TASK_COMM_LEN];
 };
 
+/* the key of the output summary */
+struct info_t {
+	pid_t	pid;
+	int	rwflag;
+	int	major;
+	int	minor;
+	char	name[TASK_COMM_LEN];
+};
+
+/* the value of the output summary */
+struct val_t {
+	__u64	bytes;
+	__u64	us;
+	__u32	io;
+};
+
 #endif
