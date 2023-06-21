@@ -32,6 +32,12 @@ func GetPkgVersion(machines []*database.Agent, batch *common.Batch, pkgname stri
 						switch pkgname {
 						case "gala-gopher":
 							m.Gopher_version = v
+						case "gala-anteater":
+							m.Anteater_version = v
+						case "gala-inference":
+							m.Inference_version = v
+						case "gala-spider":
+							m.Spider_version = v
 						}
 					}
 				}
