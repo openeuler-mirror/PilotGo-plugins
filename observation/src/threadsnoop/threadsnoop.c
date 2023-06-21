@@ -38,6 +38,14 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 	return 0;
 }
 
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
 int main(int argc, char *argv[])
 {
 	struct syms_cache *syms_cache = NULL;
@@ -51,6 +59,26 @@ int main(int argc, char *argv[])
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
 	if (err)
 		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+	
+	syms_cache = syms_cache__new(0);
+	if (!syms_cache) {
+		warning("Failed to to create syms cache\n");
+		err = -ENOMEM;
+		goto cleanup;
+	}
+
+cleanup:
+	bpf_buffer__free(buf);
+	threadsnoop_bpf__destroy(obj);
+	if (syms_cache)
+		syms_cache__free(syms_cache);
+	if (link)
+		bpf_link__destroy(link);
 
 return err != 0;
 }
