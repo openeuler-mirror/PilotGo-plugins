@@ -83,3 +83,13 @@ func Restart(param *common.Batch) error {
 	_, _, err = FormatData(cmdResults)
 	return nil
 }
+
+func Stop(param *common.Batch) error {
+	cmd := "systemctl stop redis_exporter && systemctl status redis_exporter"
+	cmdResults, err := global.GlobalClient.RunScript(param, cmd)
+	if err != nil {
+		return err
+	}
+	_, _, err = FormatData(cmdResults)
+	return nil
+}
