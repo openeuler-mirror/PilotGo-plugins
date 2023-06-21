@@ -109,3 +109,41 @@ cleanup:
 	bpf_map_delete_elem(&sockets, &pid);
 	return 0;
 }
+
+SEC("kprobe/inet_bind")
+int BPF_KPROBE(ipv4_bind_entry, struct socket *socket)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	return probe_entry(ctx, socket);
+}
+
+SEC("kretprobe/inet_bind")
+int BPF_KRETPROBE(ipv4_bind_exit)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	return probe_exit(ctx, 4);
+}
+
+SEC("kprobe/inet6_bind")
+int BPF_KPROBE(ipv6_bind_entry, struct socket *socket)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	return probe_entry(ctx, socket);
+}
+
+SEC("kretprobe/inet6_bind")
+int BPF_KRETPROBE(ipv6_bind_exit)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	return probe_exit(ctx, 6);
+}
+
+char LICENSE[] SEC("license") = "Dual BSD/GPL";
