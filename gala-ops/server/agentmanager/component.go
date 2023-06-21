@@ -167,6 +167,12 @@ func (o *Opsclient) GetAgent(uuid string) *database.Agent {
 	return nil
 }
 
+func (o *Opsclient) DeleteAgent(uuid string) {
+	if _, ok := o.agentMap.LoadAndDelete(uuid); !ok {
+		logger.Warn("delete known agent:%s", uuid)
+	}
+}
+
 /*******************************************************插件启动自检*******************************************************/
 
 func (o *Opsclient) GetMachineList() ([]*database.Agent, error) {
