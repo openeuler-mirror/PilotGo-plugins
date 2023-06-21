@@ -30,3 +30,40 @@ struct
     __type(key, u32);
     __type(value, u64);
 } num_map SEC(".maps");
+
+static int __migrate_misplaced_page(void)
+{
+    pid_t pid = (pid_t)bpf_get_current_pid_tgid();
+    u64 ts = bpf_ktime_get_ns();
+
+    bpf_map_update_elem(&start, &pid, &ts, BPF_ANY);
+    return 0;
+}
+
+SEC("fentry/migrate_misplaced_page")
+int BPF_PROG(fentry_migrate_misplaced_page)
+{
+    return __migrate_misplaced_page();
+}
+
+SEC("kprobe/migrate_misplaced_page")
+int BPF_KPROBE(kprobe_migrate_misplaced_page)
+{
+    return __migrate_misplaced_page();
+}
+
+static u64 zero;
+
+SEC("fexit/migrate_misplaced_page")
+int BPF_PROG(fexit_migrate_misplaced_page)
+{
+    return __migrate_misplaced_page_exit();
+}
+
+SEC("kretprobe/migrate_misplaced_page")
+int BPF_KRETPROBE(kretprobe_migrate_misplaced_page)
+{
+    return __migrate_misplaced_page_exit();
+}
+
+char LICENSE[] SEC("license") = "GPL";
