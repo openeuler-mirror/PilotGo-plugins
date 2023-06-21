@@ -33,6 +33,13 @@ func addTargets(targets []string, url string) error {
 	return nil
 }
 
+func deleteTargets(targets []string, url string) error {
+	// TODO:
+	// jobName := "redis"
+	// 删除yml文件中有关配置
+	return nil
+}
+
 func MonitorTargets(targets []string) error {
 	plugin, err := client.GetClient().GetPluginInfo("redis")
 	if err != nil {
