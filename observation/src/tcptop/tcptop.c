@@ -171,3 +171,191 @@ static int sort_column(const void *obj1, const void *obj2)
                 return (i2->value.sent + i2->value.received) - (i1->value.sent + i1->value.received);
 }
 
+static int print_stat(struct tcptop_bpf *obj)
+{
+        struct ip_key_t key, *prev_key = NULL;
+        static struct info_t infos[OUTPUT_ROWS_LIMIT];
+        int fd = bpf_map__fd(obj->maps.ip_map);
+        bool ipv6_header_printed = false;
+        int rows = 0;
+        int err = 0;
+
+        if (!env.no_summary) {
+                FILE *f = fopen("/proc/loadavg", "r");
+
+                if (f) {
+                        char ts[16], buf[256];
+
+                        strftime_now(ts, sizeof(ts), "%H:%M:%S");
+                        if (fread(buf, 1, sizeof(buf), f))
+                                printf("%8s loadavg: %s\n", ts, buf);
+                        fclose(f);
+                }
+        }
+
+        while (!bpf_map_get_next_key(fd, prev_key, &infos[rows].key)) {
+                err = bpf_map_lookup_elem(fd, &infos[rows].key, &infos[rows].value);
+                if (err) {
+                        warning("bpf_map_lookup_elem failed: %s\n", strerror(errno));
+                        return err;
+                }
+                prev_key = &infos[rows].key;
+                rows++;
+        }
+
+        printf("%-6s %-12s %-21s %-21s %6s %6s", "PID", "COMM", "LADDR", "RADDR",
+               "RX_KB", "TX_KB\n");
+
+        qsort(infos, rows, sizeof(struct info_t), sort_column);
+        rows = MIN(rows, env.output_rows);
+
+        for (int i = 0; i < rows; i++) {
+                /* Default width to fit IPv4 plus port. */
+                int column_width = 21;
+                struct ip_key_t *key = &infos[i].key;
+                struct traffic_t *value = &infos[i].value;
+
+                if (key->family == AF_INET6) {
+                        /* Width to fit IPv6 plus port. */
+                        column_width = 51;
+                        if (!ipv6_header_printed) {
+                                printf("\n%-6s %-12s %-51s %-51s %6s %6s",
+                                       "PID", "COMM", "LADDR6", "RADDR6",
+                                       "RX_KB", "TX_KB\n");
+                                ipv6_header_printed = true;
+                        }
+                }
+
+                char saddr[INET6_ADDRSTRLEN];
+                char daddr[INET6_ADDRSTRLEN];
+
+                inet_ntop(key->family, &key->saddr, saddr, INET6_ADDRSTRLEN);
+                inet_ntop(key->family, &key->daddr, daddr, INET6_ADDRSTRLEN);
+
+                /*
+                 * A port is stored in u16, so highest value is 65535, which is
+                 * 5 characters long.
+                 * We need one character more for ':'.
+                 */
+                size_t size = INET6_ADDRSTRLEN + PORT_LENGTH + 1;
+                char saddr_port[size], daddr_port[size];
+
+                snprintf(saddr_port, size, "%s:%d", saddr, key->lport);
+                snprintf(daddr_port, size, "%s:%d", daddr, key->dport);
+
+                printf("%-6d %-12.12s %-*s %-*s %6ld %6ld\n",
+                       key->pid, key->name, column_width, saddr_port,
+                       column_width, daddr_port,
+                       value->received / 1024, value->sent / 1024);
+        }
+
+        printf("\n");
+
+        prev_key = NULL;
+        while (!bpf_map_get_next_key(fd, prev_key, &key)) {
+                err = bpf_map_delete_elem(fd, &key);
+                if (err) {
+                        warning("bpf_map_delete_elem failed: %s\n", strerror(errno));
+                        return err;
+                }
+                prev_key = &key;
+        }
+
+        return err;
+}
+
+int main(int argc, char *argv[])
+{
+        static const struct argp argp = {
+                .options = opts,
+                .parser = parse_arg,
+                .doc = argp_program_doc,
+        };
+        struct tcptop_bpf *obj;
+        int cgfd = -1;
+        int err;
+        int family = -1;
+
+        err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+        if (err)
+                return err;
+
+        if (!bpf_is_root())
+                return 1;
+
+        libbpf_set_print(libbpf_print_fn);
+
+        if (env.ipv4_only)
+                family = AF_INET;
+        if (env.ipv6_only)
+                family = AF_INET6;
+
+        obj = tcptop_bpf__open();
+        if (!obj) {
+                warning("Failed to open BPF object\n");
+                return 1;
+        }
+
+        obj->rodata->target_pid = env.target_pid;
+        obj->rodata->target_family = family;
+        obj->rodata->filter_cg = env.cgroup_filtering;
+
+        err = tcptop_bpf__load(obj);
+        if (err) {
+                warning("Failed to load BPF object: %d\n", err);
+                goto cleanup;
+        }
+
+        if (env.cgroup_filtering) {
+                int zero = 0;
+                int cg_map_fd = bpf_map__fd(obj->maps.cgroup_map);
+
+                cgfd = open(env.cgroup_path, O_RDONLY);
+                if (cgfd < 0) {
+                        warning("Failed opening Cgroup path: %s\n", env.cgroup_path);
+                        goto cleanup;
+                }
+
+                if (bpf_map_update_elem(cg_map_fd, &zero, &cgfd, BPF_ANY)) {
+                        warning("Failed adding target cgroup to map\n");
+                        goto cleanup;
+                }
+        }
+
+        err = tcptop_bpf__attach(obj);
+        if (err) {
+                warning("Failed to attach BPF programs: %d\n", err);
+                goto cleanup;
+        }
+
+        if (signal(SIGINT, sig_handler) == SIG_ERR) {
+                warning("Can't set signal handler: %s\n", strerror(errno));
+                err = 1;
+                goto cleanup;
+        }
+
+        while (1) {
+                sleep(env.interval);
+
+                if (env.clear_screen) {
+                        err = system("clear");
+                        if (err)
+                                goto cleanup;
+                }
+
+                err = print_stat(obj);
+                if (err)
+                        goto cleanup;
+
+                if (exiting || --env.count == 0)
+                        goto cleanup;
+        }
+
+cleanup:
+        if (env.cgroup_filtering && cgfd != -1)
+                close(cgfd);
+        tcptop_bpf__destroy(obj);
+
+        return err != 0;
+}
+
