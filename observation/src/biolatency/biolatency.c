@@ -132,3 +132,54 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static void print_cmd_flags(int cmd_flags)
+{
+	static struct {
+		int bit;
+		const char *str;
+	} flags[] = {
+		{ REQ_NOWAIT, "NoWait-" },
+		{ REQ_BACKGROUND, "Background-" },
+		{ REQ_RAHEAD, "ReadAhead-" },
+		{ REQ_PREFLUSH, "PreFlush-" },
+		{ REQ_FUA, "FUA-" },
+		{ REQ_INTEGRITY, "Integrity-" },
+		{ REQ_IDLE, "Idle-" },
+		{ REQ_NOMERGE, "NoMerge-" },
+		{ REQ_PRIO, "Priority-" },
+		{ REQ_META, "Metadata-" },
+		{ REQ_SYNC, "Sync-" },
+	};
+
+	static const char *ops[] = {
+		[REQ_OP_READ] = "Read",
+		[REQ_OP_WRITE] = "Write",
+		[REQ_OP_FLUSH] = "Flush",
+		[REQ_OP_DISCARD] = "Discard",
+		[REQ_OP_SECURE_ERASE] = "SecureErase",
+		[REQ_OP_ZONE_RESET] = "ZoneReset",
+		[REQ_OP_WRITE_SAME] = "WriteSame",
+		[REQ_OP_ZONE_RESET_ALL] = "ZoneResetAll",
+		[REQ_OP_WRITE_ZEROES] = "WriteZeroes",
+		[REQ_OP_ZONE_OPEN] = "ZoneOpen",
+		[REQ_OP_ZONE_CLOSE] = "ZoneClose",
+		[REQ_OP_ZONE_FINISH] = "ZoneFinish",
+		[REQ_OP_SCSI_IN] = "SCSIIn",
+		[REQ_OP_SCSI_OUT] = "SCSIOut",
+		[REQ_OP_DRV_IN] = "DrvIn",
+		[REQ_OP_DRV_OUT] = "DrvOut",
+	};
+
+	printf("flags = ");
+
+	for (int i = 0; i < ARRAY_SIZE(flags); i++) {
+		if (cmd_flags & flags[i].bit)
+			printf("%s", flags[i].str);
+	}
+
+	if ((cmd_flags & REQ_OP_MASK) < ARRAY_SIZE(ops))
+		printf("%s", ops[cmd_flags & REQ_OP_MASK]);
+	else
+		printf("Unknown");
+}
