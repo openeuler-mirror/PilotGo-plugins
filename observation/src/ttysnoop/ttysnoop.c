@@ -99,6 +99,14 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 	return 0;
 }
 
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !env.verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
 static bool tty_write_is_newly(void)
 {
 	const struct btf_type *type;
@@ -160,6 +168,7 @@ int main(int argc, char *argv[])
 	}
 
 	new_tty_write = tty_write_is_newly();
+	libbpf_set_print(libbpf_print_fn);
 
 return err != 0;
 }
