@@ -39,7 +39,7 @@ func main() {
 
 	PluginClient := client.DefaultClient(PluginInfo)
 	// 临时给server赋值
-	PluginClient.Server = "http://192.168.75.100:8888"
+	PluginClient.Server = "http://192.168.75.100:8887"
 	agentmanager.Galaops = &agentmanager.Opsclient{
 		Sdkmethod:   PluginClient,
 		PromePlugin: nil,
