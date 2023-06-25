@@ -183,3 +183,43 @@ static void print_cmd_flags(int cmd_flags)
 	else
 		printf("Unknown");
 }
+
+static int print_log2_hists(struct bpf_map *hists, struct partitions *partitions)
+{
+	struct hist_key lookup_key = { .cmd_flags = -1 }, next_key;
+	const char *units = env.milliseconds ? "msecs" : "usecs";
+	const struct partition *partition;
+	int err, fd = bpf_map__fd(hists);
+	struct hist hist;
+
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_lookup_elem(fd, &next_key, &hist);
+		if (err < 0) {
+			warning("Failed to lookup hist: %d\n", err);
+			return -1;
+		}
+		if (env.per_disk) {
+			partition = partitions__get_by_dev(partitions,
+							  next_key.dev);
+			printf("\ndisk = %s\t", partition ? partition->name :
+			       "Unknown");
+		}
+		if (env.per_flag)
+			print_cmd_flags(next_key.cmd_flags);
+		printf("\n");
+		print_log2_hist(hist.slots, MAX_SLOTS, units);
+		lookup_key = next_key;
+	}
+
+	lookup_key.cmd_flags = -1;
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_delete_elem(fd, &next_key);
+		if (err < 0) {
+			warning("Failed to cleanup hist : %d\n", err);
+			return -1;
+		}
+		lookup_key = next_key;
+	}
+
+	return 0;
+}
