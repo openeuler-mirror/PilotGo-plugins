@@ -152,6 +152,7 @@ int main(int argc, char *argv[])
 		.parser = parse_arg,
 		.doc = argp_program_doc,
 	};
+	struct ttysnoop_bpf *obj;
 	int err;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
@@ -169,6 +170,15 @@ int main(int argc, char *argv[])
 
 	new_tty_write = tty_write_is_newly();
 	libbpf_set_print(libbpf_print_fn);
+	
+	obj = ttysnoop_bpf__open_opts(&open_opts);
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+        obj->rodata->user_data_count = env.count;
+	obj->rodata->pts_inode = env.pts_inode;
 
 return err != 0;
 }
