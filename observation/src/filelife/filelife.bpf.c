@@ -75,3 +75,52 @@ int BPF_KPROBE(security_inode_create, struct inode *dir,
 {
 	return probe_create(dentry);
 }
+
+/*
+ * In different kernel versions, function vfs_unlink() has two declarations,
+ * and their parameter lists are as follows:
+ *
+ * int vfs_unlink(struct inode *dir, struct dentry *dentry,
+ *		  struct inode **delegated_inode);
+ * int vfs_unlink(struct user_namespace *mnt_userns, struct inode *dir,
+ *		  struct dentry *dentry, struct inode **delegated_inode);
+ */
+SEC("kprobe/vfs_unlink")
+int BPF_KPROBE(vfs_unlink, void *arg0, void *arg1, void *arg2)
+{
+	u64 id = bpf_get_current_pid_tgid();
+	struct event event = {};
+	const u8 *qs_name_ptr;
+	u32 tgid = id >> 32;
+	u64 *tsp, delta_ns;
+	bool has_arg = renamedata_has_old_mnt_userns_field();
+
+	tsp = has_arg ?
+		bpf_map_lookup_elem(&start, &arg2) :
+		bpf_map_lookup_elem(&start, &arg1);
+	if (!tsp)
+		return 0;
+
+	delta_ns = bpf_ktime_get_ns() - *tsp;
+
+	if (has_arg)
+		bpf_map_delete_elem(&start, &arg2);
+	else
+		bpf_map_delete_elem(&start, &arg1);
+
+	qs_name_ptr = has_arg ?
+		BPF_CORE_READ((struct dentry *)arg2, d_name.name) :
+		BPF_CORE_READ((struct dentry *)arg1, d_name.name);
+
+	bpf_core_read_str(&event.file, sizeof(event.file), qs_name_ptr);
+	bpf_get_current_comm(&event.task, sizeof(event.task));
+	event.delta_ns = delta_ns;
+	event.tgid = tgid;
+
+	/* output */
+	bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU,
+			      &event, sizeof(event));
+	return 0;
+}
+
+char LICENSE[] SEC("license") = "GPL";
