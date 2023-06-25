@@ -19,6 +19,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
+	"github.com/mitchellh/mapstructure"
 	"openeuler.org/PilotGo/gala-ops-plugin/database"
 )
 
@@ -176,18 +177,28 @@ func (o *Opsclient) DeleteAgent(uuid string) {
 /*******************************************************插件启动自检*******************************************************/
 
 func (o *Opsclient) GetMachineList() ([]*database.Agent, error) {
-	url := Galaops.Sdkmethod.Server + "/pluginapi/machine_list"
+	url := Galaops.Sdkmethod.Server + "/api/v1/pluginapi/machine_list"
 	r, err := httputils.Get(url, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get machine list: %s", err.Error())
 	}
 
-	results := []*database.Agent{}
+	results := &struct {
+		Code int         `json:"code"`
+		Data interface{} `json:"data"`
+	}{}
 	if err := json.Unmarshal(r.Body, &results); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal in deploystatuscheck(): %s", err.Error())
+		return nil, fmt.Errorf("failed to unmarshal in getmachinelist(): %s", err.Error())
 	}
 
-	return results, nil
+	machinelist := []*database.Agent{}
+	for _, m := range results.Data.([]interface{}) {
+		p := &database.Agent{}
+		mapstructure.Decode(m, p)
+		machinelist = append(machinelist, p)
+	}
+
+	return machinelist, nil
 }
 
 func (o *Opsclient) DeployStatusCheck() error {
@@ -204,10 +215,10 @@ func (o *Opsclient) DeployStatusCheck() error {
 	// 获取业务机集群gala-gopher安装部署情况
 
 	// 获取业务机集群gala-gopher版本信息
-	machines, err = GetPkgVersion(machines, batch, "gala-gopher")
-	if err != nil {
-		return err
-	}
+	// machines, err = GetPkgVersion(machines, batch, "gala-gopher")
+	// if err != nil {
+	// 	return err
+	// }
 
 	// 添加业务机集群信息至opsclient.agentmap
 	for _, m := range machines {
