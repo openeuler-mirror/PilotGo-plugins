@@ -45,3 +45,28 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 
 	return 0;
 }
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !verbose)
+		return 0;
+
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
+void handle_event(void *ctx, int cpu, void *data, __u32 data_sz)
+{
+	const struct event *e = data;
+	char ts[32];
+
+	strftime_now(ts, sizeof(ts), "%H:%M:%S");
+	printf("%-8s %-6d %-16s %-7.2f %s\n",
+		ts, e->tgid, e->task, (double)e->delta_ns / 1e9,
+		e->file);
+}
