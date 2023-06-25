@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 	};
 	struct ttysnoop_bpf *obj;
 	struct bpf_buffer *buf = NULL;
-	int err;
+	int err, fd = -1;
 	bool new_tty_write = false;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
@@ -193,6 +193,33 @@ int main(int argc, char *argv[])
 		bpf_program__set_autoload(obj->progs.kprobe__tty_write_old, false);
 	else
 		bpf_program__set_autoload(obj->progs.kprobe__tty_write_new, false);
+
+        err = ttysnoop_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = ttysnoop_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	if (env.record) {
+		fd = creat(env.record_filename, 0644);
+		if (fd < 0) {
+			warning("Failed to creat record file\n");
+			err = fd;
+			goto cleanup;
+		}
+	}
+
+	err = bpf_buffer__open(buf, handle_event, handle_lost_events, &fd);
+	if (err) {
+		warning("Failed to open ring/perf buffer: %d\n", err);
+		goto cleanup;
+	}
 
 cleanup:
 	bpf_buffer__free(buf);
