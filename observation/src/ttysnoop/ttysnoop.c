@@ -153,7 +153,9 @@ int main(int argc, char *argv[])
 		.doc = argp_program_doc,
 	};
 	struct ttysnoop_bpf *obj;
+	struct bpf_buffer *buf = NULL;
 	int err;
+	bool new_tty_write = false;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
 	if (err)
@@ -179,6 +181,17 @@ int main(int argc, char *argv[])
 
         obj->rodata->user_data_count = env.count;
 	obj->rodata->pts_inode = env.pts_inode;
+	
+	buf = bpf_buffer__new(obj->maps.events, obj->maps.heap);
+	if (!buf) {
+		warning("Failed to create ring/perf buffer: %s\n", strerror(errno));
+		err = 1;
+		goto cleanup;
+	}
+cleanup:
+	bpf_buffer__free(buf);
+	ttysnoop_bpf__destroy(obj);
+	cleanup_core_btf(&open_opts);
 
-return err != 0;
+	return err != 0;
 }
