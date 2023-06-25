@@ -223,3 +223,124 @@ static int print_log2_hists(struct bpf_map *hists, struct partitions *partitions
 
 	return 0;
 }
+
+int main(int argc, char *argv[])
+{
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct biolatency_bpf *obj;
+	int cgfd = -1;
+	struct partitions *partitions = NULL;
+	const struct partition *partition;
+
+	int err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	obj = biolatency_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	partitions = partitions__load();
+	if (!partitions) {
+		warning("Failed to load partitions info\n");
+		goto cleanup;
+	}
+
+	if (env.disk) {
+		partition = partitions__get_by_name(partitions, env.disk);
+		if (!partition) {
+			warning("Invalid partition name: not exist\n");
+			goto cleanup;
+		}
+		obj->rodata->filter_dev = true;
+		obj->rodata->target_dev = partition->dev;
+	}
+
+	obj->rodata->target_per_disk = env.per_disk;
+	obj->rodata->target_per_flag = env.per_flag;
+	obj->rodata->target_ms = env.milliseconds;
+	obj->rodata->target_queued = env.queued;
+	obj->rodata->filter_memcg = env.cg;
+
+	if (probe_tp_btf("block_rq_insert")) {
+		bpf_program__set_autoload(obj->progs.block_rq_insert_raw, false);
+		bpf_program__set_autoload(obj->progs.block_rq_issue_raw, false);
+		bpf_program__set_autoload(obj->progs.block_rq_complete_raw, false);
+		if (!env.queued)
+			bpf_program__set_autoload(obj->progs.block_rq_insert_btf, false);
+	} else {
+		bpf_program__set_autoload(obj->progs.block_rq_insert_btf, false);
+		bpf_program__set_autoload(obj->progs.block_rq_issue_btf, false);
+		bpf_program__set_autoload(obj->progs.block_rq_complete_btf, false);
+		if (!env.queued)
+			bpf_program__set_autoload(obj->progs.block_rq_insert_raw, false);
+	}
+
+	err = biolatency_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	if (env.cg) {
+		int idx = 0;
+		int cg_map_fd = bpf_map__fd(obj->maps.cgroup_map);
+		cgfd = open(env.cgroupspath, O_RDONLY);
+		if (cgfd < 0) {
+			warning("Failed opening Cgroup path: %s", env.cgroupspath);
+			goto cleanup;
+		}
+		if (bpf_map_update_elem(cg_map_fd, &idx, &cgfd, BPF_ANY)) {
+			warning("Failed adding target cgroup to map");
+			goto cleanup;
+		}
+	}
+
+	err = biolatency_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	signal(SIGINT, sig_handler);
+
+	printf("Tracing block device I/O... Hit Ctrl-C to end.\n");
+
+	while (1) {
+		sleep(env.interval);
+		printf("\n");
+
+		if (env.timestamp) {
+			char ts[32] = {};
+
+			strftime_now(ts, sizeof(ts), "%H:%M:%S");
+			printf("%-8s\n", ts);
+		}
+
+		err = print_log2_hists(obj->maps.hists, partitions);
+		if (err)
+			break;
+
+		if (exiting || --env.times == 0)
+			break;
+	}
+
+cleanup:
+	biolatency_bpf__destroy(obj);
+	partitions__free(partitions);
+	if (cgfd > 0)
+		close(cgfd);
+
+	return err != 0;
+}
