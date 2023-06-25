@@ -144,3 +144,43 @@ cleanup:
 	bpf_map_delete_elem(&start, &rq);
 	return 0;
 }
+
+SEC("tp_btf/block_rq_insert")
+int BPF_PROG(block_rq_insert_btf)
+{
+	return handle_block_rq_insert(ctx);
+}
+
+SEC("tp_btf/block_rq_issue")
+int BPF_PROG(block_rq_issue_btf)
+{
+	return handle_block_rq_issue(ctx);
+}
+
+SEC("tp_btf/block_rq_complete")
+int BPF_PROG(block_rq_complete_btf, struct request *rq, int error,
+	     unsigned int nr_bytes)
+{
+	return handle_block_rq_complete(rq, error, nr_bytes);
+}
+
+SEC("raw_tp/block_rq_insert")
+int BPF_PROG(block_rq_insert_raw)
+{
+	return handle_block_rq_insert(ctx);
+}
+
+SEC("raw_tp/block_rq_issue")
+int BPF_PROG(block_rq_issue_raw)
+{
+	return handle_block_rq_issue(ctx);
+}
+
+SEC("raw_tp/block_rq_complete")
+int BPF_PROG(block_rq_complete_raw, struct request *rq, int error,
+	     unsigned int nr_bytes)
+{
+	return handle_block_rq_complete(rq, error, nr_bytes);
+}
+
+char LICENSE[] SEC("license") = "GPL";
