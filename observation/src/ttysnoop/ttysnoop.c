@@ -107,6 +107,55 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static int handle_event(void *ctx, void *data, size_t data_sz)
+{
+	const struct event *e = data;
+	int fd = *(int *)ctx;
+
+	printf("%s", e->buf);
+	fflush(stdout);
+
+	if (fd > 0)
+		write(fd, e->buf, e->count);
+
+	return 0;
+}
+
+static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
+{
+	warning("Lost %llu event on CPU #%d!\n", lost_cnt, cpu);
+}
+
+static bool fallback_to_compare_kernel_version(void)
+{
+	struct utsname sys_info;
+	int major1, minor1, patch1;
+	int major2, minor2, patch2;
+	const char *version = "5.10.11";
+
+	uname(&sys_info);
+
+	sscanf(sys_info.release, "%d.%d.%d%*s", &major1, &minor1, &patch1);
+	sscanf(version, "%d.%d.%d%*s", &major2, &minor2, &patch2);
+
+	if (major1 < major2)
+		return false;
+	else if (major1 > major2)
+		return true;
+
+	if (minor1 < minor2)
+		return false;
+	else if (minor1 > minor2)
+		return true;
+
+	if (patch1 < patch2)
+		return false;
+	else if (patch1 > patch2)
+		return true;
+
+	return false;
+}
+
 static bool tty_write_is_newly(void)
 {
 	const struct btf_type *type;
