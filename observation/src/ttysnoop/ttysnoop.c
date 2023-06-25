@@ -188,6 +188,12 @@ int main(int argc, char *argv[])
 		err = 1;
 		goto cleanup;
 	}
+
+	if (new_tty_write)
+		bpf_program__set_autoload(obj->progs.kprobe__tty_write_old, false);
+	else
+		bpf_program__set_autoload(obj->progs.kprobe__tty_write_new, false);
+
 cleanup:
 	bpf_buffer__free(buf);
 	ttysnoop_bpf__destroy(obj);
