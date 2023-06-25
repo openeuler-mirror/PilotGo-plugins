@@ -21,6 +21,29 @@ const volatile bool target_ms = false;
 const volatile bool filter_dev = false;
 const volatile __u32 target_dev = 0;
 
+struct {
+	__uint(type, BPF_MAP_TYPE_CGROUP_ARRAY);
+	__uint(max_entries, 1);
+	__uint(key_size, sizeof(u32));
+	__uint(value_size, sizeof(u32));
+} cgroup_map SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, struct request *);
+	__type(value, u64);
+} start SEC(".maps");
+
+static struct hist zero;
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, struct hist_key);
+	__type(value, struct hist);
+} hists SEC(".maps");
+
 static int __always_inline trace_rq_start(struct request *rq, int issue)
 {
 	u64 ts;
