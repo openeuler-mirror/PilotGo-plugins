@@ -96,3 +96,51 @@ static int handle_block_rq_issue(__u64 *ctx)
 	else
 		return trace_rq_start((void *)ctx[0], true);
 }
+
+static int handle_block_rq_complete(struct request *rq, int error,
+				    unsigned int nr_bytes)
+{
+	u64 slot, *tsp, ts = bpf_ktime_get_ns();
+	struct hist_key hkey = {};
+	struct hist *histp;
+	s64 delta;
+
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	tsp = bpf_map_lookup_elem(&start, &rq);
+	if (!tsp)
+		return 0;
+
+	delta = (s64)(ts - *tsp);
+	if (delta < 0)
+		goto cleanup;
+
+	if (target_per_disk) {
+		struct gendisk *disk = get_disk(rq);
+
+		hkey.dev = disk ? MKDEV(BPF_CORE_READ(disk, major),
+					BPF_CORE_READ(disk, first_minor)) : 0;
+	}
+
+	if (target_per_flag)
+		hkey.cmd_flags = BPF_CORE_READ(rq, cmd_flags);
+
+	histp = bpf_map_lookup_or_try_init(&hists, &hkey, &zero);
+	if (!histp)
+		goto cleanup;
+
+	if (target_ms)
+		delta /= 1000000U;
+	else
+		delta /= 1000U;
+
+	slot = log2l(delta);
+	if (slot >= MAX_SLOTS)
+		slot = MAX_SLOTS - 1;
+	__sync_fetch_and_add(&histp->slots[slot], 1);
+
+cleanup:
+	bpf_map_delete_elem(&start, &rq);
+	return 0;
+}
