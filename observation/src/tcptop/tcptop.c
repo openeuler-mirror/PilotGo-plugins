@@ -72,3 +72,102 @@ struct info_t {
         struct traffic_t value;
 };
 
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+        switch (key) {
+        case 'p':
+                env.target_pid = argp_parse_pid(key, arg, state);
+                break;
+        case 'c':
+                env.cgroup_path = arg;
+                env.cgroup_filtering = true;
+                break;
+        case 'C':
+                env.clear_screen = false;
+                break;
+        case 'S':
+                env.no_summary = true;
+                break;
+        case '4':
+                env.ipv4_only = true;
+                break;
+        case '6':
+                env.ipv6_only = true;
+                break;
+        case 's':
+                if (!strcmp(arg, "all")) {
+                        env.sort_by = ALL;
+                } else if (!strcmp(arg, "sent")) {
+                        env.sort_by = SENT;
+                } else if (!strcmp(arg, "received")) {
+                        env.sort_by = RECEIVED;
+                } else {
+                        warning("Invalid sort method: %s\n", arg);
+                        argp_usage(state);
+                }
+                break;
+        case 'r':
+                env.output_rows = MIN(argp_parse_long(key, arg, state), OUTPUT_ROWS_LIMIT);
+                break;
+        case 'v':
+                env.verbose = true;
+                break;
+        case 'h':
+                argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+                break;
+        case ARGP_KEY_END:
+                if (env.ipv4_only && env.ipv6_only) {
+                        warning("Only one --ipvX option should be used\n");
+                        argp_usage(state);
+                }
+                break;
+        case ARGP_KEY_ARG:
+                if (state->arg_num == 0) {
+                        env.interval = argp_parse_long(key, arg, state);
+                } else if (state->arg_num == 1) {
+                        env.count = argp_parse_long(key, arg, state);
+                } else {
+                        warning("Unrecognized positional argument: %s\n", arg);
+                        argp_usage(state);
+                }
+                break;
+        default:
+                return ARGP_ERR_UNKNOWN;
+        }
+        return 0;
+}
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+                           va_list args)
+{
+        if (level == LIBBPF_DEBUG && !env.verbose)
+                return 0;
+        return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+        exiting = 1;
+}
+
+static int sort_column(const void *obj1, const void *obj2)
+{
+        struct info_t *i1 = (struct info_t *)obj1;
+        struct info_t *i2 = (struct info_t *)obj2;
+
+        if (i1->key.family != i2->key.family) {
+                /*
+                 * i1 - i2 because we want to sort by increasing order (first
+                 * AF_INET then AF_INET6).
+                 */
+                return i1->key.family - i2->key.family;
+        }
+
+        if (env.sort_by == SENT)
+                return i2->value.sent - i1->value.sent;
+        else if (env.sort_by == RECEIVED)
+                return i2->value.received - i1->value.received;
+        else
+                return (i2->value.sent + i2->value.received) - (i1->value.sent + i1->value.received);
+}
+
