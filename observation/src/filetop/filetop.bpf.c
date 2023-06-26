@@ -27,3 +27,53 @@ static void get_file_path(struct file *file, char *buf, size_t size)
 	dname = BPF_CORE_READ(file, f_path.dentry, d_name);
 	bpf_core_read(buf, size, dname.name);
 }
+
+static int probe_entry(struct pt_regs *ctx, struct file *file, size_t count,
+		       enum op op)
+{
+	__u64 pid_tgid = bpf_get_current_pid_tgid();
+	__u32 pid = pid_tgid >> 32;
+	__u32 tid = pid_tgid;
+	int mode;
+	struct file_id key = {};
+	struct file_stat *valuep;
+
+	if (target_pid && target_pid != pid)
+		return 0;
+
+	mode = BPF_CORE_READ(file, f_inode, i_mode);
+	if (regular_file_only && !S_ISREG(mode))
+		return 0;
+
+	key.dev = BPF_CORE_READ(file, f_inode, i_sb, s_dev);
+	key.rdev = BPF_CORE_READ(file, f_inode, i_rdev);
+	key.inode = BPF_CORE_READ(file, f_inode, i_ino);
+	key.pid = pid;
+	key.tid = tid;
+
+	valuep = bpf_map_lookup_or_try_init(&entries, &key, &zero_value);
+	if (!valuep)
+		return 0;
+
+	valuep->pid = pid;
+	valuep->tid = tid;
+	bpf_get_current_comm(&valuep->comm, sizeof(valuep->comm));
+	get_file_path(file, valuep->filename, sizeof(valuep->filename));
+	if (S_ISREG(mode)) {
+		valuep->type = 'R';
+	} else if (S_ISSOCK(mode)) {
+		valuep->type = 'S';
+	} else {
+		valuep->type = 'O';
+	}
+
+	if (op == READ) {
+		valuep->reads++;
+		valuep->read_bytes += count;
+	} else {
+		valuep->writes++;
+		valuep->write_bytes += count;
+	}
+
+	return 0;
+}
