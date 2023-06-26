@@ -165,3 +165,54 @@ int BPF_PROG(block_rq_issue_raw)
 	else
 		return trace_rq_start((void *)ctx[1], false);
 }
+
+static __always_inline int probe_block_rq_complete(void *ctx, struct request *rq,
+						   int error,
+						   unsigned int nr_bytes)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	u64 ts = bpf_ktime_get_ns();
+	struct piddata *piddatap;
+	struct event event = {};
+	struct stage *stagep;
+	s64 delta;
+
+	stagep = bpf_map_lookup_elem(&start, &rq);
+	if (!stagep)
+		return 0;
+
+	delta = (s64)(ts - stagep->issue);
+	if (delta < 0)
+		goto cleanup;
+
+	piddatap = bpf_map_lookup_elem(&infobyreq, &rq);
+	if (!piddatap) {
+		event.comm[0] = '?';
+	} else {
+		__builtin_memcpy(&event.comm, piddatap->comm,
+				 sizeof(event.comm));
+		event.pid = piddatap->pid;
+	}
+	event.delta = delta;
+	if (target_queued && BPF_CORE_READ(rq, q, elevator)) {
+		if (!stagep->insert)
+			event.qdelta = -1; /* missed or don't insert entry */
+		else
+			event.qdelta = stagep->issue - stagep->insert;
+	}
+
+	event.ts = ts;
+	event.sector = BPF_CORE_READ(rq, __sector);
+	event.len = BPF_CORE_READ(rq, __data_len);
+	event.cmd_flags = BPF_CORE_READ(rq, cmd_flags);
+	event.dev = stagep->dev;
+	bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, &event,
+			      sizeof(event));
+
+cleanup:
+	bpf_map_delete_elem(&start, &rq);
+	bpf_map_delete_elem(&infobyreq, &rq);
+	return 0;
+}
