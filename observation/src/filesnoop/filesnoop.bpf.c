@@ -186,3 +186,43 @@ handle_file_syscall_enter(void *ctx, enum file_op op, int fd)
 	bpf_map_update_elem(&prints, &tid, &value, BPF_ANY);
 	return 0;
 }
+
+static __always_inline int
+handle_file_syscall_exit(void *ctx, enum file_op op, int ret)
+{
+	pid_t tid = bpf_get_current_pid_tgid();
+	struct event *event;
+
+	/* Not record by enter */
+	struct print_value *val = bpf_map_lookup_and_delete_elem(&prints, &tid);
+	if (!val)
+		return 0;
+
+	/* Only F_CLOSE, F_ALL or target_op can arrive here */
+	if (is_target_operation(op)) {
+		event = reserve_buf(sizeof(*event));
+		if (!event)
+			return 0;
+
+		bpf_probe_read(&event->filename, sizeof(event->filename),
+			       &val->filename->name);
+
+		event->pid = tid;
+		bpf_get_current_comm(&event->comm, sizeof(event->comm));
+		event->op = op;
+		event->ret = ret;
+		event->fd = val->key.fd;
+
+		submit_buf(ctx, event, sizeof(*event));
+	}
+
+	/* value->filename is pointer of files map, we must delete
+	 * files map after CLOSE operation finish
+	 */
+	if (op == F_CLOSE) {
+		bpf_map_delete_elem(&opens, &tid);
+		bpf_map_delete_elem(&files, &val->key);
+	}
+
+	return 0;
+}
