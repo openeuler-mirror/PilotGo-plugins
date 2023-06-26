@@ -117,3 +117,51 @@ static __always_inline int trace_rq_start(struct request *rq, bool insert)
 		bpf_map_update_elem(&start, &rq, stagep, BPF_ANY);
 	return 0;
 }
+
+SEC("tp_btf/block_rq_insert")
+int BPF_PROG(block_rq_insert)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 11, 0))
+		return trace_rq_start((void *)ctx[0], true);
+	else
+		return trace_rq_start((void *)ctx[1], true);
+}
+
+SEC("raw_tp/block_rq_insert")
+int BPF_PROG(block_rq_insert_raw)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 11, 0))
+		return trace_rq_start((void *)ctx[0], true);
+	else
+		return trace_rq_start((void *)ctx[1], true);
+}
+
+SEC("tp_btf/block_rq_issue")
+int BPF_PROG(block_rq_issue)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 11, 0))
+		return trace_rq_start((void *)ctx[0], false);
+	else
+		return trace_rq_start((void *)ctx[1], false);
+}
+
+SEC("raw_tp/block_rq_issue")
+int BPF_PROG(block_rq_issue_raw)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 11, 0))
+		return trace_rq_start((void *)ctx[0], false);
+	else
+		return trace_rq_start((void *)ctx[1], false);
+}
