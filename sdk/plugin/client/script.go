@@ -34,12 +34,16 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, erro
 		return nil, err
 	}
 
-	res := []*CmdResult{}
+	res := &struct {
+		Code    int          `json:"code"`
+		Message string       `json:"msg"`
+		Data    []*CmdResult `json:"data"`
+	}{}
 	if err := json.Unmarshal(r.Body, &res); err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return res.Data, nil
 }
 
 func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, error) {
@@ -60,10 +64,14 @@ func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, er
 		return nil, err
 	}
 
-	res := []*CmdResult{}
+	res := &struct {
+		Code    int          `json:"code"`
+		Message string       `json:"msg"`
+		Data    []*CmdResult `json:"data"`
+	}{}
 	if err := json.Unmarshal(r.Body, &res); err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return res.Data, nil
 }
