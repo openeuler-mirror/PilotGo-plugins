@@ -139,6 +139,7 @@ int main(int argc, char *argv[])
 		.doc = argp_program_doc,
 	};
 
+        struct wakeuptime_bpf *bpf_obj;
 	int err;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
@@ -157,6 +158,29 @@ int main(int argc, char *argv[])
 		warning("use either -u or -p");
 
 	libbpf_set_print(libbpf_print_fn);
+
+        bpf_obj = wakeuptime_bpf__open();
+	if (!bpf_obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	if (probe_tp_btf("sched_switch")) {
+		bpf_program__set_autoload(bpf_obj->progs.sched_switch_raw, false);
+		bpf_program__set_autoload(bpf_obj->progs.sched_wakeup_raw, false);
+	} else {
+		bpf_program__set_autoload(bpf_obj->progs.sched_switch_btf, false);
+		bpf_program__set_autoload(bpf_obj->progs.sched_wakeup_btf, false);
+	}
+
+	bpf_obj->rodata->target_pid = env.pid;
+	bpf_obj->rodata->min_block_ns = env.min_block_time;
+	bpf_obj->rodata->max_block_ns = env.max_block_time;
+	bpf_obj->rodata->user_threads_only = env.user_threads_only;
+
+	bpf_map__set_value_size(bpf_obj->maps.stackmap,
+				env.perf_max_stack_depth * sizeof(unsigned long));
+	bpf_map__set_max_entries(bpf_obj->maps.stackmap, env.stack_storage_size);
 
 	return err != 0;
 }
