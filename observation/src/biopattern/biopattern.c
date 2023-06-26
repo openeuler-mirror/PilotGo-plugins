@@ -143,3 +143,93 @@ static int print_map(struct bpf_map *counters, struct partitions *partitions)
 
 	return 0;
 }
+
+int main(int argc, char *argv[])
+{
+	LIBBPF_OPTS(bpf_object_open_opts, open_opts);
+	struct partitions *partitions = NULL;
+	const struct partition *partition;
+	static struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct biopattern_bpf *obj;
+	int err;
+
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	err = ensure_core_btf(&open_opts);
+	if (err) {
+		warning("Failed to fetch necessary BTF for CO-RE: %s\n",
+			strerror(-err));
+		return 1;
+	}
+
+	obj = biopattern_bpf__open_opts(&open_opts);
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	partitions = partitions__load();
+	if (!partitions) {
+		warning("Failed to load partitions info\n");
+		goto cleanup;
+	}
+
+	if (env.disk) {
+		partition = partitions__get_by_name(partitions, env.disk);
+		if (!partition) {
+			warning("Invalid partition name: %s not exist\n", env.disk);
+			goto cleanup;
+		}
+		obj->rodata->filter_dev = true;
+		obj->rodata->target_dev = partition->dev;
+	}
+
+	err = biopattern_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = biopattern_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF programs\n");
+		goto cleanup;
+	}
+
+	signal(SIGINT, sig_handler);
+
+	printf("Tracing block device I/O requested seeks... Hit Ctrl-C to end.\n");
+
+	if (env.timestamp)
+		printf("%-9s ", "TIME");
+	printf("%-7s %5s %5s %8s %10s\n", "DISK", "%RND", "%SEQ", "COUNT", "KBYTES");
+
+	while (1) {
+		sleep(env.interval);
+
+		err = print_map(obj->maps.counters, partitions);
+		if (err)
+			break;
+
+		if (exiting || --env.times == 0)
+			break;
+	}
+
+cleanup:
+	biopattern_bpf__destroy(obj);
+	partitions__free(partitions);
+	cleanup_core_btf(&open_opts);
+
+	return err != 0;
+}
