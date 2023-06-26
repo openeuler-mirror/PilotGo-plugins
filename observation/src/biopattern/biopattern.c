@@ -16,6 +16,29 @@ static struct env {
 	.times = 99999999,
 };
 
+static volatile sig_atomic_t exiting;
+
+const char *argp_program_version = "biopattern 0.1";
+const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+"Show block device I/O pattern.\n"
+"\n"
+"USAGE: biopattern [--help] [-T] [-d DISK] [interval] [count]\n"
+"\n"
+"EXAMPLES:\n"
+"    biopattern              # show block I/O pattern\n"
+"    biopattern 1 10         # print 1 second summaries, 10 times\n"
+"    biopattern -T 1         # 1s summaries with timestamps\n"
+"    biopattern -d sdc       # trace sdc only\n";
+
+static const struct argp_option opts[] = {
+	{ "timestamp", 'T', NULL, 0, "Include timestamp on output" },
+	{ "disk", 'd', "DISK", 0, "Trace this disk only" },
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
+
 static error_t parse_arg(int key, char *arg, struct argp_state *state)
 {
 	static int pos_args;
@@ -61,4 +84,17 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 		return ARGP_ERR_UNKNOWN;
 	}
 	return 0;
+}
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !env.verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
 }
