@@ -140,3 +140,100 @@ static void alias_parse(char *prog)
 	else if (!strcmp(name, "statsnoop"))
 		env.target_op = F_STATX;
 }
+
+int main(int argc, char *argv[])
+{
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct bpf_buffer *buf = NULL;
+	struct filesnoop_bpf *obj;
+	int err;
+
+	alias_parse(argv[0]);
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	obj = filesnoop_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	buf = bpf_buffer__new(obj->maps.events, obj->maps.heap);
+	if (!buf) {
+		warning("Failed to create ring/perf buffer");
+		err = 1;
+		goto cleanup;
+	}
+
+	if (env.filter_filename) {
+		obj->rodata->target_filename_sz = strlen(env.filename);
+		obj->rodata->filter_filename = env.filter_filename;
+		strcpy(obj->bss->target_filename, env.filename);
+	}
+	obj->rodata->target_op = env.target_op;
+
+	if (!tracepoint_exists("syscalls", "sys_enter_open")) {
+		bpf_program__set_autoload(obj->progs.tracepoint_sys_enter_open, false);
+		bpf_program__set_autoload(obj->progs.tracepoint_sys_exit_open, false);
+	}
+
+	if (!tracepoint_exists("syscalls", "sys_enter_openat2")) {
+		bpf_program__set_autoload(obj->progs.tracepoint_sys_enter_openat2, false);
+		bpf_program__set_autoload(obj->progs.tracepoint_sys_exit_openat2, false);
+	}
+
+	err = filesnoop_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = filesnoop_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = bpf_buffer__open(buf, handle_event, handle_lost_events, NULL);
+	if (err) {
+		warning("Failed to open ring/perf buffer: %d\n", err);
+		goto cleanup;
+	}
+
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Can't set signal handler: %s\n", strerror(-errno));
+		err = 1;
+		goto cleanup;
+	}
+
+	if (env.timestamp)
+		printf("%-9s ", "TIME");
+	printf("%-8s %-16s %-10s %5s %5s %s\n", "PID", "COMM", "OPERATION", "FD",
+	       "RET", "FILENAME");
+
+	while (!exiting) {
+		err = bpf_buffer__poll(buf, POLL_TIMEOUT_MS);
+		if (err < 0 && err != -EINTR) {
+			warning("Error polling ring/perf buffer: %d\n", err);
+			goto cleanup;
+		}
+		/* reset err to 0 when exiting */
+		err = 0;
+	}
+
+cleanup:
+	bpf_buffer__free(buf);
+	filesnoop_bpf__destroy(obj);
+
+	return err != 0;
+}
