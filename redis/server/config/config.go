@@ -18,10 +18,19 @@ type HttpConf struct {
 	Addr string `yaml:"addr"`
 }
 
+type MysqlDBInfo struct {
+	HostName string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	UserName string `yaml:"user"`
+	Password string `yaml:"password"`
+	DataBase string `yaml:"database"`
+}
+
 type ServerConfig struct {
 	Redis   *Redis          `yaml:"redis"`
 	Http    *HttpConf       `yaml:"http"`
 	Logopts *logger.LogOpts `yaml:"log"`
+	Mysql   *MysqlDBInfo    `yaml:"mysql"`
 }
 
 const config_file = "./config.yml"
