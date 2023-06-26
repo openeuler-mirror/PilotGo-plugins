@@ -98,3 +98,48 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static int print_map(struct bpf_map *counters, struct partitions *partitions)
+{
+	__u32 total, lookup_key = -1, next_key;
+	int err, fd = bpf_map__fd(counters);
+	const struct partition *partition;
+	struct counter counter;
+
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_lookup_elem(fd, &next_key, &counter);
+		if (err < 0) {
+			warning("Failed to lookup counters: %d\n", err);
+			return -1;
+		}
+
+		lookup_key = next_key;
+		total = counter.sequential + counter.random;
+		if (!total)
+			continue;
+		if (env.timestamp) {
+			char ts[32];
+
+			strftime_now(ts, sizeof(ts), "%H:%M:%S");
+			printf("%-9s ", ts);
+		}
+		partition = partitions__get_by_dev(partitions, next_key);
+		printf("%-7s %5ld %5ld %8d %10lld\n",
+		       partition ? partition->name : "Unknown",
+		       counter.random * 100L / total,
+		       counter.sequential * 100L / total, total,
+		       counter.bytes / 1024);
+	}
+
+	lookup_key = -1;
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_delete_elem(fd, &next_key);
+		if (err < 0) {
+			warning("Failed to cleanup counters: %d\n", err);
+			return -1;
+		}
+		lookup_key = next_key;
+	}
+
+	return 0;
+}
