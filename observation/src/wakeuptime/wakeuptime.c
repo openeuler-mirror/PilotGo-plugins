@@ -4,6 +4,24 @@
 #include "wakeuptime.skel.h"
 #include "trace_helpers.h"
 
+struct env {
+	pid_t pid;
+	bool user_threads_only;
+	bool verbose;
+	int stack_storage_size;
+	int perf_max_stack_depth;
+	__u64 min_block_time;
+	__u64 max_block_time;
+	int duration;
+} env = {
+	.verbose = false,
+	.stack_storage_size = 1024,
+	.perf_max_stack_depth = 127,
+	.min_block_time = 1,
+	.max_block_time = -1,
+	.duration = 99999999,
+};
+
 const char *argp_program_version = "wakeuptime 0.1";
 const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
 const char argp_program_doc[] =
@@ -118,6 +136,17 @@ int main(int argc, char *argv[])
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
 	if (err)
 		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	if (env.min_block_time >= env.max_block_time) {
+		warning("min_block_time should be smaller than max_block_time\n");
+		return 1;
+	}
+
+	if (env.user_threads_only && env.pid > 0)
+		warning("use either -u or -p");
 
 	return err != 0;
 }
