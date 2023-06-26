@@ -158,3 +158,31 @@ handle_file_syscall_open_exit(struct trace_event_raw_sys_exit *ctx, enum file_op
 	return 0;
 
 }
+
+static __always_inline int
+handle_file_syscall_enter(void *ctx, enum file_op op, int fd)
+{
+	pid_t tid = bpf_get_current_pid_tgid();
+	struct key_t key = {
+		.tid = tid,
+		.fd  = fd,
+	};
+
+	/* I'm not the open one */
+	struct fsfilename *filename = bpf_map_lookup_elem(&files, &key);
+	if (!filename)
+		return 0;
+
+	/* F_CLOSE is for cleanup maps */
+	if (!is_target_operation(op) && op != F_CLOSE)
+		return 0;
+
+	/* Record print values */
+	struct print_value value = {
+		.key = key,
+		.filename = filename,
+	};
+
+	bpf_map_update_elem(&prints, &tid, &value, BPF_ANY);
+	return 0;
+}
