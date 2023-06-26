@@ -7,6 +7,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"openeuler.org/PilotGo/redis-plugin/config"
+	"openeuler.org/PilotGo/redis-plugin/db"
 	"openeuler.org/PilotGo/redis-plugin/global"
 	"openeuler.org/PilotGo/redis-plugin/plugin"
 	"openeuler.org/PilotGo/redis-plugin/router"
@@ -31,6 +32,11 @@ func main() {
 	global.GlobalClient = client.DefaultClient(plugin.Init(config.Config().Redis))
 	router.RegisterAPIs(server)
 	global.GlobalClient.Server = config.Config().Http.Addr
+
+	if err := db.MysqldbInit(config.Config().Mysql); err != nil {
+		logger.Error("mysql db init failed, please check again: %s", err)
+		os.Exit(-1)
+	}
 
 	if err := server.Run(config.Config().Http.Addr); err != nil {
 		logger.Fatal("failed to run server")
