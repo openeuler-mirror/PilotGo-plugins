@@ -216,3 +216,20 @@ cleanup:
 	bpf_map_delete_elem(&infobyreq, &rq);
 	return 0;
 }
+
+
+SEC("tp_btf/block_rq_complete")
+int BPF_PROG(block_rq_complete, struct request *rq, int error,
+	     unsigned int nr_bytes)
+{
+	return probe_block_rq_complete(ctx, rq, error, nr_bytes);
+}
+
+SEC("raw_tp/block_rq_complete")
+int BPF_PROG(block_rq_complete_raw, struct request *rq, int error,
+	     unsigned int nr_bytes)
+{
+	return probe_block_rq_complete(ctx, rq, error, nr_bytes);
+}
+
+char LICENSE[] SEC("license") = "GPL";
