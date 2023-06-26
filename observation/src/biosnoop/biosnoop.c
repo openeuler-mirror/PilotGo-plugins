@@ -17,6 +17,31 @@ static struct env {
 	bool cg;
 } env;
 
+static volatile __u64 start_ts;
+
+const char *argp_program_version = "biosnoop 0.1";
+const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+"Trace block I/O.\n"
+"\n"
+"USAGE: biosnoop [--help] [-d DISK] [-c CG] [-Q]\n"
+"\n"
+"EXAMPLES:\n"
+"    biosnoop              # trace all block I/O\n"
+"    biosnoop -Q           # include OS queued time in I/O time\n"
+"    biosnoop 10           # trace for 10 seconds only\n"
+"    biosnoop -d sdc       # trace sdc only\n"
+"    biosnoop -c CG        # Trace process under cgroupsPath CG\n";
+
+static const struct argp_option opts[] = {
+	{ "queued", 'Q', NULL, 0, "Include OS queued time in I/O time" },
+	{ "disk", 'd', "DISK", 0, "Trace this disk only" },
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ "cgroup", 'c', "/sys/fs/cgroup/unified/CG", 0, "Trace process in cgroup path" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
+
 static error_t parse_arg(int key, char *arg, struct argp_state *state)
 {
 	static int pos_args;
@@ -60,4 +85,17 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 		return ARGP_ERR_UNKNOWN;
 	}
 	return 0;
+}
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !env.verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
 }
