@@ -98,3 +98,26 @@ static __always_inline bool is_target_operation(enum file_op op)
 
 	return true;
 }
+
+static __always_inline int
+handle_file_syscall_open_enter(struct trace_event_raw_sys_enter *ctx, enum file_op op)
+{
+	struct fsfilename filename = {};
+
+	if (filter_filename && target_filename_sz == 0)
+		return 0;
+
+	pid_t tid = bpf_get_current_pid_tgid();
+
+	if (op == F_OPENAT || op == F_OPENAT2)
+		bpf_probe_read_user_str(&filename.name, FSFILENAME_MAX, (const char *)ctx->args[1]);
+	else
+		bpf_probe_read_user_str(&filename.name, FSFILENAME_MAX, (const char *)ctx->args[0]);
+
+	/* If not match name, everything is over */
+	if (!filename_matched(filename.name))
+		return 0;
+
+	bpf_map_update_elem(&opens, &tid, &filename, BPF_ANY);
+	return 0;
+}
