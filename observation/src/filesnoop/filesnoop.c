@@ -95,3 +95,27 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !env.verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static int handle_event(void *ctx, void *data, size_t data_sz)
+{
+	const struct event *e = data;
+
+	if (env.timestamp) {
+		char ts[16];
+
+		strftime_now(ts, sizeof(ts), "%H:%M:%S");
+		printf("%-9s ", ts);
+	}
+
+	printf("%-8d %-16s %-10s %5d %5d %s\n", e->pid, e->comm, op2string[e->op],
+	       e->fd, e->ret, e->filename);
+	return 0;
+}
