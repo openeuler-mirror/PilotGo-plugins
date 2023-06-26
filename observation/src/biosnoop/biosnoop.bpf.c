@@ -71,9 +71,6 @@ int BPF_PROG(blk_account_io_start, struct request *rq)
 		return 0;
 
 	return trace_pid(rq);
-<<<<<<< Updated upstream
-}
-=======
 }
 
 SEC("kprobe/blk_account_io_start")
@@ -93,4 +90,3 @@ int BPF_KPROBE(blk_account_io_merge_bio, struct request *rq)
 
 	return trace_pid(rq);
 }
->>>>>>> Stashed changes
