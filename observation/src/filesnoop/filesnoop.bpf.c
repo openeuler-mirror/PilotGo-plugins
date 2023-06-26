@@ -334,3 +334,38 @@ int tracepoint_sys_exit_fstatfs(struct trace_event_raw_sys_exit *ctx)
 {
 	return handle_file_syscall_exit(ctx, F_FSTATFS, ctx->ret);
 }
+
+SEC("tracepoint/syscalls/sys_exit_newfstat")
+int tracepoint_sys_enter_newfstat(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_NEWFSTAT, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_newfstat")
+int tracepoint_sys_exit_newfstat(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_NEWFSTAT, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_unlinkat")
+int tracepoint_sys_enter_unlinkat(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_UNLINKAT, (int)ctx->args[0]);
+}
+SEC("tracepoint/syscalls/sys_exit_unlinkat")
+int tracepoint_sys_exit_unlinkat(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_UNLINKAT, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_renameat")
+int tracepoint_sys_enter_renameat(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_RENAMEAT, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_renameat")
+int tracepoint_sys_exit_renameat(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_RENAMEAT, ctx->ret);
+}
