@@ -90,3 +90,30 @@ int BPF_KPROBE(blk_account_io_merge_bio, struct request *rq)
 
 	return trace_pid(rq);
 }
+
+static __always_inline int trace_rq_start(struct request *rq, bool insert)
+{
+	struct stage *stagep, stage = {};
+	u64 ts = bpf_ktime_get_ns();
+
+	stagep = bpf_map_lookup_elem(&start, &rq);
+	if (!stagep) {
+		struct gendisk *disk = get_disk(rq);
+
+		stage.dev = disk ? MKDEV(BPF_CORE_READ(disk, major),
+					 BPF_CORE_READ(disk, first_minor)) : 0;
+		if (filter_dev && target_dev != stage.dev)
+			return 0;
+
+		stagep = &stage;
+	}
+
+	if (insert)
+		stagep->insert = ts;
+	else
+		stagep->issue = ts;
+
+	if (stagep == &stage)
+		bpf_map_update_elem(&start, &rq, stagep, BPF_ANY);
+	return 0;
+}
