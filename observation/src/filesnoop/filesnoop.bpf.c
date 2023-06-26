@@ -298,3 +298,39 @@ int tracepoint_sys_exit_read(struct trace_event_raw_sys_exit *ctx)
 {
 	return handle_file_syscall_exit(ctx, F_READ, ctx->ret);
 }
+
+SEC("tracepoint/syscalls/sys_enter_readv")
+int tracepoint_sys_enter_readv(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_READV, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_readv")
+int tracepoint_sys_exit_readv(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_READV, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_statx")
+int tracepoint_sys_enter_statx(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_STATX, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_statx")
+int tracepoint_sys_exit_statx(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_STATX, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_fstatfs")
+int tracepoint_sys_enter_fstatfs(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_FSTATFS, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_fstatfs")
+int tracepoint_sys_exit_fstatfs(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_FSTATFS, ctx->ret);
+}
