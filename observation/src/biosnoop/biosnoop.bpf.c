@@ -71,4 +71,26 @@ int BPF_PROG(blk_account_io_start, struct request *rq)
 		return 0;
 
 	return trace_pid(rq);
+<<<<<<< Updated upstream
 }
+=======
+}
+
+SEC("kprobe/blk_account_io_start")
+int BPF_KPROBE(kprobe_blk_account_io_start, struct request *rq)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	return trace_pid(rq);
+}
+
+SEC("kprobe/blk_account_io_merge_bio")
+int BPF_KPROBE(blk_account_io_merge_bio, struct request *rq)
+{
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+	return trace_pid(rq);
+}
+>>>>>>> Stashed changes
