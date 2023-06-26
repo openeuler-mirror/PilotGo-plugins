@@ -131,6 +131,9 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static void sig_handler(int sig)
+{}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
@@ -200,6 +203,16 @@ int main(int argc, char *argv[])
 		warning("Failed to attach BPF programs\n");
 		goto cleanup;
 	}
+
+        if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Cann't set signal handler: %s\n", strerror(errno));
+		err = 1;
+		goto cleanup;
+	}
+
+	printf("Tracing blocked time (us) by kernel stack\n");
+	sleep(env.duration);
+	print_map(ksyms, bpf_obj);
 
 	return err != 0;
 }
