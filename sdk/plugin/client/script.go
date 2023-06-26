@@ -39,7 +39,7 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, erro
 		Message string       `json:"msg"`
 		Data    []*CmdResult `json:"data"`
 	}{}
-	if err := json.Unmarshal(r.Body, &res); err != nil {
+	if err := json.Unmarshal(r.Body, res); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +69,7 @@ func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, er
 		Message string       `json:"msg"`
 		Data    []*CmdResult `json:"data"`
 	}{}
-	if err := json.Unmarshal(r.Body, &res); err != nil {
+	if err := json.Unmarshal(r.Body, res); err != nil {
 		return nil, err
 	}
 

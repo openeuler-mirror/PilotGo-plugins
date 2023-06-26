@@ -35,9 +35,11 @@ func request(method, url string, param *Params) (*Response, error) {
 	}
 
 	// 处理header参数
-	if param != nil && len(param.Header) > 0 {
-		for k, v := range param.Header {
-			req.Header.Add(k, v)
+	if param != nil {
+		if len(param.Header) > 0 {
+			for k, v := range param.Header {
+				req.Header.Add(k, v)
+			}
 		}
 
 		// 如果存在body数据，则自动加入到Content-Type信息当中
