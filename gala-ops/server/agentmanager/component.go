@@ -215,10 +215,10 @@ func (o *Opsclient) DeployStatusCheck() error {
 	// 获取业务机集群gala-gopher安装部署情况
 
 	// 获取业务机集群gala-gopher版本信息
-	// machines, err = GetPkgVersion(machines, batch, "gala-gopher")
-	// if err != nil {
-	// 	return err
-	// }
+	machines, err = GetPkgVersion(machines, batch, "gala-gopher")
+	if err != nil {
+		return err
+	}
 
 	// 添加业务机集群信息至opsclient.agentmap
 	for _, m := range machines {
