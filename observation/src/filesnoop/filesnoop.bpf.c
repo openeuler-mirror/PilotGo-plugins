@@ -121,3 +121,40 @@ handle_file_syscall_open_enter(struct trace_event_raw_sys_enter *ctx, enum file_
 	bpf_map_update_elem(&opens, &tid, &filename, BPF_ANY);
 	return 0;
 }
+
+static __always_inline int
+handle_file_syscall_open_exit(struct trace_event_raw_sys_exit *ctx, enum file_op op)
+{
+	pid_t tid = bpf_get_current_pid_tgid();
+	struct fsfilename *filename;
+	int fd = ctx->ret;
+
+	filename = bpf_map_lookup_and_delete_elem(&opens, &tid);
+	if (!filename)
+		return 0;
+
+	/* op is F_OPEN/F_OPENAT/F_OPENAT2 only */
+	if (is_target_operation(op)) {
+		struct event *event = reserve_buf(sizeof(*event));
+		if (!event)
+			return 0;
+
+		event->pid = tid;
+		bpf_get_current_comm(&event->comm, sizeof(event->comm));
+		event->op = op;
+		event->ret = ctx->ret;
+		event->fd = ctx->ret;
+		bpf_probe_read(&event->filename, FSFILENAME_MAX,
+			       &filename->name);
+		submit_buf(ctx, event, sizeof(*event));
+	}
+
+	/* make sure open is not failed and not only filter open syscall*/
+	if (fd >= 0 && (target_op == F_ALL || !is_target_operation(op))) {
+		struct key_t key = { .tid = tid, .fd = fd, };
+		bpf_map_update_elem(&files, &key, filename, BPF_ANY);
+	}
+
+	return 0;
+
+}
