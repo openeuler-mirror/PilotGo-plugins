@@ -56,4 +56,49 @@ int BPF_KPROBE(blk_mq_start_request, struct request *req)
 	return 0;
 }
 
+SEC("kprobe")
+int BPF_KPROBE(blk_account_io_done, struct request *req, u64 now)
+{
+	struct val_t *valp, zero = {};
+	struct info_t info = {};
+	struct start_req_t *startp;
+	unsigned int cmd_flags;
+	struct gendisk *disk;
+	struct who_t *whop;
+	u64 delta_us;
+
+	/* fetch timestamp and calculate delta */
+	startp = bpf_map_lookup_elem(&start, &req);
+	if (!startp)
+		return 0;	/* missed tracing issue */
+
+	delta_us = (bpf_ktime_get_ns() - startp->ts) / 1000;
+
+	/* setup info_t key */
+	cmd_flags = BPF_CORE_READ(req, cmd_flags);
+	disk = get_disk(req);
+	info.major = BPF_CORE_READ(disk, major);
+	info.minor = BPF_CORE_READ(disk, first_minor);
+	info.rwflag = !!((cmd_flags & REQ_OP_MASK) == REQ_OP_WRITE);
+
+	whop = bpf_map_lookup_elem(&whobyreq, &req);
+	if (whop) {
+		info.pid = whop->pid;
+		__builtin_memcpy(&info.name, whop->name, sizeof(info.name));
+	}
+
+	valp = bpf_map_lookup_or_try_init(&counts, &info, &zero);
+	if (valp) {
+		/* save stats */
+		valp->us += delta_us;
+		valp->bytes += startp->data_len;
+		valp->io++;
+	}
+
+	bpf_map_delete_elem(&start, &req);
+	bpf_map_delete_elem(&whobyreq, &req);
+
+	return 0;
+}
+
 char LICENSE[] SEC("license") = "GPL";
