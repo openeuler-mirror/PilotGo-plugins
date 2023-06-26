@@ -262,3 +262,39 @@ int tracepoint_sys_exit_openat2(struct trace_event_raw_sys_exit *ctx)
 {
 	return handle_file_syscall_open_exit(ctx, F_OPENAT2);
 }
+
+SEC("tracepoint/syscalls/sys_enter_write")
+int tracepoint_sys_enter_write(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_WRITE, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_write")
+int tracepoint_sys_exit_write(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_WRITE, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_writev")
+int tracepoint_sys_enter_writev(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_WRITEV, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_writev")
+int tracepoint_sys_exit_writev(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_WRITEV, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_read")
+int tracepoint_sys_enter_read(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_READ, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_read")
+int tracepoint_sys_exit_read(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_READ, ctx->ret);
+}
