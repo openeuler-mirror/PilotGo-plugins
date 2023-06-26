@@ -43,4 +43,17 @@ int BPF_KPROBE(blk_account_io_start, struct request *req)
 	return 0;
 }
 
+SEC("kprobe/blk_mq_start_request")
+int BPF_KPROBE(blk_mq_start_request, struct request *req)
+{
+	/* time block I/O */
+	struct start_req_t start_req;
+
+	start_req.ts = bpf_ktime_get_ns();
+	start_req.data_len = BPF_CORE_READ(req, __data_len);
+	bpf_map_update_elem(&start, &req, &start_req, BPF_ANY);
+
+	return 0;
+}
+
 char LICENSE[] SEC("license") = "GPL";

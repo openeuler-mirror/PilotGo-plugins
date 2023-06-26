@@ -1,6 +1,7 @@
 package agentmanager
 
 import (
+	"fmt"
 	"strings"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
@@ -48,5 +49,5 @@ func GetPkgVersion(machines []*database.Agent, batch *common.Batch, pkgname stri
 		}
 		return machines, nil
 	}
-	return nil, err
+	return nil, fmt.Errorf("runcommand error: %s", err)
 }
