@@ -369,3 +369,41 @@ int tracepoint_sys_exit_renameat(struct trace_event_raw_sys_exit *ctx)
 {
 	return handle_file_syscall_exit(ctx, F_RENAMEAT, ctx->ret);
 }
+
+SEC("tracepoint/syscalls/sys_enter_renameat2")
+int tracepoint_sys_enter_renameat2(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_RENAMEAT2, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_renameat2")
+int tracepoint_sys_exit_renameat2(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_RENAMEAT2, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_close")
+int tracepoint_sys_enter_close(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_CLOSE, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_close")
+int tracepoint_sys_exit_close(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_CLOSE, ctx->ret);
+}
+
+SEC("tracepoint/syscalls/sys_enter_utimensat")
+int tracepoint_sys_enter_utimensat(struct trace_event_raw_sys_enter *ctx)
+{
+	return handle_file_syscall_enter(ctx, F_UTIMENSAT, (int)ctx->args[0]);
+}
+
+SEC("tracepoint/syscalls/sys_exit_utimensat")
+int tracepoint_sys_exit_utimensat(struct trace_event_raw_sys_exit *ctx)
+{
+	return handle_file_syscall_exit(ctx, F_UTIMENSAT, ctx->ret);
+}
+
+char LICENSE[] SEC("license") = "GPL";
