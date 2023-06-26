@@ -28,3 +28,31 @@ const char argp_program_doc[] =
 "EXAMPLE:\n"
 "    filesnoop -o OPEN        # trace open/openat/openat2 syscall\n"
 "                             # (open,write,read,stat,close)\n";
+
+static const struct argp_option opts[] = {
+	{ "version", 'v', NULL, 0, "Verbose debug output" },
+	{ "timestamp", 'T', NULL, 0, "Include timestamp on output" },
+	{ "filename", 'f', "FILENAME", 0, "Trace FILENAME only" },
+	{ "operation", 'o', "OPERATION", 0, "Trace OPERATION only" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
+
+const char *op2string[] = {
+	[F_ALL] = "NONE",
+	[F_OPEN] = "OPEN",
+	[F_OPENAT] = "OPENAT",
+	[F_OPENAT2] = "OPENAT2",
+	[F_WRITE] = "WRITE",
+	[F_WRITEV] = "WRITEV",
+	[F_READ] = "READ",
+	[F_READV] = "READV",
+	[F_STATX] = "STATX",
+	[F_FSTATFS] = "FSTATFS",
+	[F_NEWFSTAT] = "NEWFSTAT",
+	[F_RENAMEAT] = "RENAMEAT",
+	[F_RENAMEAT2] = "RENAMEAT2",
+	[F_UNLINKAT] = "UNLINKAT",
+	[F_CLOSE] = "CLOSE",
+	[F_UTIMENSAT] = "UTIMENSAT",
+};
