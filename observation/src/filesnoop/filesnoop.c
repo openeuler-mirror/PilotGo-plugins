@@ -56,3 +56,42 @@ const char *op2string[] = {
 	[F_CLOSE] = "CLOSE",
 	[F_UTIMENSAT] = "UTIMENSAT",
 };
+
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+	switch (key) {
+	case 'v':
+		env.verbose = true;
+		break;
+	case 'h':
+		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+		break;
+	case 'T':
+		env.timestamp = true;
+		break;
+	case 'f':
+		env.filename = arg;
+		env.filter_filename = true;
+		break;
+	case 'o':
+		for (int i = 0; i < ARRAY_SIZE(op2string); i++) {
+			if (strcmp(op2string[i], arg) == 0) {
+				env.target_op = i;
+			}
+		}
+		if (env.target_op == F_ALL) {
+			warning("%s is not valid operation\n", arg);
+			argp_usage(state);
+		}
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+
+	return 0;
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
