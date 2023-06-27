@@ -50,3 +50,33 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static int print_log2_hists(int fd)
+{
+	struct hist_key lookup_key = {}, next_key;
+	struct hist hist;
+	int err;
+
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_lookup_elem(fd, &next_key, &hist);
+		if (err < 0) {
+			warning("Failed to lookup hist: %d\n", err);
+			return -1;
+		}
+		printf("\nProcess Name = %s\n", next_key.comm);
+		print_log2_hist(hist.slots, MAX_SLOTS, "Kbytes");
+		lookup_key = next_key;
+	}
+
+	memset(lookup_key.comm, '?', sizeof(lookup_key.comm));
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_delete_elem(fd, &next_key);
+		if (err < 0) {
+			warning("Failed to cleanup hist : %d\n", err);
+			return -1;
+		}
+		lookup_key = next_key;
+	}
+
+	return 0;
+}
