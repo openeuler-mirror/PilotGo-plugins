@@ -39,3 +39,14 @@ const char argp_program_doc[] =
 "    filetop            # file I/O top, refresh every 1s\n"
 "    filetop -p 1216    # only trace PID 1216\n"
 "    filetop 5 10       # 5s summaries, 10 times\n";
+
+static const struct argp_option opts[] = {
+	{ "pid", 'p', "PID", 0, "Process ID to trace" },
+	{ "noclear", 'C', NULL, 0, "Don't clear the screen" },
+	{ "all", 'a', NULL, 0, "Include special files" },
+	{ "sort", 's', "SORT", 0, "Sort columns, default all [all, reads, writes, rbytes, wbytes]" },
+	{ "rows", 'r', "ROWS", 0, "Maximum rows to print, default 20" },
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
