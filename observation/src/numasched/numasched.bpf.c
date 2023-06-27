@@ -63,3 +63,19 @@ update:
     bpf_map_update_elem(&numa_node_map, &pid, &numa_id, BPF_ANY);
     return 0;
 }
+
+SEC("tp_btf/sched_switch")
+int BPF_PROG(sched_switch_btf, int preempt, struct task_struct *prev,
+             struct task_struct *next)
+{
+    return handle_sched_switch(ctx, prev, next);
+}
+
+SEC("raw_tp/sched_switch")
+int BPF_PROG(sched_switch_raw, int preempt, struct task_struct *prev,
+             struct task_struct *next)
+{
+    return handle_sched_switch(ctx, prev, next);
+}
+
+char LICENSE[] SEC("license") = "GPL";
