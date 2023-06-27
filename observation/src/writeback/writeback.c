@@ -79,6 +79,24 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
+        err = writeback_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = writeback_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF programs: %d\n", err);
+		goto cleanup;
+	}
+
+	err = bpf_buffer__open(buf, handle_event, handle_lost_events, NULL);
+	if (err) {
+		warning("Failed to open ring/perf buffer: %d\n", err);
+		goto cleanup;
+	}
+
 cleanup:
 	bpf_buffer__free(buf);
 	writeback_bpf__destroy(obj);
