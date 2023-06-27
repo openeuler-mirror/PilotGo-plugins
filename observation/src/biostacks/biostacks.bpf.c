@@ -14,6 +14,27 @@ const volatile bool target_ms = false;
 const volatile bool filter_dev = false;
 const volatile __u32 target_dev = 0;
 
+struct internal_rqinfo {
+	u64 start_ts;
+	struct rqinfo rqinfo;
+};
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, struct request *);
+	__type(value, struct internal_rqinfo);
+} rqinfos SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, struct rqinfo);
+	__type(value, struct hist);
+} hists SEC(".maps");
+
+static struct hist zero;
+
 static __always_inline int trace_start(void *ctx, struct request *rq, bool merge_bio)
 {
 	struct internal_rqinfo *i_rqinfop = NULL, i_rqinfo = {};
@@ -43,4 +64,22 @@ static __always_inline int trace_start(void *ctx, struct request *rq, bool merge
 		bpf_map_update_elem(&rqinfos, &rq, i_rqinfop, BPF_ANY);
 
 	return 0;
+}
+
+SEC("fentry/blk_account_io_start")
+int BPF_PROG(blk_account_io_start, struct request *rq)
+{
+	return trace_start(ctx, rq, false);
+}
+
+SEC("kprobe/blk_account_io_start")
+int BPF_KPROBE(kprobe_blk_account_io_start, struct request *rq)
+{
+	return trace_start(ctx, rq, false);
+}
+
+SEC("kprobe/blk_account_io_merge_bio")
+int BPF_PROG(blk_account_io_merge_bio, struct request *rq)
+{
+	return trace_start(ctx, rq, true);
 }
