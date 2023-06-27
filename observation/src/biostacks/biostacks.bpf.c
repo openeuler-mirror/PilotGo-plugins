@@ -117,3 +117,18 @@ cleanup:
 
 	return 0;
 }
+
+
+SEC("fentry/blk_account_io_done")
+int BPF_PROG(blk_account_io_done, struct request *rq)
+{
+	return probe_blk_account_io_done(rq);
+}
+
+SEC("kprobe/blk_account_io_done")
+int BPF_KPROBE(kprobe_blk_account_io_done, struct request *rq)
+{
+	return probe_blk_account_io_done(rq);
+}
+
+char LICENSE[] SEC("license") = "GPL";
