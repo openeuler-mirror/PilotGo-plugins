@@ -38,6 +38,60 @@ static const struct argp_option opts[] = {
 	{}
 };
 
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+	static int pos_args;
+	struct argument *argument = state->input;
+	size_t len = TASK_COMM_LEN;
+
+	switch (key) {
+	case 'h':
+		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+		break;
+	case 'v':
+		verbose = true;
+		break;
+	case 'c':
+		argument->comm = arg;
+		argument->comm_len = min(strlen(arg) + 1, len);
+		break;
+	case 'd':
+		argument->disk = arg;
+		if (strlen(arg) + 1 > DISK_NAME_LEN) {
+			warning("Invalid disk name: too long\n");
+			argp_usage(state);
+		}
+		break;
+	case 'T':
+		argument->timestamp = true;
+		break;
+	case ARGP_KEY_ARG:
+		errno = 0;
+		if (pos_args == 0) {
+			argument->interval = strtol(arg, NULL, 10);
+			if (errno || argument->interval <= 0) {
+				warning("Invalid interval\n");
+				argp_usage(state);
+			}
+		} else if (pos_args == 1) {
+			argument->times = strtol(arg, NULL, 10);
+			if (errno || argument->times <= 0) {
+				warning("Invalid times\n");
+				argp_usage(state);
+			}
+		} else {
+			warning("Unrecognized positional argument: %s\n", arg);
+			argp_usage(state);
+		}
+		pos_args++;
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+
+	return 0;
+}
+
 static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 			   va_list args)
 {
