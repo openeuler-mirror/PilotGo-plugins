@@ -28,3 +28,17 @@ static int __always_inline probe_md_flush_request(void *ctx, void *mddev,
     bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, &event, sizeof(event));
     return 0;
 }
+
+SEC("fentry/md_flush_request")
+int BPF_PROG(md_flush_request, void *mddev, void *bio)
+{
+    return probe_md_flush_request(ctx, mddev, bio);
+}
+
+SEC("kprobe/md_flush_request")
+int BPF_KPROBE(kprobe_md_flush_request, void *mddev, void *bio)
+{
+    return probe_md_flush_request(ctx, mddev, bio);
+}
+
+char LICENSE[] SEC("license") = "GPL";
