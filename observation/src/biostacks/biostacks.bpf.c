@@ -83,3 +83,37 @@ int BPF_PROG(blk_account_io_merge_bio, struct request *rq)
 {
 	return trace_start(ctx, rq, true);
 }
+
+static __always_inline int probe_blk_account_io_done(struct request *rq)
+{
+	u64 slot, ts = bpf_ktime_get_ns();
+	struct internal_rqinfo *i_rqinfop;
+	struct hist *histp;
+	s64 delta;
+
+	i_rqinfop = bpf_map_lookup_elem(&rqinfos, &rq);
+	if (!i_rqinfop)
+		return 0;
+
+	delta = (s64)(ts - i_rqinfop->start_ts);
+	if (delta < 0)
+		goto cleanup;
+
+	histp = bpf_map_lookup_or_try_init(&hists, &i_rqinfop->rqinfo, &zero);
+	if (!histp)
+		goto cleanup;
+
+	if (target_ms)
+		delta /= 1000000U;
+	else
+		delta /= 1000U;
+	slot = log2l(delta);
+	if (slot >= MAX_SLOTS)
+		slot = MAX_SLOTS - 1;
+	__sync_fetch_and_add(&histp->slots[slot], 1);
+
+cleanup:
+	bpf_map_delete_elem(&rqinfos, &rq);
+
+	return 0;
+}
