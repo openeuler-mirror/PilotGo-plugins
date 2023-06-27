@@ -140,6 +140,7 @@ int main(int argc, char *argv[])
 	};
 
         struct wakeuptime_bpf *bpf_obj;
+	struct ksyms *ksyms = NULL;
 	int err;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
@@ -181,6 +182,24 @@ int main(int argc, char *argv[])
 	bpf_map__set_value_size(bpf_obj->maps.stackmap,
 				env.perf_max_stack_depth * sizeof(unsigned long));
 	bpf_map__set_max_entries(bpf_obj->maps.stackmap, env.stack_storage_size);
+
+        ksyms = ksyms__load();
+	if (!ksyms) {
+		warning("Failed to load kallsyms\n");
+		goto cleanup;
+	}
+
+	err = wakeuptime_bpf__load(bpf_obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = wakeuptime_bpf__attach(bpf_obj);
+	if (err) {
+		warning("Failed to attach BPF programs\n");
+		goto cleanup;
+	}
 
 	return err != 0;
 }
