@@ -15,6 +15,61 @@ static bool kill_only = false;
 static bool signal_name = false;
 static bool verbose = false;
 
+const char *argp_program_version = "sigsnoop 0.1";
+const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+"Trace standard and real-time signals.\n"
+"\n"
+"USAGE: sigsnoop [-h] [-x] [-k] [-n] [-p PID] [-s SIGNAL]\n"
+"\n"
+"EXAMPLES:\n"
+"    sigsnoop             # trace signals system-wide\n"
+"    sigsnoop -k          # trace signals issued by kill syscall only\n"
+"    sigsnoop -x          # trace failed signals only\n"
+"    sigsnoop -p 1216     # only trace PID 1216\n"
+"    sigsnoop -s 9        # only trace signal 9\n";
+
+static const struct argp_option opts[] = {
+	{ "failed", 'x', NULL, 0, "Trace failed signals only." },
+	{ "kill", 'k', NULL, 0, "Trace signals issued by kill syscall only." },
+	{ "pid", 'p', "PID", 0, "Process ID to trace" },
+	{ "signal", 's', "SIGNAL", 0, "Signal to trace." },
+	{ "name", 'n', NULL, 0, "Output signal name instead of signal number." },
+	{ "verbose", 'v', NULL, 0, "verbose debug output" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
+
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+	switch (key) {
+	case 'p':
+		target_pid = argp_parse_pid(key, arg, state);
+		break;
+	case 's':
+		target_signal = argp_parse_long(key, arg, state);
+		break;
+	case 'n':
+		signal_name = true;
+		break;
+	case 'x':
+		failed_only = true;
+		break;
+	case 'k':
+		kill_only = true;
+		break;
+	case 'v':
+		verbose = true;
+		break;
+	case 'h':
+		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
