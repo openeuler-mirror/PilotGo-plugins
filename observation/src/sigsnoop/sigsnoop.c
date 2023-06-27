@@ -78,6 +78,14 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static void alias_parse(char *prog)
+{
+	char *name = basename(prog);
+
+	if (!strcmp(name, "killsnoop"))
+		kill_only = true;
+}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
@@ -103,6 +111,21 @@ int main(int argc, char *argv[])
 		warning("Failed to open BPF object\n");
 		return 1;
 	}	
+
+        obj->rodata->filtered_pid = target_pid;
+	obj->rodata->target_signal = target_signal;
+	obj->rodata->failed_only = failed_only;
+
+	if (kill_only) {
+		bpf_program__set_autoload(obj->progs.sig_trace, false);
+	} else {
+		bpf_program__set_autoload(obj->progs.kill_entry, false);
+		bpf_program__set_autoload(obj->progs.kill_exit, false);
+		bpf_program__set_autoload(obj->progs.tkill_entry, false);
+		bpf_program__set_autoload(obj->progs.tkill_exit, false);
+		bpf_program__set_autoload(obj->progs.tgkill_entry, false);
+		bpf_program__set_autoload(obj->progs.tgkill_exit, false);
+	}
 
 	return err != 0;
 }
