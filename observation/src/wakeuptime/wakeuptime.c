@@ -71,7 +71,7 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 	case 'p':
 		env.pid = argp_parse_pid(key, arg, state);
 		break;
-         case OPT_PERF_MAX_STACK_DEPTH:
+	case OPT_PERF_MAX_STACK_DEPTH:
 		errno = 0;
 		env.perf_max_stack_depth = strtol(arg, NULL, 10);
 		if (errno) {
@@ -119,7 +119,7 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 	default:
 		return ARGP_ERR_UNKNOWN;
 	}
-	
+
 	return 0;
 }
 
@@ -134,6 +134,53 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 static void sig_handler(int sig)
 {}
 
+static void print_map(struct ksyms *ksyms, struct wakeuptime_bpf *bpf_obj)
+{
+	struct key_t lookup_key = {}, next_key;
+	unsigned long *ip;
+	int counts_fd, stack_traces_fd;
+	__u64 val;
+
+	ip = calloc(env.perf_max_stack_depth, sizeof(*ip));
+	if (!ip) {
+		warning("Failed to alloc ip\n");
+		return;
+	}
+
+	counts_fd = bpf_map__fd(bpf_obj->maps.counts);
+	stack_traces_fd = bpf_map__fd(bpf_obj->maps.stackmap);
+
+	while (!bpf_map_get_next_key(counts_fd, &lookup_key, &next_key)) {
+		int err = bpf_map_lookup_elem(counts_fd, &next_key, &val);
+
+		if (err < 0) {
+			warning("Failed to lookup info: %d\n", err);
+			free(ip);
+			return;
+		}
+
+		printf("\n	%-16s %s\n", "target:", next_key.target);
+		lookup_key = next_key;
+
+		err = bpf_map_lookup_elem(stack_traces_fd, &next_key.wake_stack_id, ip);
+		if (err < 0)
+			warning("missed kernel stack: %d\n", err);
+
+		for (int i = 0; i < env.perf_max_stack_depth && ip[i]; i++) {
+			const struct ksym *ksym = ksyms__map_addr(ksyms, ip[i]);
+
+			printf("	%-16lx %s\n", ip[i], ksym ? ksym->name : "Unknown");
+		}
+		printf("	%-16s %s\n", "waker:", next_key.waker);
+
+		/* To convert val in microseconds */
+		val /= 1000;
+		printf("	%lld\n", val);
+	}
+
+	free(ip);
+}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
@@ -142,7 +189,7 @@ int main(int argc, char *argv[])
 		.doc = argp_program_doc,
 	};
 
-        struct wakeuptime_bpf *bpf_obj;
+	struct wakeuptime_bpf *bpf_obj;
 	struct ksyms *ksyms = NULL;
 	int err;
 
@@ -163,7 +210,7 @@ int main(int argc, char *argv[])
 
 	libbpf_set_print(libbpf_print_fn);
 
-        bpf_obj = wakeuptime_bpf__open();
+	bpf_obj = wakeuptime_bpf__open();
 	if (!bpf_obj) {
 		warning("Failed to open BPF object\n");
 		return 1;
@@ -186,7 +233,7 @@ int main(int argc, char *argv[])
 				env.perf_max_stack_depth * sizeof(unsigned long));
 	bpf_map__set_max_entries(bpf_obj->maps.stackmap, env.stack_storage_size);
 
-        ksyms = ksyms__load();
+	ksyms = ksyms__load();
 	if (!ksyms) {
 		warning("Failed to load kallsyms\n");
 		goto cleanup;
@@ -204,7 +251,7 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-        if (signal(SIGINT, sig_handler) == SIG_ERR) {
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
 		warning("Cann't set signal handler: %s\n", strerror(errno));
 		err = 1;
 		goto cleanup;
@@ -214,5 +261,10 @@ int main(int argc, char *argv[])
 	sleep(env.duration);
 	print_map(ksyms, bpf_obj);
 
+cleanup:
+	wakeuptime_bpf__destroy(bpf_obj);
+	ksyms__free(ksyms);
+
 	return err != 0;
 }
+
