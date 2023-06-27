@@ -39,3 +39,33 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 
 	return 0;
 }
+
+#define MAX_PATH_LEN	256
+
+static char *comm_for_pid(const char *pid)
+{
+	char comm_path[MAX_PATH_LEN];
+	snprintf(comm_path, sizeof(comm_path), "/proc/%s/comm", pid);
+
+	FILE *file = fopen(comm_path, "r");
+	if (!file)
+		return "[unknown]";
+
+	char *buffer = NULL;
+	size_t length = 0;
+	ssize_t read;
+
+	read = getline(&buffer, &length, file);
+	fclose(file);
+
+	if (read == -1) {
+		if (buffer)
+			free(buffer);
+		return "[unknown]";
+	}
+
+	if (buffer[read - 1] == '\n')
+		buffer[read - 1] = 0;
+
+	return buffer;
+}
