@@ -53,7 +53,9 @@ int main(int argc, char *argv[])
 		.parser = parse_arg,
 		.doc = argp_program_doc,
 	};
-        int err;
+        struct bpf_buffer *buf = NULL;
+	struct writeback_bpf *obj;
+	int err;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
 	if (err)
@@ -64,5 +66,22 @@ int main(int argc, char *argv[])
 
 	libbpf_set_print(libbpf_print_fn);
 
+        obj = writeback_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	buf = bpf_buffer__new(obj->maps.events, obj->maps.heap);
+	if (!buf) {
+		warning("Failed to create ring/perf buffer: %s\n", strerror(errno));
+		err = 1;
+		goto cleanup;
+	}
+
+cleanup:
+	bpf_buffer__free(buf);
+	writeback_bpf__destroy(obj);
+	
 	return err != 0;
 }
