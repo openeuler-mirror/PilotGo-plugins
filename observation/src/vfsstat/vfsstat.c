@@ -24,6 +24,15 @@ static const struct argp_option opts[] = {
 	{},
 };
 
+static struct env {
+	bool verbose;
+	int count;
+	int interval;
+} env = {
+	.interval = 1, /* once a second */
+	.count = 99999999,
+};
+
 static error_t parse_arg(int key, char *arg, struct argp_state *state)
 {
 	switch (key) {
@@ -60,6 +69,35 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static const char *stat_types_names[] = {
+	[S_READ] = "READ",
+	[S_WRITE] = "WRITE",
+	[S_FSYNC] = "FSYNC",
+	[S_OPEN] = "OPEN",
+	[S_CREATE] = "CREATE",
+};
+
+static void print_header(void)
+{
+	printf("%-8s ", "TIME");
+	for (int i = 0; i < S_MAXSTAT; i++)
+		printf(" %6s/s", stat_types_names[i]);
+	printf("\n");
+}
+
+static void print_and_reset_stats(__u64 stats[S_MAXSTAT])
+{
+	char s[16];
+	__u64 val;
+
+	printf("%-8s ", strftime_now(s, sizeof(s), "%H:%M:%S"));
+	for (int i = 0; i < S_MAXSTAT; i++) {
+		val = __atomic_exchange_n(&stats[i], 0, __ATOMIC_RELAXED);
+		printf(" %8llu", val / env.interval);
+	}
+	printf("\n");
+}
+
 static void sig_handler(int sig)
 {
 	exiting = 1;
@@ -74,18 +112,19 @@ int main(int argc, char *argv[])
 		.doc = argp_program_doc,
 		.args_doc = args_doc
 	};
+	struct vfsstat_bpf *skel;
 	int err;
 
 	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
 	if (err)
 		return err;
-        
+
 	if (!bpf_is_root())
 		return 1;
 
 	libbpf_set_print(libbpf_print_fn);
 
-        err = ensure_core_btf(&open_opts);
+	err = ensure_core_btf(&open_opts);
 	if (err) {
 		warning("Failed to fetch necessary BTF for CO-RE: %s\n", strerror(-err));
 		return 1;
@@ -117,7 +156,7 @@ int main(int argc, char *argv[])
 		warning("Failed to load BPF skelect: %d\n", err);
 		goto cleanup;
 	}
-        
+
 	if (!skel->bss) {
 		warning("Memory-mapping BPF maps is supported starting from Linux 5.7, please upgrade.\n");
 		goto cleanup;
@@ -131,6 +170,15 @@ int main(int argc, char *argv[])
 
 	signal(SIGINT, sig_handler);
 
+	print_header();
+
+	while (!exiting) {
+		sleep(env.interval);
+		print_and_reset_stats(skel->bss->stats);
+
+		if (--env.count == 0)
+			break;
+	}
 
 cleanup:
 	vfsstat_bpf__destroy(skel);
@@ -138,3 +186,4 @@ cleanup:
 
 	return err != 0;
 }
+
