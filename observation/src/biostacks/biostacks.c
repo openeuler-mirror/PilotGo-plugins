@@ -84,3 +84,36 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 
 static void sig_handler(int sig)
 {}
+
+static void print_map(struct ksyms *ksyms, struct partitions *partitions, int fd)
+{
+	const char *units = env.milliseconds ? "msecs" : "usecs";
+	struct rqinfo lookup_key = {}, next_key;
+	const struct partition *partition;
+	const struct ksym *ksym;
+	int num_stack, i, err;
+	struct hist hist;
+
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_lookup_elem(fd, &next_key, &hist);
+		if (err < 0) {
+			warning("Failed to lookup hist: %d\n", err);
+			return;
+		}
+		partition = partitions__get_by_dev(partitions, next_key.dev);
+		printf("%-14.14s %-6d %-7s\n",
+			next_key.comm, next_key.pid,
+			partition ? partition->name : "Unknown");
+		num_stack = next_key.kern_stack_size /
+				sizeof(next_key.kern_stack[0]);
+		for (i = 0; i < num_stack; i++) {
+			ksym = ksyms__map_addr(ksyms, next_key.kern_stack[i]);
+			printf("%s\n", ksym ? ksym->name : "Unknown");
+		}
+		print_log2_hist(hist.slots, MAX_SLOTS, units);
+		printf("\n");
+		lookup_key = next_key;
+	}
+
+	return;
+}
