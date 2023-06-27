@@ -64,3 +64,23 @@ static __always_inline int trace_rq_issue(struct request *rq)
 
 	return 0;
 }
+
+SEC("tp_btf/block_rq_issue")
+int BPF_PROG(block_rq_issue)
+{
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 11, 0))
+		return trace_rq_issue((void *)ctx[0]);
+	else
+		return trace_rq_issue((void *)ctx[1]);
+}
+
+SEC("raw_tp/block_rq_issue")
+int BPF_PROG(block_rq_issue_raw)
+{
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 11, 0))
+		return trace_rq_issue((void *)ctx[0]);
+	else
+		return trace_rq_issue((void *)ctx[1]);
+}
+
+char LICENSE[] SEC("license") = "GPL";
