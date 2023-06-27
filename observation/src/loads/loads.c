@@ -134,3 +134,114 @@ static void print_loads(struct loads_bpf__bss *bss)
 		   load5 >> 11, ((load5 & ((1 << 11) - 1)) * 1000) >> 11,
 		   load15 >> 11, ((load15 & ((1 << 11) - 1)) * 1000) >> 11);
 }
+
+int main(int argc, char *argv[])
+{
+	LIBBPF_OPTS(bpf_object_open_opts, open_opts);
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct bpf_link *link[MAX_NR_CPUS] = {};
+	struct loads_bpf *obj;
+	struct ksyms *ksyms = NULL;
+	const struct ksym *ksym;
+	int err;
+
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	nr_cpus = libbpf_num_possible_cpus();
+	if (nr_cpus < 0)
+	{
+		warning("Failed to get # of possible cpus: '%s'!\n",
+				strerror(-nr_cpus));
+		return 1;
+	}
+	if (nr_cpus > MAX_NR_CPUS)
+	{
+		warning("The number of cpu cores is too big, please increase "
+				"MAX_CPU_NR's value and recompile");
+		return 1;
+	}
+
+	err = ensure_core_btf(&open_opts);
+	if (err)
+	{
+		warning("Failed to fetch necessary BTF for CO-RE: %s\n", strerror(-errno));
+		return 1;
+	}
+
+	obj = loads_bpf__open_opts(&open_opts);
+	if (!obj)
+	{
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	ksyms = ksyms__load();
+	if (!ksyms)
+	{
+		warning("Failed to load ksyms\n");
+		err = 1;
+		goto cleanup;
+	}
+
+	ksym = ksyms__get_symbol(ksyms, "avenrun");
+	if (!ksym)
+	{
+		warning("Failed to get avenrun's kernel address\n");
+		err = 1;
+		goto cleanup;
+	}
+
+	obj->rodata->avenrun_kaddr = ksym->addr;
+
+	err = loads_bpf__load(obj);
+	if (err)
+	{
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	if (!obj->bss)
+	{
+		warning("Memory-mapping BPF maps is supported starting from Linux 5.7, please upgrade.\n");
+		err = 1;
+		goto cleanup;
+	}
+
+	err = open_and_attach_perf_event(obj->progs.do_sample, link);
+	if (err)
+		goto cleanup;
+
+	printf("Reading load averages... Hit Ctrl-C to end.\n");
+
+	signal(SIGINT, sig_handler);
+
+	while (!exiting)
+	{
+		sleep(env.interval);
+		print_loads(obj->bss);
+
+		if (exiting || --env.times == 0)
+			break;
+	}
+
+cleanup:
+	for (int i = 0; i < nr_cpus; i++)
+		bpf_link__destroy(link[i]);
+
+	loads_bpf__destroy(obj);
+	cleanup_core_btf(&open_opts);
+	ksyms__free(ksyms);
+
+	return err != 0;
+}
