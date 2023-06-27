@@ -46,6 +46,34 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+const char *reasons[] = {
+	[0] = "background",
+	[1] = "vmscan",
+	[2] = "sync",
+	[3] = "periodic",
+	[4] = "laptop_timer",
+	[5] = "free_more_memory",
+	[6] = "fs_free_space",
+	[7] = "forker_thread",
+};
+
+static int handle_event(void *ctx, void *data, size_t data_sz)
+{
+	const struct event *e = data;
+	char ts[16];
+
+	strftime_now(ts, sizeof(ts), "%H:%M:%S");
+	printf("%-9s %-8s %-8ld %-16s %lld.%03lld\n", ts, e->name,
+	       e->nr_pages & 0xffff, reasons[e->reason & 0xffffffff],
+	       e->latency / 1000, e->latency % 1000);
+	return 0;
+}
+
+static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
+{
+	warning("Lost %llu events on CPU #%d!\n", lost_cnt, cpu);
+}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
