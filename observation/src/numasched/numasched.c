@@ -43,3 +43,38 @@ static const struct argp_option opts[] = {
     {NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help"},
     {},
 };
+
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+    switch (key)
+    {
+    case 'h':
+        argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+        break;
+    case 'v':
+        env.verbose = true;
+        break;
+    case 'T':
+        env.timestamp = true;
+        break;
+    case 'p':
+        env.pid = argp_parse_pid(key, arg, state);
+        break;
+    case 't':
+        errno = 0;
+        env.tid = strtol(arg, NULL, 10);
+        if (errno)
+        {
+            warning("Invalid tid: %s\n", arg);
+            argp_usage(state);
+        }
+        break;
+    case 'c':
+        env.comm = arg;
+        break;
+    default:
+        return ARGP_ERR_UNKNOWN;
+    }
+
+    return 0;
+}
