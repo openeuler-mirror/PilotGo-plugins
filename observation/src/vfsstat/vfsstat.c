@@ -60,6 +60,11 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
 int main(int argc, char *argv[])
 {
 	LIBBPF_OPTS(bpf_object_open_opts, open_opts);
@@ -112,6 +117,20 @@ int main(int argc, char *argv[])
 		warning("Failed to load BPF skelect: %d\n", err);
 		goto cleanup;
 	}
+        
+	if (!skel->bss) {
+		warning("Memory-mapping BPF maps is supported starting from Linux 5.7, please upgrade.\n");
+		goto cleanup;
+	}
+
+	err = vfsstat_bpf__attach(skel);
+	if (err) {
+		warning("Failed to attach BPF programs: %s\n", strerror(-err));
+		goto cleanup;
+	}
+
+	signal(SIGINT, sig_handler);
+
 
 cleanup:
 	vfsstat_bpf__destroy(skel);
