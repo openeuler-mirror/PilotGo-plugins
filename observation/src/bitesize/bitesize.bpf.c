@@ -32,3 +32,35 @@ static __always_inline bool comm_allowed(const char *comm)
 
 	return true;
 }
+
+static __always_inline int trace_rq_issue(struct request *rq)
+{
+	struct hist_key hkey;
+	struct hist *histp;
+	u64 slot;
+
+	if (filter_dev) {
+		struct gendisk *disk = get_disk(rq);
+		u32 dev;
+
+		dev = disk ? MKDEV(BPF_CORE_READ(disk, major),
+				   BPF_CORE_READ(disk, first_minor)) : 0;
+		if (target_dev != dev)
+			return 0;
+	}
+
+	bpf_get_current_comm(&hkey.comm, sizeof(hkey.comm));
+	if (!comm_allowed(hkey.comm))
+		return 0;
+
+	histp = bpf_map_lookup_or_try_init(&hists, &hkey, &zero);
+	if (!histp)
+		return 0;
+
+	slot = log2l(BPF_CORE_READ(rq, __data_len) / 1024);
+	if (slot >= MAX_SLOTS)
+		slot = MAX_SLOTS - 1;
+	__sync_fetch_and_add(&histp->slots[slot], 1);
+
+	return 0;
+}
