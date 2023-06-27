@@ -117,3 +117,101 @@ static void print_map(struct ksyms *ksyms, struct partitions *partitions, int fd
 
 	return;
 }
+
+int main(int argc, char *argv[])
+{
+	struct partitions *partitions = NULL;
+	const struct partition *partition;
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+
+	struct ksyms *ksyms = NULL;
+	struct biostacks_bpf *obj;
+	int err;
+
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	obj = biostacks_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	partitions = partitions__load();
+	if (!partitions) {
+		warning("Failed to load partitions info\n");
+		goto cleanup;
+	}
+
+	if (env.disk) {
+		partition = partitions__get_by_name(partitions, env.disk);
+		if (!partition) {
+			warning("Invalid partition name: not exist\n");
+			goto cleanup;
+		}
+		obj->rodata->filter_dev = true;
+		obj->rodata->target_dev = partition->dev;
+	}
+
+	obj->rodata->target_ms = env.milliseconds;
+
+	if (fentry_can_attach("blk_account_io_start", NULL)) {
+		bpf_program__set_attach_target(obj->progs.blk_account_io_start, 0,
+					       "blk_account_io_start");
+		bpf_program__set_attach_target(obj->progs.blk_account_io_done, 0,
+					       "blk_account_io_done");
+		bpf_program__set_autoload(obj->progs.kprobe_blk_account_io_start, false);
+		bpf_program__set_autoload(obj->progs.kprobe_blk_account_io_done, false);
+	} else if (fentry_can_attach("__blk_account_io_start", NULL)) {
+		bpf_program__set_attach_target(obj->progs.blk_account_io_start, 0,
+					       "__blk_account_io_start");
+		bpf_program__set_attach_target(obj->progs.blk_account_io_done, 0,
+					       "__blk_account_io_done");
+		bpf_program__set_autoload(obj->progs.kprobe_blk_account_io_start, false);
+		bpf_program__set_autoload(obj->progs.kprobe_blk_account_io_done, false);
+	} else {
+		bpf_program__set_autoload(obj->progs.blk_account_io_start, false);
+		bpf_program__set_autoload(obj->progs.blk_account_io_done, false);
+	}
+
+	ksyms = ksyms__load();
+	if (!ksyms) {
+		warning("Failed to load kallsyms\n");
+		goto cleanup;
+	}
+
+	if (!ksyms__get_symbol(ksyms, "blk_account_io_merge_bio"))
+		bpf_program__set_autoload(obj->progs.blk_account_io_merge_bio, false);
+
+	err = biostacks_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	err = biostacks_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF programs: %d\n", err);
+		goto cleanup;
+	}
+
+	signal(SIGINT, sig_handler);
+
+	printf("Tracing block I/O with init stacks. Hit Ctrl-C to end.\n");
+	sleep(env.duration);
+	print_map(ksyms, partitions, bpf_map__fd(obj->maps.hists));
+
+cleanup:
+	biostacks_bpf__destroy(obj);
+	ksyms__free(ksyms);
+	partitions__free(partitions);
+
+	return err != 0;
+}
