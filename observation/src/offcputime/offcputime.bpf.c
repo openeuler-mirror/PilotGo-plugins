@@ -44,3 +44,18 @@ struct
     __type(value, offcpu_val_t);
     __uint(max_entries, MAX_ENTRIES);
 } info SEC(".maps");
+
+static bool allow_record(struct task_struct *task)
+{
+    if (target_tgid != -1 && target_tgid != BPF_CORE_READ(task, tgid))
+        return false;
+    if (target_pid != -1 && target_pid != BPF_CORE_READ(task, pid))
+        return false;
+    if (user_threads_only && BPF_CORE_READ(task, flags) & PF_KTHREAD)
+        return false;
+    else if (kernel_threads_only && !(BPF_CORE_READ(task, flags) & PF_KTHREAD))
+        return false;
+    if (state != -1 && get_task_state(task) != state)
+        return false;
+    return true;
+}
