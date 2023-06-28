@@ -116,3 +116,103 @@ static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
 {
     warning("Lost %llu events on cpu #%d!\n", lost_cnt, cpu);
 }
+
+int main(int argc, char *argv[])
+{
+    static struct argp argp = {
+        .options = opts,
+        .parser = parse_arg,
+        .doc = argp_program_doc,
+    };
+
+    struct perf_buffer *pb = NULL;
+    struct numasched_bpf *bpf_obj;
+    int err;
+
+    err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+    if (err)
+        return err;
+
+    if (numa_max_node() == 0)
+    {
+        printf("We only have one NUMA Node, so we don't need to track NUMA switching.\n");
+        return 0;
+    }
+
+    if (!bpf_is_root())
+        return 1;
+
+    libbpf_set_print(libbpf_print_fn);
+
+    bpf_obj = numasched_bpf__open();
+    if (!bpf_obj)
+    {
+        warning("Failed to open BPF object\n");
+        return 1;
+    }
+
+    /* Init global data (filtering options) */
+    bpf_obj->rodata->target_tgid = env.pid;
+    bpf_obj->rodata->target_pid = env.tid;
+
+    if (probe_tp_btf("sched_switch"))
+        bpf_program__set_autoload(bpf_obj->progs.sched_switch_raw, false);
+    else
+        bpf_program__set_autoload(bpf_obj->progs.sched_switch_btf, false);
+
+    err = numasched_bpf__load(bpf_obj);
+    if (err)
+    {
+        warning("Failed to load BPF object: %d\n", err);
+        goto cleanup;
+    }
+
+    err = numasched_bpf__attach(bpf_obj);
+    if (err)
+    {
+        warning("Failed to attach programs: %d\n", err);
+        goto cleanup;
+    }
+
+    if (env.timestamp)
+        printf("%-9s", "TIME");
+
+    printf("%-16s %-10s %-10s %8s    %-8s\n", "COMM", "PID", "TID", "SRC_NID",
+           "DST_NID");
+
+    pb = perf_buffer__new(bpf_map__fd(bpf_obj->maps.events), PERF_BUFFER_PAGES,
+                          handle_event, handle_lost_events, NULL, NULL);
+    if (!pb)
+    {
+        err = -errno;
+        warning("Failed to open perf buffer: %d\n", err);
+        goto cleanup;
+    }
+
+    if (signal(SIGINT, sig_handler) == SIG_ERR)
+    {
+        warning("Cann't set signal handler: %s\n", strerror(errno));
+        err = 1;
+        goto cleanup;
+    }
+
+    /* Loop */
+    while (!exiting)
+    {
+        err = perf_buffer__poll(pb, PERF_POLL_TIMEOUT_MS);
+        if (err < 0 && err != -EINTR)
+        {
+            warning("Error polling perf buffer: %s\n", strerror(-err));
+            goto cleanup;
+        }
+
+        /* reset err to retrun 0 if exiting */
+        err = 0;
+    }
+
+cleanup:
+    perf_buffer__free(pb);
+    numasched_bpf__destroy(bpf_obj);
+
+    return err != 0;
+}
