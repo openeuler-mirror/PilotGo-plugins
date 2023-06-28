@@ -124,3 +124,35 @@ static error_t parse_arg(int key, char *arg, struct argp_state *state)
 
 	return 0;
 }
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
+static int sort_column(const void *obj1, const void *obj2)
+{
+	struct file_stat *s1 = (struct file_stat *)obj1;
+	struct file_stat *s2 = (struct file_stat *)obj2;
+
+	if (sort_by == READS) {
+		return s2->reads - s1->reads;
+	} else if (sort_by == WRITES) {
+		return s2->writes - s1->writes;
+	} else if (sort_by == RBYTES) {
+		return s2->read_bytes - s1->read_bytes;
+	} else if (sort_by == WBYTES) {
+		return s2->write_bytes - s1->write_bytes;
+	} else {
+		return (s2->reads + s2->writes + s2->read_bytes + s2->write_bytes) -
+			(s1->reads + s1->writes + s1->read_bytes + s1->write_bytes);
+	}
+}
