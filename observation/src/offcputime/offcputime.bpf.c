@@ -16,3 +16,31 @@ const volatile __u64 min_block_ns = -1;
 const volatile pid_t target_tgid = -1;
 const volatile pid_t target_pid = -1;
 const volatile long state = -1;
+
+struct internal_key
+{
+    u64 start_ts;
+    offcpu_key_t key;
+};
+
+struct
+{
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __type(key, u32);
+    __type(value, struct internal_key);
+    __uint(max_entries, MAX_ENTRIES);
+} start SEC(".maps");
+
+struct
+{
+    __uint(type, BPF_MAP_TYPE_STACK_TRACE);
+    __uint(key_size, sizeof(u32));
+} stackmap SEC(".maps");
+
+struct
+{
+    __uint(type, BPF_MAP_TYPE_HASH);
+    __type(key, offcpu_key_t);
+    __type(value, offcpu_val_t);
+    __uint(max_entries, MAX_ENTRIES);
+} info SEC(".maps");
