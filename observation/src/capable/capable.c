@@ -243,3 +243,31 @@ skip_ustack:
 cleanup:
 	free(ip);
 }
+
+static void handle_event(void *ctx, int cpu, void *data, __u32 data_sz)
+{
+	const struct cap_event *e = data;
+	char ts[32];
+
+	strftime_now(ts, sizeof(ts), "%H:%M:%S");
+
+	char *verdict = "deny";
+	if (!e->ret)
+		verdict = "allow";
+
+	if (((struct context *)ctx)->argument->extra_fields)
+		printf("%-8s %-5d %-7d %-7d %-16s %-7d %-20s %-7d %-7s %-7d\n",
+		       ts, e->uid, e->pid, e->tgid, e->task, e->cap, cap_name[e->cap],
+		       e->audit, verdict, e->insetid);
+	else
+		printf("%-8s %-5d %-7d %-16s %-7d %-20s %-7d %-7s\n", ts,
+		       e->uid, e->pid, e->task, e->cap, cap_name[e->cap],
+		       e->audit, verdict);
+
+	print_map(ksyms, syms_cache, ctx);
+}
+
+static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
+{
+	warning("Lost %llu events on CPU #%d!\n", lost_cnt, cpu);
+}
