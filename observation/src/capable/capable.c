@@ -94,3 +94,32 @@ const char argp_program_doc[] =
 
 #define OPT_PERF_MAX_STACK_DEPTH	1	/* for --perf-max-stack-depth */
 #define OPT_STACK_STORAGE_SIZE		2	/* for --stack-storage-size */
+
+static const struct argp_option opts[] = {
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ "pid", 'p', "PID", 0, "Trace this PID only" },
+	{ "cgroup", 'c', "/sys/fs/cgroup/unifed", 0, "Trace process in cgroup path" },
+	{ "kernel-stack", 'K', NULL, 0, "output kernel stack trace" },
+	{ "user-stack", 'U', NULL, 0, "output user stack trace" },
+	{ "extra-fields", 'x', NULL, 0, "extra fields: show TID and INSETID columns" },
+	{ "unique", 'u', "off", 0, "Print unique output for <pid> or <cgroup> (default: off)" },
+	{ "perf-max-stack-depth", OPT_PERF_MAX_STACK_DEPTH,
+	  "PERF-MAX-STACK-DEPTH", 0, "the limit for both kernel and user stack traces (default: 127)" },
+	{ "stack-storage-size", OPT_STACK_STORAGE_SIZE, "STACK-STORAGE-SIZE", 0,
+	  "the number of unique stack traces that can be stored and displayed (default: 1024)" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
+
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
