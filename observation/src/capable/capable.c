@@ -271,3 +271,166 @@ static void handle_lost_events(void *ctx, int cpu, __u64 lost_cnt)
 {
 	warning("Lost %llu events on CPU #%d!\n", lost_cnt, cpu);
 }
+
+int main(int argc, char *argv[])
+{
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+
+	struct capable_bpf *obj;
+	struct perf_buffer *pb = NULL;
+	int err;
+	int cgfd = -1;
+	enum uniqueness uniqueness_type = UNQ_OFF;
+	struct stat st;
+	struct argument argument = {
+		.pid = -1,
+		.stack_storage_size = 1024,
+		.perf_max_stack_depth = 127,
+		.unique = false,
+	};
+	struct context ctx = {
+		.argument = &argument,
+	};
+
+	err = argp_parse(&argp, argc, argv, 0, NULL, &argument);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	if (argument.unique) {
+		if (strcmp(argument.unique_type, "pid") == 0) {
+			uniqueness_type = UNQ_PID;
+		} else if (strcmp(argument.unique_type, "cgroup") == 0) {
+			uniqueness_type = UNQ_CGROUP;
+		} else {
+			warning("Unknown unique type %s\n", argument.unique_type);
+			return -1;
+		}
+	}
+
+	libbpf_set_print(libbpf_print_fn);
+
+	obj = capable_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	obj->rodata->target_pid = argument.pid;
+	obj->rodata->filter_cg = argument.cg;
+	obj->rodata->user_stack = argument.user_stack;
+	obj->rodata->kernel_stack = argument.kernel_stack;
+	obj->rodata->unique_type = uniqueness_type;
+
+	bpf_map__set_value_size(obj->maps.stackmap,
+				argument.perf_max_stack_depth * sizeof(unsigned long));
+	bpf_map__set_max_entries(obj->maps.stackmap, argument.stack_storage_size);
+
+	err = capable_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	if (!obj->bss) {
+                warning("Memory-mapping BPF maps is supported starting from Linux 5.7, please upgrade.\n");
+                goto cleanup;
+        }
+
+	if (stat("/proc/self/ns/pid", &st)) {
+		warning("Failed to stat pid file\n");
+		goto cleanup;
+	}
+
+	obj->bss->myinfo.pid_tgid = getpid() | syscall(SYS_gettid) << 32;
+	obj->bss->myinfo.dev = st.st_dev;
+	obj->bss->myinfo.ino = st.st_ino;
+
+	/* update cgroup path fd to map */
+	if (argument.cg) {
+		int idx = 0;
+		int cg_map_fd = bpf_map__fd(obj->maps.cgroup_map);
+
+		cgfd = open(argument.cgroupspath, O_RDONLY);
+		if (cgfd < 0) {
+			warning("Failed opening cgroup path: %s\n", argument.cgroupspath);
+			goto cleanup;
+		}
+
+		if (bpf_map_update_elem(cg_map_fd, &idx, &cgfd, BPF_ANY)) {
+			warning("Failed adding target cgroup to map");
+			goto cleanup;
+		}
+	}
+
+	ksyms = ksyms__load();
+	if (!ksyms) {
+		warning("Failed to load kallsyms\n");
+		goto cleanup;
+	}
+
+	syms_cache = syms_cache__new(0);
+	if (!syms_cache) {
+		warning("Failed to create syms_cache\n");
+		goto cleanup;
+	}
+
+	int ifd = bpf_map__fd(obj->maps.info);
+	int sfd = bpf_map__fd(obj->maps.stackmap);
+	ctx.ifd = ifd;
+	ctx.sfd = sfd;
+
+	err = capable_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF program: %d\n", err);
+		goto cleanup;
+	}
+
+	pb = perf_buffer__new(bpf_map__fd(obj->maps.events), PERF_BUFFER_PAGES,
+			      handle_event, handle_lost_events, &ctx, NULL);
+	if (!pb) {
+		err = -errno;
+		warning("Failed to open perf buffer: %d\n", err);
+		goto cleanup;
+	}
+
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Can't set signal handler: %s\n", strerror(errno));
+		err = 1;
+		goto cleanup;
+	}
+
+	if (argument.extra_fields)
+		printf("%-8s %-5s %-7s %-7s %-16s %-7s %-20s %-7s %-7s %-7s\n",
+		       "TIME", "UID", "PID", "TID", "COMM", "CAP", "NAME", "AUDIT",
+		       "VERDICT", "INSETID");
+	else
+		printf("%-8s %-5s %-7s %-16s %-7s %-20s %-7s %-7s\n", "TIME", "UID",
+		       "PID", "COMM", "CAP", "NAME", "AUDIT", "VERDICT");
+
+	/* main: poll */
+	while (!exiting) {
+		err = perf_buffer__poll(pb, PERF_POLL_TIMEOUT_MS);
+		if (err < 0 && err != -EINTR) {
+			warning("Error polling perf buffer: %s\n", strerror(-err));
+			goto cleanup;
+		}
+		/* reset err to return 0 if exiting */
+		err = 0;
+	}
+
+cleanup:
+	capable_bpf__destroy(obj);
+	syms_cache__free(syms_cache);
+	ksyms__free(ksyms);
+	if (cgfd > 0)
+		close(cgfd);
+
+	return err != 0;
+}
