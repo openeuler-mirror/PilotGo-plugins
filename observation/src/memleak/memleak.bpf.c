@@ -53,3 +53,21 @@ struct
     __uint(type, BPF_MAP_TYPE_STACK_TRACE);
     __type(key, u32);
 } stack_traces SEC(".maps");
+
+static union combined_alloc_info initial_cinfo;
+
+static __always_inline void update_statistics_add(u64 stack_id, u64 sz)
+{
+    union combined_alloc_info *existing_cinfo;
+
+    existing_cinfo = bpf_map_lookup_or_try_init(&combined_allocs, &stack_id,
+                                                &initial_cinfo);
+    if (!existing_cinfo)
+        return;
+
+    const union combined_alloc_info incremental_cinfo = {
+        .total_size = sz,
+        .number_of_allocs = 1};
+
+    __sync_fetch_and_add(&existing_cinfo->bits, incremental_cinfo.bits);
+}
