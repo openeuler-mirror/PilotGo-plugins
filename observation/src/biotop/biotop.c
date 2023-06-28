@@ -96,3 +96,67 @@ static const struct argp_option opts[] = {
 	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
 	{}
 };
+
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+	static int pos_args;
+
+	switch (key) {
+	case 'c':
+		env.clear_screen = false;
+		break;
+	case 's':
+		if (!strcmp(arg, "all")) {
+			env.sort_by = ALL;
+		} else if (!strcmp(arg, "io")) {
+			env.sort_by = IO;
+		} else if (!strcmp(arg, "bytes")) {
+			env.sort_by = BYTES;
+		} else if (!strcmp(arg, "time")) {
+			env.sort_by = TIME;
+		} else {
+			warning("Invalid sort method: %s\n", arg);
+			argp_usage(state);
+		}
+		break;
+	case 'r':
+		errno = 0;
+		env.output_rows = strtol(arg, NULL, 10);
+		if (errno || env.output_rows <= 0) {
+			warning("Invalid rows: %s\n", arg);
+			argp_usage(state);
+		}
+		if (env.output_rows > OUTPUT_ROWS_LIMIT)
+			env.output_rows = OUTPUT_ROWS_LIMIT;
+		break;
+	case 'v':
+		env.verbose = true;
+		break;
+	case 'h':
+		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+		break;
+	case ARGP_KEY_ARG:
+		errno = 0;
+		if (pos_args == 0) {
+			env.interval = strtol(arg, NULL, 10);
+			if (errno || env.interval <= 0) {
+				warning("Invalid interval\n");
+				argp_usage(state);
+			}
+		} else if (pos_args == 1) {
+			env.count = strtol(arg, NULL, 10);
+			if (errno || env.count <= 0) {
+				warning("Invalid count\n");
+				argp_usage(state);
+			}
+		} else {
+			warning("Unrecognized positional argument: %s\n", arg);
+			argp_usage(state);
+		}
+		pos_args++;
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+	return 0;
+}
