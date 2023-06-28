@@ -76,3 +76,23 @@ static struct env {
 	.count		= 99999999,
 	.verbose	= false,
 };
+
+const char *argp_program_version = "biotop 0.1";
+const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+"Trace file reads/writes by process.\n"
+"\n"
+"USAGE: biotop [-h] [interval] [count]\n"
+"\n"
+"EXAMPLES:\n"
+"    biotop            # file I/O top, refresh every 1s\n"
+"    biotop 5 10       # 5s summaries, 10 times\n";
+
+static const struct argp_option opts[] = {
+	{ "noclear", 'c', NULL, 0, "Don't clear the screen" },
+	{ "sort", 's', "SORT", 0, "Sort columns, default all [all, io, bytes, time]" },
+	{ "rows", 'r', "ROWS", 0, "Maximum rows to print, default 20" },
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
