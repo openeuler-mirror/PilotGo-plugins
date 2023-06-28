@@ -46,6 +46,11 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 	return vfprintf(stderr, format, args);
 }
 
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
 const char *reasons[] = {
 	[0] = "background",
 	[1] = "vmscan",
@@ -81,7 +86,7 @@ int main(int argc, char *argv[])
 		.parser = parse_arg,
 		.doc = argp_program_doc,
 	};
-        struct bpf_buffer *buf = NULL;
+	struct bpf_buffer *buf = NULL;
 	struct writeback_bpf *obj;
 	int err;
 
@@ -89,12 +94,12 @@ int main(int argc, char *argv[])
 	if (err)
 		return err;
 
-        if (!bpf_is_root())
+	if (!bpf_is_root())
 		return 1;
 
 	libbpf_set_print(libbpf_print_fn);
 
-        obj = writeback_bpf__open();
+	obj = writeback_bpf__open();
 	if (!obj) {
 		warning("Failed to open BPF object\n");
 		return 1;
@@ -107,7 +112,7 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
-        err = writeback_bpf__load(obj);
+	err = writeback_bpf__load(obj);
 	if (err) {
 		warning("Failed to load BPF object: %d\n", err);
 		goto cleanup;
@@ -125,9 +130,30 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Can't set signal handler: %s\n", strerror(errno));
+		err = 1;
+		goto cleanup;
+	}
+
+	printf("Tracing writeback... Hit Ctrl-C to end.\n");
+	printf("%-9s %-8s %-8s %-16s %s\n", "TIME", "DEVICE", "PAGES",
+	       "REASON", "LAT(ms)");
+
+	while (!exiting) {
+		err = bpf_buffer__poll(buf, POLL_TIMEOUT_MS);
+		if (err < 0 && err != -EINTR) {
+			warning("Error polling ring/perf buffer: %d\n", err);
+			goto cleanup;
+		}
+		/* reset err to 0 when exiting */
+		err = 0;
+	}
+
 cleanup:
 	bpf_buffer__free(buf);
 	writeback_bpf__destroy(obj);
-	
+
 	return err != 0;
 }
+
