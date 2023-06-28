@@ -110,3 +110,51 @@ static __always_inline int gen_alloc_enter(size_t size)
 
     return 0;
 }
+
+static __always_inline int gen_alloc_exit2(void *ctx, u64 address)
+{
+    const pid_t pid = bpf_get_current_pid_tgid() >> 32;
+    struct alloc_info info = {};
+
+    const u64 *size = bpf_map_lookup_and_delete_elem(&sizes, &pid);
+    if (!size)
+        return 0;
+
+    info.size = *size;
+
+    if (address != 0)
+    {
+        info.timestamp_ns = bpf_ktime_get_ns();
+        info.stack_id = bpf_get_stackid(ctx, &stack_traces, stack_flags);
+        bpf_map_update_elem(&allocs, &address, &info, BPF_ANY);
+        update_statistics_add(info.stack_id, info.size);
+    }
+
+    if (trace_all)
+        bpf_printk("alloc exited, size = %lu, result = %lx\n",
+                   info.size, address);
+
+    return 0;
+}
+
+static __always_inline int gen_alloc_exit(struct pt_regs *ctx)
+{
+    return gen_alloc_exit2(ctx, PT_REGS_RC(ctx));
+}
+
+static __always_inline int gen_free_enter(const void *address)
+{
+    const u64 addr = (u64)address;
+
+    const struct alloc_info *info = bpf_map_lookup_and_delete_elem(&allocs, &addr);
+    if (!info)
+        return 0;
+
+    update_statistics_del(info->stack_id, info->size);
+
+    if (trace_all)
+        bpf_printk("Free entered, address = %lx, size = %lu\n",
+                   address, info->size);
+
+    return 0;
+}
