@@ -177,3 +177,69 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static void print_map(struct ksyms *ksyms, struct syms_cache *syms_cache,
+		      void *ctx)
+{
+	struct key_t lookup_key = {}, next_key;
+	const struct ksym *ksym;
+	const struct syms *syms;
+	const struct sym *sym;
+	int err;
+	unsigned long *ip;
+	struct cap_event val;
+	int ifd = ((struct context *)ctx)->ifd;
+	int sfd = ((struct context *)ctx)->sfd;
+	struct argument *argument = ((struct context *)ctx)->argument;
+
+	ip = calloc(argument->perf_max_stack_depth, sizeof(*ip));
+	if (!ip) {
+		warning("Failed to alloc ip\n");
+		return;
+	}
+
+	while (!bpf_map_get_next_key(ifd, &lookup_key, &next_key)) {
+		err = bpf_map_lookup_elem(ifd, &next_key, &val);
+		if (err < 0) {
+			warning("Failed to lookup info: %d\n", err);
+			goto cleanup;
+		}
+		lookup_key = next_key;
+
+		if (argument->kernel_stack) {
+			if (bpf_map_lookup_elem(sfd, &next_key.kernel_stack_id, ip))
+				warning("    [Missed Kernel Stack]\n");
+			for (int i = 0; i < argument->perf_max_stack_depth && ip[i]; i++) {
+				ksym = ksyms__map_addr(ksyms, ip[i]);
+				printf("    %s\n", ksym ? ksym->name : "Unknown");
+			}
+		}
+
+		if (argument->user_stack) {
+			if (next_key.user_stack_id == -1)
+				goto skip_ustack;
+
+			if (bpf_map_lookup_elem(sfd, &next_key.user_stack_id, ip)) {
+				warning("    [Missed User Stack]\n");
+				continue;
+			}
+
+			syms = syms_cache__get_syms(syms_cache, next_key.tgid);
+			if (!syms) {
+				warning("Failed to get syms\n");
+				goto skip_ustack;
+			}
+
+			for (int i = 0; i < argument->perf_max_stack_depth && ip[i]; i++) {
+				sym = syms__map_addr(syms, ip[i]);
+				printf("    %s\n", sym ? sym->name : "Unknown");
+			}
+		}
+
+skip_ustack:
+		printf("    %-16s %s (%d)\n", "-", val.task, next_key.pid);
+	}
+
+cleanup:
+	free(ip);
+}
