@@ -46,3 +46,33 @@ int grow_vector(struct vector *vector)
 
 	return 0;
 }
+
+void free_vector(struct vector vector)
+{
+	for (size_t i = 0; i < vector.nr; i++) {
+		if (vector.elems[i] != NULL)
+			free(vector.elems[i]);
+	}
+
+	free(vector.elems);
+}
+
+struct vector disks = {};
+
+static volatile sig_atomic_t exiting;
+
+static struct env {
+	bool	clear_screen;
+	int	output_rows;
+	int	sort_by;
+	int	interval;
+	int	count;
+	bool	verbose;
+} env = {
+	.clear_screen	= true,
+	.output_rows	= 20,
+	.sort_by	= ALL,
+	.interval	= 1,
+	.count		= 99999999,
+	.verbose	= false,
+};
