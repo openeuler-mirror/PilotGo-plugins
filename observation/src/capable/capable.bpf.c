@@ -97,3 +97,73 @@ int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred,
 
 	return 0;
 }
+
+SEC("kretprobe/cap_capable")
+int BPF_KRETPROBE(kretprobe__cap_capable_exit)
+{
+	__u64 pid_tgid;
+	struct args_t *argsp;
+	struct key_t i_key;
+	struct bpf_pidns_info nsdata;
+
+	if (bpf_get_ns_current_pid_tgid(myinfo.dev, myinfo.ino, &nsdata,
+					sizeof(struct bpf_pidns_info)))
+		return 0;
+
+	pid_tgid = (__u64)nsdata.tgid << 32 | nsdata.pid;
+	argsp = bpf_map_lookup_elem(&start, &pid_tgid);
+	if (!argsp)
+		return 0;
+
+	bpf_map_delete_elem(&start, &pid_tgid);
+
+	struct cap_event event = {};
+	event.pid = pid_tgid >> 32;
+	event.tgid = pid_tgid;
+	event.cap = argsp->cap;
+	event.uid = bpf_get_current_uid_gid();
+	bpf_get_current_comm(&event.task, sizeof(event.task));
+	event.ret = PT_REGS_RC(ctx);
+
+	if (LINUX_KERNEL_VERSION >= KERNEL_VERSION(5, 1, 0)) {
+		/* @opts: bitmask of options defined in include/linux/security.h */
+		event.audit = (argsp->cap_out & 0b10) == 0;
+		event.insetid = (argsp->cap_out & 0b100) != 0;
+	} else {
+		event.audit = argsp->cap_out;
+		event.insetid = -1;
+	}
+
+	if (unique_type) {
+		struct unique_key key = { .cap = argsp->cap };
+
+		if (unique_type == UNQ_CGROUP)
+			key.cgroupid = bpf_get_current_cgroup_id();
+		else
+			key.tgid = pid_tgid;
+
+		if (bpf_map_lookup_elem(&seen, &key))
+			return 0;
+
+		u64 zero = 0;
+		bpf_map_update_elem(&seen, &key, &zero, BPF_ANY);
+	}
+
+	if (kernel_stack || user_stack) {
+		i_key.pid = pid_tgid >> 32;
+		i_key.tgid = pid_tgid;
+
+		i_key.kernel_stack_id = i_key.user_stack_id = -1;
+		if (user_stack)
+			i_key.user_stack_id = bpf_get_stackid(ctx, &stackmap, BPF_F_USER_STACK);
+		if (kernel_stack)
+			i_key.kernel_stack_id = bpf_get_stackid(ctx, &stackmap, 0);
+
+		bpf_map_update_elem(&info, &i_key, &event, BPF_NOEXIST);
+	}
+	bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+
+	return 0;
+}
+
+char LICENSE[] SEC("license") = "GPL";
