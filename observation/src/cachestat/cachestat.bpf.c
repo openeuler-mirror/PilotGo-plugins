@@ -29,3 +29,17 @@ int BPF_PROG(fentry_mark_buffer_dirty)
 	__sync_fetch_and_add(&mbd, 1);
 	return 0;
 }
+
+SEC("tracepoint/writeback/writeback_dirty_folio")
+int tracepoint_writeback_dirty_folio(struct trace_event_raw_sys_enter *ctx)
+{
+	__sync_fetch_and_add(&misses, -1);
+	return 0;
+}
+
+SEC("tracepoint/writeback/writeback_dirty_page")
+int tracepoint_writeback_dirty_page(struct trace_event_raw_sys_enter *ctx)
+{
+	__sync_fetch_and_add(&misses, -1);
+	return 0;
+}
