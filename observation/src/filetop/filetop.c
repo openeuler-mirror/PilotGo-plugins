@@ -50,3 +50,77 @@ static const struct argp_option opts[] = {
 	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
 	{}
 };
+
+static error_t parse_arg(int key, char *arg, struct argp_state *state)
+{
+	struct argument *argument = state->input;
+	static int pos_args;
+	int max_rows = OUTPUT_ROWS_LIMIT;
+
+	switch (key) {
+	case 'p':
+		argument->target_pid = argp_parse_pid(key, arg, state);
+		break;
+	case 'C':
+		argument->clear_screen = false;
+		break;
+	case 'a':
+		argument->regular_file_only = false;
+		break;
+	case 's':
+		if (!strcmp(arg, "all"))
+			sort_by = ALL;
+		else if (!strcmp(arg, "reads"))
+			sort_by = READS;
+		else if (!strcmp(arg, "writes"))
+			sort_by = WRITES;
+		else if (!strcmp(arg, "rbytes"))
+			sort_by = RBYTES;
+		else if (!strcmp(arg, "wbytes"))
+			sort_by = WBYTES;
+		else {
+			warning("Invalid sort method: %s\n", arg);
+			argp_usage(state);
+		}
+		break;
+	case 'r':
+		errno = 0;
+		argument->output_rows = strtol(arg, NULL, 10);
+		if (errno || argument->output_rows <= 0) {
+			warning("Invalud rows: %s\n", arg);
+			argp_usage(state);
+		}
+		argument->output_rows = min(max_rows, argument->output_rows);
+		break;
+	case 'v':
+		verbose = true;
+		break;
+	case 'h':
+		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
+		break;
+	case ARGP_KEY_ARG:
+		errno = 0;
+		if (pos_args == 0) {
+			argument->interval = strtol(arg, NULL, 10);
+			if (errno || argument->interval <= 0) {
+				warning("Invalid interval\n");
+				argp_usage(state);
+			}
+		} else if (pos_args == 1) {
+			argument->count = strtol(arg, NULL, 10);
+			if (errno || argument->count <= 0) {
+				warning("Invalid count\n");
+				argp_usage(state);
+			}
+		} else {
+			warning("Unrecognized positional argument: %s\n", arg);
+			argp_usage(state);
+		}
+		pos_args++;
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+
+	return 0;
+}
