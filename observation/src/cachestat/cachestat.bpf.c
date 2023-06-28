@@ -43,3 +43,17 @@ int tracepoint_writeback_dirty_page(struct trace_event_raw_sys_enter *ctx)
 	__sync_fetch_and_add(&misses, -1);
 	return 0;
 }
+
+SEC("kprobe/add_to_page_cache_lru")
+int BPF_KPROBE(kprobe_add_to_page_cache_lru)
+{
+	__sync_fetch_and_add(&misses, 1);
+	return 0;
+}
+
+SEC("kprobe/filemap_add_folio")
+int BPF_KPROBE(kprobe_filemap_add_folio)
+{
+	__sync_fetch_and_add(&misses, 1);
+	return 0;
+}
