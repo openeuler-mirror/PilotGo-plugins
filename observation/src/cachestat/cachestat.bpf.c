@@ -57,3 +57,20 @@ int BPF_KPROBE(kprobe_filemap_add_folio)
 	__sync_fetch_and_add(&misses, 1);
 	return 0;
 }
+
+SEC("kprobe/mark_page_accessed")
+int BPF_KPROBE(kprobe_mark_page_accessed)
+{
+	__sync_fetch_and_add(&total, 1);
+	return 0;
+}
+
+SEC("kprobe/mark_buffer_dirty")
+int BPF_KPROBE(kprobe_mark_buffer_dirty)
+{
+	__sync_fetch_and_add(&total, -1);
+	__sync_fetch_and_add(&mbd, 1);
+	return 0;
+}
+
+char LICENSE[] SEC("license") = "GPL";
