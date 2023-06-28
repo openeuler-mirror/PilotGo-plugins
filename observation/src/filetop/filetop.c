@@ -156,3 +156,60 @@ static int sort_column(const void *obj1, const void *obj2)
 			(s1->reads + s1->writes + s1->read_bytes + s1->write_bytes);
 	}
 }
+
+static int print_stat(struct filetop_bpf *obj, struct argument *argument)
+{
+	FILE *f;
+	int err = 0;
+	struct file_id key, *prev_key = NULL;
+	static struct file_stat values[OUTPUT_ROWS_LIMIT];
+	int fd = bpf_map__fd(obj->maps.entries);
+	int rows = 0;
+
+	f = fopen("/proc/loadavg", "r");
+	if (f) {
+		char ts[32], buf[256] = {};
+
+		strftime_now(ts, sizeof(ts), "%H:%M:%S");
+
+		if (fread(buf, 1, sizeof(buf), f))
+			printf("%8s loadavg: %s\n", ts, buf);
+		fclose(f);
+	}
+
+	printf("%-7s %-16s %-6s %-6s %-7s %-7s %1s %s\n",
+	       "TID", "COMM", "READS", "WRITES", "R_Kb", "W_Kb", "T", "FILE");
+
+	while (!bpf_map_get_next_key(fd, prev_key, &key)) {
+		err = bpf_map_lookup_elem(fd, &key, &values[rows++]);
+		if (err) {
+			warning("bpf_map_lookup_elem failed: %s\n", strerror(errno));
+			return err;
+		}
+		prev_key = &key;
+	}
+
+	qsort(values, rows, sizeof(struct file_stat), sort_column);
+	rows = min(rows, argument->output_rows);
+
+	for (int i = 0; i < rows; i++) {
+		printf("%-7d %-16s %-6lld %-6lld %-7lld %-7lld %c %s\n",
+		       values[i].tid, values[i].comm, values[i].reads, values[i].writes,
+		       values[i].read_bytes / 1024, values[i].write_bytes / 1024,
+		       values[i].type, values[i].filename);
+	}
+
+	printf("\n");
+	prev_key = NULL;
+
+	while (!bpf_map_get_next_key(fd, prev_key, &key)) {
+		err = bpf_map_delete_elem(fd, &key);
+		if (err) {
+			warning("bpf_map_lookup_elem failed: %s\n", strerror(errno));
+			return err;
+		}
+		prev_key = &key;
+	}
+
+	return err;
+}
