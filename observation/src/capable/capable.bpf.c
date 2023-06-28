@@ -66,3 +66,34 @@ struct {
 	__type(key, struct unique_key);
 	__type(value, u64);
 } seen SEC(".maps");
+
+SEC("kprobe/cap_capable")
+int BPF_KPROBE(kprobe__cap_capable_entry, const struct cred *cred,
+	       struct user_namespace *target_ns, int cap, int cap_out)
+{
+	__u64 pid_tgid;
+	struct bpf_pidns_info nsdata;
+
+	if (filter_cg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
+
+
+	if (bpf_get_ns_current_pid_tgid(myinfo.dev, myinfo.ino, &nsdata,
+					sizeof(struct bpf_pidns_info)))
+		return 0;
+
+	pid_tgid = (__u64)nsdata.tgid << 32 | nsdata.pid;
+	if (myinfo.pid_tgid == pid_tgid)
+		return 0;
+
+	if (target_pid != -1 && target_pid != nsdata.tgid)
+		return 0;
+
+	struct args_t args = {};
+	args.cap = cap;
+	args.cap_out = cap_out;
+
+	bpf_map_update_elem(&start, &pid_tgid, &args, BPF_ANY);
+
+	return 0;
+}
