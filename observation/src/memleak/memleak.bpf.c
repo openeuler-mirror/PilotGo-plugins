@@ -158,3 +158,59 @@ static __always_inline int gen_free_enter(const void *address)
 
     return 0;
 }
+
+SEC("uprobe")
+int BPF_KPROBE(malloc_enter, size_t size)
+{
+    return gen_alloc_enter(size);
+}
+
+SEC("uretprobe")
+int BPF_KRETPROBE(malloc_exit)
+{
+    return gen_alloc_exit(ctx);
+}
+
+SEC("uprobe")
+int BPF_KPROBE(free_enter, void *address)
+{
+    return gen_free_enter(address);
+}
+
+SEC("uprobe")
+int BPF_KPROBE(calloc_enter, size_t nmemb, size_t size)
+{
+    return gen_alloc_enter(nmemb * size);
+}
+
+SEC("uretprobe")
+int BPF_KRETPROBE(calloc_exit)
+{
+    return gen_alloc_exit(ctx);
+}
+
+SEC("uprobe")
+int BPF_KPROBE(realloc_enter, void *ptr, size_t size)
+{
+    gen_free_enter(ptr);
+
+    return gen_alloc_enter(size);
+}
+
+SEC("uretprobe")
+int BPF_KRETPROBE(realloc_exit)
+{
+    return gen_alloc_exit(ctx);
+}
+
+SEC("uprobe")
+int BPF_KPROBE(mmap_enter, void *address, size_t size)
+{
+    return gen_alloc_enter(size);
+}
+
+SEC("uretprobe")
+int BPF_KRETPROBE(mmap_exit)
+{
+    return gen_alloc_exit(ctx);
+}
