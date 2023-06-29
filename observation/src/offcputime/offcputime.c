@@ -45,3 +45,29 @@ const char argp_program_doc[] =
     "    offcputime -t 188      # only trace thread 188\n"
     "    offcputime -u          # only trace user threads (no kernel)\n"
     "    offcputime -k          # only trace kernel threads (no user)\n";
+
+#define OPT_PERF_MAX_STACK_DEPTH 1 /* --perf-max-stack-depth */
+#define OPT_STACK_STORAGE_SIZE 2   /* --stack-storage-size */
+#define OPT_STATE 3                /* --state */
+
+static const struct argp_option opts[] = {
+    {"pid", 'p', "PID", 0, "Trace this PID only"},
+    {"tid", 't', "TID", 0, "Trace this TID only"},
+    {"user-threads-only", 'u', NULL, 0,
+     "User threads only (no kernel threads)"},
+    {"kernel-threads-only", 'k', NULL, 0,
+     "Kernel threads only (no user threads)"},
+    {"perf-max-stack-depth", OPT_PERF_MAX_STACK_DEPTH,
+     "PERF-MAX-STACK-DEPTH", 0, "the limit for both kernel and user stack traces (default 127)"},
+    {"stack-storage-size", OPT_STACK_STORAGE_SIZE, "STACK-STORAGE-SIZE", 0,
+     "the number of unique stack traces that can be stored and displayed (default 1024)"},
+    {"min-block-time", 'm', "MIN-BLOCK-TIME", 0,
+     "the amount of time in microseconds over which we store traces (default 1)"},
+    {"max-block-time", 'M', "MAX-BLOCK-TIME", 0,
+     "the amount of time in microseconds under which we store traces (default U64_MAX)"},
+    {"state", OPT_STATE, "STATE", 0,
+     "filter on this thread state bitmask (eg, 2 == TASK_UNINTERRUPTIBLE) see include/linux/sched.h"},
+    {"verbose", 'v', NULL, 0, "Verbose debug output"},
+    {NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help"},
+    {},
+};
