@@ -91,3 +91,27 @@ int BPF_KRETPROBE(file_write_exit)
 {
 	return probe_return(F_WRITE);
 }
+
+SEC("kprobe/dummy_getattr")
+int BPF_KPROBE(getattr_entry)
+{
+	return probe_entry();
+}
+
+SEC("kretprobe/dummy_getattr")
+int BPF_KRETPROBE(getattr_exit)
+{
+	return probe_return(F_GETATTR);
+}
+
+SEC("fentry/dummy_file_read")
+int BPF_PROG(file_read_fentry)
+{
+	return probe_entry();
+}
+
+SEC("fexit/dummy_file_read")
+int BPF_PROG(file_read_fexit)
+{
+	return probe_return(F_READ);
+}
