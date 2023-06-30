@@ -139,3 +139,29 @@ int BPF_PROG(file_open_fexit)
 {
 	return probe_return(F_OPEN);
 }
+
+SEC("fentry/dummy_file_sync")
+int BPF_PROG(file_sync_fentry)
+{
+	return probe_entry();
+}
+
+SEC("fexit/dummy_file_sync")
+int BPF_PROG(file_sync_fexit)
+{
+	return probe_return(F_FSYNC);
+}
+
+SEC("fentry/dummy_getattr")
+int BPF_PROG(getattr_fentry)
+{
+	return probe_entry();
+}
+
+SEC("fexit/dummy_getattr")
+int BPF_PROG(getattr_fexit)
+{
+	return probe_return(F_GETATTR);
+}
+
+char LICENSE[] SEC("license") = "GPL";
