@@ -420,3 +420,33 @@ int memleak__kmem_cache_free(void *ctx)
 
     return gen_free_enter(ptr);
 }
+
+SEC("tracepoint/kmem/mm_page_alloc")
+int memleak__mm_page_alloc(struct trace_event_raw_mm_page_alloc *ctx)
+{
+    gen_alloc_enter(page_size << ctx->order);
+
+    return gen_alloc_exit2(ctx, ctx->pfn);
+}
+
+SEC("tracepoint/kmem/mm_page_free")
+int memleak__mm_page_free(struct trace_event_raw_mm_page_free *ctx)
+{
+    return gen_free_enter((void *)ctx->pfn);
+}
+
+SEC("tracepoint/percpu/percpu_alloc_percpu")
+int memleak__percpu_alloc_percpu(struct trace_event_raw_percpu_alloc_percpu *ctx)
+{
+    gen_alloc_enter(ctx->bytes_alloc);
+
+    return gen_alloc_exit2(ctx, (u64)(ctx->ptr));
+}
+
+SEC("tracepoint/percpu/percpu_free_percpu")
+int memleak__percpu_free_percpu(struct trace_event_raw_percpu_free_percpu *ctx)
+{
+    return gen_free_enter(ctx->ptr);
+}
+
+char LICENSE[] SEC("license") = "GPL";
