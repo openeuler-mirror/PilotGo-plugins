@@ -344,3 +344,109 @@ static int print_stat(struct biotop_bpf *obj)
 
 	return err;
 }
+
+int main(int argc, char *argv[])
+{
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct biotop_bpf *obj;
+	struct ksyms *ksyms;
+	int err;
+
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	obj = biotop_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	parse_disk_stat();
+
+	ksyms = ksyms__load();
+	if (!ksyms) {
+		err = -ENOMEM;
+		warning("Failed to load kallsyms\n");
+		goto cleanup;
+	}
+
+	err = biotop_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	if (ksyms__get_symbol(ksyms, "__blk_account_io_start"))
+		obj->links.blk_account_io_start =
+			bpf_program__attach_kprobe(obj->progs.blk_account_io_start,
+						   false, "__blk_account_io_start");
+	else
+		obj->links.blk_account_io_start =
+			bpf_program__attach_kprobe(obj->progs.blk_account_io_start,
+						   false, "blk_account_io_start");
+
+	if (!obj->links.blk_account_io_start) {
+		warning("Failed to load attach blk_account_io_start\n");
+		goto cleanup;
+	}
+
+	if (ksyms__get_symbol(ksyms, "__blk_account_io_done"))
+		obj->links.blk_account_io_done =
+			bpf_program__attach_kprobe(obj->progs.blk_account_io_done,
+						   false, "__blk_account_io_done");
+	else
+		obj->links.blk_account_io_done =
+			bpf_program__attach_kprobe(obj->progs.blk_account_io_done,
+						   false, "blk_account_io_done");
+
+	if (!obj->links.blk_account_io_done) {
+		warning("Failed to load attach blk_account_io_done");
+		goto cleanup;
+	}
+
+	err = biotop_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF programs: %d\n", err);
+		goto cleanup;
+	}
+
+	if (signal(SIGINT, sig_handler) == SIG_ERR) {
+		warning("Can't set signal handler: %s\n", strerror(errno));
+		err =  1;
+		goto cleanup;
+	}
+
+	while (1) {
+		sleep(env.interval);
+
+		if (env.clear_screen) {
+			err = system("clear");
+			if (err)
+				goto cleanup;
+		}
+
+		err = print_stat(obj);
+		if (err)
+			goto cleanup;
+
+		if (exiting || !env.count--)
+			goto cleanup;
+	}
+
+cleanup:
+	ksyms__free(ksyms);
+	free_vector(disks);
+	biotop_bpf__destroy(obj);
+
+	return err != 0;
+}
