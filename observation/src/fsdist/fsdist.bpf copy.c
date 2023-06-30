@@ -173,3 +173,38 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 		return 0;
 	return vfprintf(stderr, format, args);
 }
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
+static int print_hists(struct fsdist_bpf__bss *bss)
+{
+	const char *units = timestamp_in_ms ? "msecs" : "usecs";
+
+	for (enum fs_file_op op = F_READ; op < F_MAX_OP; op++) {
+		struct hist hist = bss->hists[op];
+
+		bss->hists[op] = zero;
+		if (!memcmp(&zero, &hist, sizeof(hist)))
+			continue;
+		printf("operation = '%s'\n", file_op_names[op]);
+		print_log2_hist(hist.slots, MAX_SLOTS, units);
+		printf("\n");
+	}
+	return 0;
+}
+
+static bool check_fentry()
+{
+	for (int i = 0; i < F_MAX_OP; i++) {
+		const char *fn_name, *module;
+
+		fn_name = fs_configs[fs_type].op_funcs[i];
+		module = fs_configs[fs_type].fs;
+		if (fn_name && !fentry_can_attach(fn_name, module))
+			return false;
+	}
+	return true;
+}
