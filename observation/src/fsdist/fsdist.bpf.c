@@ -67,3 +67,27 @@ cleanup:
 	bpf_map_delete_elem(&starts, &tid);
 	return 0;
 }
+
+SEC("kprobe/dummy_file_read")
+int BPF_KPROBE(file_read_entry)
+{
+	return probe_entry();
+}
+
+SEC("kretprobe/dummy_file_read")
+int BPF_KRETPROBE(file_read_exit)
+{
+	return probe_return(F_READ);
+}
+
+SEC("kprobe/dummy_file_write")
+int BPF_KPROBE(file_write_entry)
+{
+	return probe_entry();
+}
+
+SEC("kretprobe/dummy_file_write")
+int BPF_KRETPROBE(file_write_exit)
+{
+	return probe_return(F_WRITE);
+}
