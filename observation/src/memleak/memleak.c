@@ -51,3 +51,55 @@ static struct env
     .page_size = -1,
     .kernel_trace = true,
 };
+
+struct allocation_node
+{
+    uint64_t address;
+    size_t size;
+    struct allocation_node *next;
+};
+
+struct allocation
+{
+    uint64_t stack_id;
+    size_t size;
+    size_t count;
+    struct allocation_node *allocations;
+};
+
+#define __ATTACH_UPROBE(skel, sym_name, prog_name, is_retprobe)  \
+    do                                                           \
+    {                                                            \
+        LIBBPF_OPTS(bpf_uprobe_opts, uprobe_opts,                \
+                    .func_name = #sym_name,                      \
+                    .retprobe = is_retprobe);                    \
+        skel->links.prog_name = bpf_program__attach_uprobe_opts( \
+            skel->progs.prog_name,                               \
+            env.pid,                                             \
+            env.object,                                          \
+            0,                                                   \
+            &uprobe_opts);                                       \
+    } while (false);
+
+#define __CHECK_PROGRAM(skel, prog_name)                   \
+    do                                                     \
+    {                                                      \
+        if (!skel->links.prog_name)                        \
+        {                                                  \
+            perror("No program attached for " #prog_name); \
+            return -errno;                                 \
+        }                                                  \
+    } while (false);
+
+#define __ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name, is_retprobe) \
+    do                                                                  \
+    {                                                                   \
+        __ATTACH_UPROBE(skel, sym_name, prog_name, is_retprobe);        \
+        __CHECK_PROGRAM(skel, prog_name);                               \
+    } while (false);
+
+#define ATTACH_UPROBE(skel, sym_name, prog_name) __ATTACH_UPROBE(skel, sym_name, prog_name, false)
+#define ATTACH_URETPROBE(skel, sym_name, prog_name) __ATTACH_UPROBE(skel, sym_name, prog_name, true)
+
+#define ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name) __ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name, false)
+#define ATTACH_URETPROBE_CHECKED(skel, sym_name, prog_name) __ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name, true)
