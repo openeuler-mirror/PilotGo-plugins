@@ -34,3 +34,36 @@ static int probe_entry()
 	bpf_map_update_elem(&starts, &tid, &ts, BPF_ANY);
 	return 0;
 }
+
+static int probe_return(enum fs_file_op op)
+{
+	__u32 tid = (__u32)bpf_get_current_pid_tgid();
+	__u64 ts = bpf_ktime_get_ns();
+	__u64 *tsp, slot;
+	__s64 delta;
+
+	tsp = bpf_map_lookup_elem(&starts, &tid);
+	if (!tsp)
+		return 0;
+
+	if (op >= F_MAX_OP)
+		goto cleanup;
+
+	delta = (__s64)(ts - *tsp);
+	if (delta < 0)
+		goto cleanup;
+
+	if (in_ms)
+		delta /= 1000000;
+	else
+		delta /= 1000;
+
+	slot = log2l(delta);
+	if (slot >= MAX_SLOTS)
+		slot = MAX_SLOTS - 1;
+	__sync_fetch_and_add(&hists[op].slots[slot], 1);
+
+cleanup:
+	bpf_map_delete_elem(&starts, &tid);
+	return 0;
+}
