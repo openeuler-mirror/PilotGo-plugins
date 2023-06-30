@@ -197,3 +197,41 @@ static int sort_column(const void *obj1, const void *obj2)
 		return (s2->io + s2->bytes + s2->us)
 			- (s1->io + s1->bytes + s1->us);
 }
+
+static void parse_disk_stat(void)
+{
+	FILE *fp;
+	char *line;
+	size_t zero = 0;
+
+	fp = fopen("/proc/diskstats", "r");
+	if (!fp)
+		return;
+
+	while (getline(&line, &zero, fp) != -1) {
+		struct disk disk;
+
+		if (sscanf(line, "%d %d %s", &disk.major, &disk.minor, disk.name) != 3)
+			continue;
+
+		if (grow_vector(&disks) == -1)
+			goto err;
+
+		disks.elems[disks.nr] = malloc(sizeof(disk));
+		if (!disks.elems[disks.nr])
+			goto err;
+
+		memcpy(disks.elems[disks.nr], &disk, sizeof(disk));
+
+		disks.nr++;
+	}
+
+	free(line);
+	fclose(fp);
+
+	return;
+
+err:
+	warning("Realloc or malloc failed\n");
+	free_vector(disks);
+}
