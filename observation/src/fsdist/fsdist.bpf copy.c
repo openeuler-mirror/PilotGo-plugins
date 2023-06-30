@@ -47,3 +47,23 @@ static struct fs_config {
 		[F_GETATTR] = NULL, /* not supported */
 	}},
 };
+
+static char *file_op_names[] = {
+	[F_READ] = "read",
+	[F_WRITE] = "write",
+	[F_OPEN] = "open",
+	[F_FSYNC] = "fsync",
+	[F_GETATTR] = "getattr",
+};
+
+static struct hist zero;
+static volatile sig_atomic_t exiting;
+
+/* options */
+static enum fs_type fs_type = NONE;
+static bool emit_timestamp = false;
+static bool timestamp_in_ms = false;
+static pid_t target_pid = 0;
+static int interval = 99999999;
+static int count = 99999999;
+static bool verbose = false;
