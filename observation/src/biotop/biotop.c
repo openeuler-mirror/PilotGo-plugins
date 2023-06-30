@@ -251,3 +251,96 @@ static char *search_disk_name(int major, int minor)
 
 	return "";
 }
+
+static int print_stat(struct biotop_bpf *obj)
+{
+	FILE *fp;
+	struct info_t *prev_key = NULL;
+	static struct data_t datas[OUTPUT_ROWS_LIMIT];
+	int err = 0, rows = 0;
+	int fd = bpf_map__fd(obj->maps.counts);
+
+	fp = fopen("/proc/loadavg", "r");
+	if (fp) {
+		char ts[16], buf[256] = {};
+		int n;
+
+		strftime_now(ts, sizeof(ts), "%H:%M:%S");
+
+		n = fread(buf, 1, sizeof(buf), fp);
+		if (n)
+			printf("%8s loadavg: %s\n", ts, buf);
+		fclose(fp);
+	}
+
+	printf("%-7s %-16s %1s %-3s %-3s %-8s %5s %7s %6s\n",
+	       "PID", "COMM", "D", "MAJ", "MIN", "DISK", "I/O", "Kbytes", "AVGms");
+
+	while (1) {
+		err = bpf_map_get_next_key(fd, prev_key, &datas[rows].key);
+		if (err) {
+			if (errno == ENOENT) {
+				err = 0;
+				break;
+			}
+			warning("bpf_map_get_next_key failed: %s\n", strerror(errno));
+			return err;
+		}
+		prev_key = &datas[rows].key;
+
+		err = bpf_map_lookup_elem(fd, &datas[rows].key, &datas[rows].value);
+		if (err) {
+			warning("bpf_map_lookup_elem failed: %s\n", strerror(errno));
+			return err;
+		}
+
+		rows++;
+	}
+
+	qsort(datas, rows, sizeof(struct data_t), sort_column);
+	rows = rows < env.output_rows ? rows : env.output_rows;
+
+	for (int i = 0; i < rows; i++) {
+		int major, minor;
+		struct info_t *key = &datas[i].key;
+		struct val_t *value = &datas[i].value;
+		float avg_ms = 0;
+
+		/* To avoid floating point exception. */
+		if (value->io)
+			avg_ms = ((float)value->us) / 1000 / value->io;
+
+		major = key->major;
+		minor = key->minor;
+
+		printf("%-7d %-16s %1s %-3d %-3d %-8s %5d %7lld %6.2f\n",
+		       key->pid, key->name, key->rwflag ? "W" : "R",
+		       major, minor, search_disk_name(major, minor),
+		       value->io, value->bytes / 1024, avg_ms);
+	}
+
+	printf("\n");
+	prev_key = NULL;
+
+	while (1) {
+		struct info_t key;
+
+		err = bpf_map_get_next_key(fd, prev_key, &key);
+		if (err) {
+			if (errno == ENOENT) {
+				err = 0;
+				break;
+			}
+			warning("bpf_map_get_next_key failed: %s\n", strerror(errno));
+			return err;
+		}
+		err = bpf_map_delete_elem(fd, &key);
+		if (err) {
+			warning("bpf_map_delete_elem failed: %s\n", strerror(errno));
+			return err;
+		}
+		prev_key = &key;
+	}
+
+	return err;
+}
