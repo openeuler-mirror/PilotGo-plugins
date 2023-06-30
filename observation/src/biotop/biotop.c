@@ -235,3 +235,19 @@ err:
 	warning("Realloc or malloc failed\n");
 	free_vector(disks);
 }
+
+static char *search_disk_name(int major, int minor)
+{
+	for (size_t i = 0; i < disks.nr; i++) {
+		struct disk *diskp;
+
+		if (!disks.elems[i])
+			continue;
+
+		diskp = (struct disk *)disks.elems[i];
+		if (diskp->major == major && diskp->minor == minor)
+			return diskp->name;
+	}
+
+	return "";
+}
