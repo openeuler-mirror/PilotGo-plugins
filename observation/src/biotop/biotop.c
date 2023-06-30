@@ -168,3 +168,32 @@ static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
 		return 0;
 	return vfprintf(stderr, format, args);
 }
+
+static void sig_handler(int sig)
+{
+	exiting = 1;
+}
+
+struct data_t {
+	struct info_t key;
+	struct val_t value;
+};
+
+static int sort_column(const void *obj1, const void *obj2)
+{
+	struct data_t *d1 = (struct data_t *)obj1;
+	struct data_t *d2 = (struct data_t *)obj2;
+
+	struct val_t *s1 = &d1->value;
+	struct val_t *s2 = &d2->value;
+
+	if (env.sort_by == IO)
+		return s2->io - s1->io;
+	else if (env.sort_by == BYTES)
+		return s2->bytes - s1->bytes;
+	else if (env.sort_by == TIME)
+		return s2->us - s1->us;
+	else
+		return (s2->io + s2->bytes + s2->us)
+			- (s1->io + s1->bytes + s1->us);
+}
