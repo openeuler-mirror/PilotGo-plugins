@@ -1,108 +1,119 @@
 // SPDX-License-Identifier: (LGPL-2.1 OR BSD-2-Clause)
 #include "commons.h"
-#include "cachestat.skel.h"
+#include "cpufreq.h"
+#include "cpufreq.skel.h"
 #include "trace_helpers.h"
+#include <linux/perf_event.h>
+#include <sys/syscall.h>
 
-struct argument {
-	time_t	interval;
-	int	times;
-	bool	timestamp;
-};
-
-static volatile sig_atomic_t exiting;
-static volatile bool verbose = false;
-
-const char *argp_program_version = "cachestat 0.1";
-const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
-const char argp_program_doc[] =
-"Count cache kernel function calls.\n"
-"\n"
-"USAGE: cachestat [--help] [-T] [interval] [count]\n"
-"\n"
-"EXAMPLES:\n"
-"    cachestat          # shows hits and misses to the file system page cache\n"
-"    cachestat -T       # include timestamps\n"
-"    cachestat 1 10     # print 1 second summaries, 10 times\n";
-
-static const struct argp_option opts[] = {
-	{ "timestamp", 'T', NULL, 0, "Include timestamp" },
-	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
-	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
-	{}
-};
-
-static error_t parse_arg(int key, char *arg, struct argp_state *state)
+int main(int argc, char *argv[])
 {
-	static int pos_args;
-	struct argument *argument = state->input;
+	static const struct argp argp = {
+		.parser = parse_arg,
+		.options = opts,
+		.doc = argp_program_doc,
+	};
+	struct bpf_link *links[MAX_CPU_NR] = {};
+	struct cpufreq_bpf *obj;
+	int err, cgfd = -1;
 
-	switch (key) {
-	case 'h':
-		argp_state_help(state, stderr, ARGP_HELP_STD_HELP);
-		break;
-	case 'v':
-		verbose = true;
-		break;
-	case 'T':
-		argument->timestamp = true;
-		break;
-	case ARGP_KEY_ARG:
-		errno = 0;
-		if (pos_args == 0) {
-			argument->interval = strtol(arg, NULL, 10);
-			if (errno || argument->interval <= 0) {
-				warning("Invalid interval\n");
-				argp_usage(state);
-			}
-		} else if (pos_args == 1) {
-			argument->times = strtol(arg, NULL, 10);
-			if (errno || argument->times <= 0) {
-				warning("Invalid times\n");
-				argp_usage(state);
-			}
-		} else {
-			warning("Unrecognized positional argument: %s\n", arg);
-			argp_usage(state);
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (!bpf_is_root())
+		return 1;
+
+	libbpf_set_print(libbpf_print_fn);
+
+	nr_cpus = libbpf_num_possible_cpus();
+	if (nr_cpus < 0) {
+		warning("Failed to get # of possible cpus: '%s'!\n",
+			strerror(-nr_cpus));
+		return 1;
+	}
+
+	if (nr_cpus > MAX_CPU_NR) {
+		warning("the number of cpu cores is too big, please "
+			"increase MAX_CPU_NR's value and recompile");
+		return 1;
+	}
+
+	obj = cpufreq_bpf__open();
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	if (probe_tp_btf("cpu_frequency"))
+		bpf_program__set_autoload(obj->progs.cpu_frequency_raw, false);
+	else
+		bpf_program__set_autoload(obj->progs.cpu_frequency, false);
+
+	err = cpufreq_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object\n");
+		goto cleanup;
+	}
+
+	if (!obj->bss) {
+		warning("Memory-mapping BPF maps is supported starting from Linux 5.7, please upgrade.\n");
+		goto cleanup;
+	}
+
+	err = init_freqs_mhz(obj->bss->freqs_mhz, nr_cpus);
+	if (err) {
+		warning("Failed to init freqs\n");
+		goto cleanup;
+	}
+
+	obj->bss->filter_memcg = env.cg;
+
+	/* update cgroup path fd to map */
+	if (env.cg) {
+		int idx = 0;
+		int cg_map_fd = bpf_map__fd(obj->maps.cgroup_map);
+
+		cgfd = open(env.cgroupspath, O_RDONLY);
+		if (cgfd < 0) {
+			warning("Failed opening Cgroup path: %s", env.cgroupspath);
+			goto cleanup;
 		}
-		pos_args++;
-		break;
-	default:
-		return ARGP_ERR_UNKNOWN;
+		if (bpf_map_update_elem(cg_map_fd, &idx, &cgfd, BPF_ANY)) {
+			warning("Failed adding target cgroup to map");
+			goto cleanup;
+		}
 	}
 
-	return 0;
-}
+	err = open_and_attach_perf_event(env.freq, obj->progs.do_sample, links);
+	if (err)
+		goto cleanup;
 
-static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
-			   va_list args)
-{
-	if (level == LIBBPF_DEBUG && !verbose)
-		return 0;
-	return vfprintf(stderr, format, args);
-}
-
-static void sig_handler(int sig)
-{
-	exiting = 1;
-}
-
-static int get_meminfo(__u64 *buffers, __u64 *cached)
-{
-	FILE *f;
-
-	f = fopen("/proc/meminfo", "r");
-	if (!f)
-		return -1;
-	if (fscanf(f,
-		   "MemTotal: %*u kB\n"
-		   "MemFree: %*u kB\n"
-		   "MemAvailable: %*u kB\n"
-		   "Buffers: %llu kB\n"
-		   "Cached: %llu kB\n",
-		   buffers, cached) != 2) {
-		fclose(f);
-		return -1;
+	err = cpufreq_bpf__attach(obj);
+	if (err) {
+		warning("Failed to attach BPF programs\n");
+		goto cleanup;
 	}
-	fclose(f);
-	return 0;
+
+	printf("Sampling CPU freq system-wide & by process. Ctrl-C to end.\n");
+
+	signal(SIGINT, sig_handler);
+
+	/*
+	 * we'll get sleep interrupted when someone process Ctrl-C (which will
+	 * be "handled" with noop by sig_handler).
+	 */
+	sleep(env.duration);
+	printf("\n");
+
+	print_linear_hists(obj->maps.hists, obj->bss);
+
+cleanup:
+	for (int i = 0; i < nr_cpus; i++)
+		bpf_link__destroy(links[i]);
+	cpufreq_bpf__destroy(obj);
+	if (cgfd > 0)
+		close(cgfd);
+
+	return err != 0;
 }
