@@ -298,3 +298,108 @@ static void print_map(struct ksyms *ksyms, struct syms_cache *syms_cache,
 cleanup:
     free(ip);
 }
+
+int main(int argc, char *argv[])
+{
+    static const struct argp argp = {
+        .options = opts,
+        .parser = parse_arg,
+        .doc = argp_program_doc,
+    };
+
+    struct syms_cache *syms_cache = NULL;
+    struct ksyms *ksyms = NULL;
+    struct offcputime_bpf *bpf_obj;
+    int err;
+
+    err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+    if (err)
+        return err;
+
+    if (!bpf_is_root())
+        return 1;
+
+    if (env.user_threads_only && env.kernel_threads_only)
+    {
+        warning("user_threads_only and kernel_threads_only cann't be used together.\n");
+        return 1;
+    }
+
+    if (env.min_block_time >= env.max_block_time)
+    {
+        warning("min_block_time should be smaller than max_block_time.\n");
+        return 1;
+    }
+
+    libbpf_set_print(libbpf_print_fn);
+
+    bpf_obj = offcputime_bpf__open();
+    if (!bpf_obj)
+    {
+        warning("Failed to open BPF object\n");
+        return 1;
+    }
+
+    /* Init global data (filtering options) */
+    bpf_obj->rodata->target_tgid = env.pid;
+    bpf_obj->rodata->target_pid = env.tid;
+    bpf_obj->rodata->user_threads_only = env.user_threads_only;
+    bpf_obj->rodata->kernel_threads_only = env.kernel_threads_only;
+    bpf_obj->rodata->state = env.state;
+    bpf_obj->rodata->min_block_ns = env.min_block_time;
+    bpf_obj->rodata->max_block_ns = env.max_block_time;
+
+    bpf_map__set_value_size(bpf_obj->maps.stackmap,
+                            env.perf_max_stack_depth * sizeof(unsigned long));
+    bpf_map__set_max_entries(bpf_obj->maps.stackmap, env.stack_storage_size);
+
+    if (probe_tp_btf("sched_switch"))
+        bpf_program__set_autoload(bpf_obj->progs.sched_switch_raw, false);
+    else
+        bpf_program__set_autoload(bpf_obj->progs.sched_switch_btf, false);
+
+    err = offcputime_bpf__load(bpf_obj);
+    if (err)
+    {
+        warning("Failed to load BPF object\n");
+        return 1;
+    }
+
+    ksyms = ksyms__load();
+    if (!ksyms)
+    {
+        warning("Failed to load kallsyms\n");
+        goto cleanup;
+    }
+
+    syms_cache = syms_cache__new(0);
+    if (!syms_cache)
+    {
+        warning("Failed to create syms_cache\n");
+        goto cleanup;
+    }
+
+    err = offcputime_bpf__attach(bpf_obj);
+    if (err)
+    {
+        warning("Failed to attach BPF program\n");
+        goto cleanup;
+    }
+
+    signal(SIGINT, sig_handler);
+
+    /*
+     * We'll get sleep interrupted when someone presses Ctrl-C (which will
+     * be "handled" with noop by sig_handler).
+     */
+    sleep(env.duration);
+
+    print_map(ksyms, syms_cache, bpf_obj);
+
+cleanup:
+    offcputime_bpf__destroy(bpf_obj);
+    syms_cache__free(syms_cache);
+    ksyms__free(ksyms);
+
+    return err != 0;
+}
