@@ -337,3 +337,49 @@ int memleak__kmalloc_node(void *ctx)
 
     return gen_alloc_exit2(ctx, (u64)ptr);
 }
+
+SEC("tracepoint/kmem/kfree")
+int memleak__kfree(void *ctx)
+{
+    const void *ptr;
+
+    if (has_kfree())
+    {
+        struct trace_event_raw_kfree___x *args = ctx;
+        ptr = BPF_CORE_READ(args, ptr);
+    }
+    else
+    {
+        struct trace_event_raw_kmem_free___x *args = ctx;
+        ptr = BPF_CORE_READ(args, ptr);
+    }
+
+    return gen_free_enter(ptr);
+}
+
+SEC("tracepoint/kmem/kmem_cache_alloc")
+int memleak__kmem_cache_alloc(void *ctx)
+{
+    const void *ptr;
+    size_t bytes_alloc;
+
+    if (has_kmem_cache_alloc())
+    {
+        struct trace_event_raw_kmem_cache_alloc___x *args = ctx;
+        ptr = BPF_CORE_READ(args, ptr);
+        bytes_alloc = BPF_CORE_READ(args, bytes_alloc);
+    }
+    else
+    {
+        struct trace_event_raw_kmem_alloc___x *args = ctx;
+        ptr = BPF_CORE_READ(args, ptr);
+        bytes_alloc = BPF_CORE_READ(args, bytes_alloc);
+    }
+
+    if (wa_missing_free)
+        gen_free_enter(ptr);
+
+    gen_alloc_enter(bytes_alloc);
+
+    return gen_alloc_exit2(ctx, (u64)ptr);
+}
