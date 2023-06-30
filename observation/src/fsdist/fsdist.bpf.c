@@ -115,3 +115,27 @@ int BPF_PROG(file_read_fexit)
 {
 	return probe_return(F_READ);
 }
+
+SEC("fentry/dummy_file_write")
+int BPF_PROG(file_write_fentry)
+{
+	return probe_entry();
+}
+
+SEC("fexit/dummy_file_write")
+int BPF_PROG(file_write_fexit)
+{
+	return probe_return(F_WRITE);
+}
+
+SEC("fentry/dummy_file_open")
+int BPF_PROG(file_open_fentry)
+{
+	return probe_entry();
+}
+
+SEC("fexit/dummy_file_open")
+int BPF_PROG(file_open_fexit)
+{
+	return probe_return(F_OPEN);
+}
