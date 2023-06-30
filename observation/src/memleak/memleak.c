@@ -103,3 +103,45 @@ struct allocation
 
 #define ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name) __ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name, false)
 #define ATTACH_URETPROBE_CHECKED(skel, sym_name, prog_name) __ATTACH_UPROBE_CHECKED(skel, sym_name, prog_name, true)
+
+static volatile sig_atomic_t exiting;
+static volatile bool child_exited = false;
+
+static void sig_handler(int signo)
+{
+    if (signo == SIGCHLD)
+        child_exited = 1;
+
+    exiting = 1;
+}
+
+const char *argp_program_version = "memleak 0.1";
+const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+    "Trace outstanding memory allocations\n"
+    "\n"
+    "USAGE: memleak [-h] [-c COMMAND] [-p PID] [-t] [-n] [-a] [-o AGE_MS] [-C] [-F] [-s SAMPLE_RATE] [-T TOP_STACKS] [-z MIN_SIZE] [-Z MAX_SIZE] [-O OBJECT] [-P] [INTERVAL] [INTERVALS]\n"
+    "\n"
+    "EXAMPLES:\n"
+    "./memleak -p $(pidof allocs)\n"
+    "        Trace allocations and display a summary of 'leaked' (outstanding)\n"
+    "        allocations every 5 seconds\n"
+    "./memleak -p $(pidof allocs) -t\n"
+    "        Trace allocations and display each individual allocator function call\n"
+    "./memleak -ap $(pidof allocs) 10\n"
+    "        Trace allocations and display allocated addresses, sizes, and stacks\n"
+    "        every 10 seconds for outstanding allocations\n"
+    "./memleak -c './allocs'\n"
+    "        Run the specified command and trace its allocations\n"
+    "./memleak\n"
+    "        Trace allocations in kernel mode and display a summary of outstanding\n"
+    "        allocations every 5 seconds\n"
+    "./memleak -o 60000\n"
+    "        Trace allocations in kernel mode and display a summary of outstanding\n"
+    "        allocations that are at least one minute (60 seconds) old\n"
+    "./memleak -s 5\n"
+    "        Trace roughly every 5th allocation, to reduce overhead\n"
+    "";
+
+#define OPT_PERF_MAX_STACK_DEPTH 1  /* --perf-max-stack-depth */
+#define OPT_STACK_MAP_MAX_ENTRIES 2 /* --stack-map-max-entries */
