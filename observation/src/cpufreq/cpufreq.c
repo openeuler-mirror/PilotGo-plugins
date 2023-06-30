@@ -6,6 +6,39 @@
 #include <linux/perf_event.h>
 #include <sys/syscall.h>
 
+static struct env {
+	bool verbose;
+	int freq;
+	int duration;
+	char *cgroupspath;
+	bool cg;
+} env = {
+	.duration = -1,
+	.freq = 99,
+};
+
+const char *argp_program_version = "cpufreq 0.1";
+const char *argp_program_bug_address = "Jackie Liu <liuyun01@kylinos.cn>";
+const char argp_program_doc[] =
+"Sampling CPU freq system-wide & by process. Ctrl-C to end.\n"
+"\n"
+"USAGE: cpufreq [--help] [-d DURATION] [-f FREQUENCY] [-c CG]\n"
+"\n"
+"EXAMPLES:\n"
+"    cpufreq         # sample CPU freq at 99HZ (default)\n"
+"    cpufreq -d 5    # sample for 5 seconds only\n"
+"    cpufreq -c CG   # Trace process under cgroupsPath CG\n"
+"    cpufreq -f 199  # sample CPU freq at 199HZ\n";
+
+static const struct argp_option opts[] = {
+	{ "duration", 'd', "DURATION", 0, "Duration to sample in seconds" },
+	{ "frequency", 'f', "FREQUENCY", 0, "Sample with a certain frequency" },
+	{ "cgroup", 'c', "/sys/fs/cgroup/unified", 0, "Trace process in cgroup path" },
+	{ "verbose", 'v', NULL, 0, "Verbose debug output" },
+	{ NULL, 'h', NULL, OPTION_HIDDEN, "Show the full help" },
+	{}
+};
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
