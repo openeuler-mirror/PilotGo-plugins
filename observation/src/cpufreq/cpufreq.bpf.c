@@ -1,31 +1,38 @@
-// SPDX-License-Identifier: GPL-2.0
+// SPDX-License-Identifier: (LGPL-2.1 OR BSD-2-Clause)
 #include "vmlinux.h"
+#include <bpf/bpf_helpers.h>
 #include <bpf/bpf_core_read.h>
 #include <bpf/bpf_tracing.h>
-#include <bpf/bpf_helpers.h>
+#include "cpufreq.h"
+#include "maps.bpf.h"
 
-__s64 total = 0;	/* total cache accesses without counting dirties */
-__s64 misses = 0;	/* total of add to lru because of read misses */
-__u64 mbd = 0;		/* total of mark_buffer_dirty events */
+__u32 freqs_mhz[MAX_CPU_NR] = {};
+static struct hist zero;
+struct hist syswide = {};
+bool filter_memcg = false;
 
-SEC("fentry/add_to_page_cache_lru")
-int BPF_PROG(fentry_add_to_page_cache_lru)
+struct {
+	__uint(type, BPF_MAP_TYPE_CGROUP_ARRAY);
+	__type(key, u32);
+	__type(value, u32);
+	__uint(max_entries, 1);
+} cgroup_map SEC(".maps");
+
+struct {
+	__uint(type, BPF_MAP_TYPE_HASH);
+	__uint(max_entries, MAX_ENTRIES);
+	__type(key, struct hkey);
+	__type(value, struct hist);
+} hists SEC(".maps");
+
+static __always_inline int probe_cpu_frequency(unsigned int state, unsigned int cpu_id)
 {
-	__sync_fetch_and_add(&misses, 1);
-	return 0;
-}
+	if (filter_memcg && !bpf_current_task_under_cgroup(&cgroup_map, 0))
+		return 0;
 
-SEC("fentry/mark_page_accessed")
-int BPF_PROG(fentry_mark_page_accessed)
-{
-	__sync_fetch_and_add(&total, 1);
-	return 0;
-}
+	if (cpu_id >= MAX_CPU_NR)
+		return 0;
 
-SEC("fentry/mark_buffer_dirty")
-int BPF_PROG(fentry_mark_buffer_dirty)
-{
-	__sync_fetch_and_add(&total, -1);
-	__sync_fetch_and_add(&mbd, 1);
+	freqs_mhz[cpu_id] = state / 1000;
 	return 0;
 }
