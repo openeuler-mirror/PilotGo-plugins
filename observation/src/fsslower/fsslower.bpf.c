@@ -52,3 +52,43 @@ static int probe_entry(struct file *fp, loff_t start, loff_t end)
 	bpf_map_update_elem(&starts, &tid, &data, BPF_ANY);
 	return 0;
 }
+
+static int probe_exit(void *ctx, enum fs_file_op op, ssize_t size)
+{
+	__u64 pid_tgid = bpf_get_current_pid_tgid();
+	__u32 pid = pid_tgid >> 32;
+	__u32 tid = pid_tgid;
+	__u64 end_ns, delta_ns;
+	struct data *datap;
+	struct event event = {};
+	struct file *fp;
+	const __u8 *filename;
+
+	if (target_pid && target_pid != pid)
+		return 0;
+
+	datap = bpf_map_lookup_and_delete_elem(&starts, &tid);
+	if (!datap)
+		return 0;
+
+	end_ns = bpf_ktime_get_ns();
+	delta_ns = end_ns - datap->ts;
+	if (delta_ns <= min_lat_ns)
+		return 0;
+
+	event.delta_us = delta_ns / 1000;
+	event.end_ns = end_ns;
+	event.offset = datap->start;
+	if (op != F_FSYNC)
+		event.size = size;
+	else
+		event.size = datap->end - datap->start;
+	event.pid = pid;
+	event.op = op;
+	fp = datap->fp;
+	filename = BPF_CORE_READ(fp, f_path.dentry, d_name.name);
+	bpf_core_read_str(&event.file, sizeof(event.file), filename);
+	bpf_get_current_comm(&event.task, sizeof(event.task));
+	bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, &event, sizeof(event));
+	return 0;
+}
