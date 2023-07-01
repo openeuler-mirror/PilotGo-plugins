@@ -145,3 +145,28 @@ const char argp_program_doc[] =
 
 #define OPT_PERF_MAX_STACK_DEPTH 1  /* --perf-max-stack-depth */
 #define OPT_STACK_MAP_MAX_ENTRIES 2 /* --stack-map-max-entries */
+
+static const struct argp_option opts[] = {
+    {"pid", 'p', "PID", 0, "process ID to trace. If not specified, trace kernel allocs"},
+    {"trace", 't', 0, 0, "print trace message for each alloc/free alloc"},
+    {"show-allocs", 'a', 0, 0, "show allocation addresses and sizes as well as call stacks"},
+    {"older", 'o', "AGE_MS", 0, "prune allocations younger than this age in milliseconds"},
+    {"command", 'c', "COMMAND", 0, "execute and trace the specified command"},
+    {"combined-only", 'C', 0, 0, "show combined allocation statistics only"},
+    {"wa-missing-only", 'F', 0, 0, "workaround to alleviate misjudgments when free is missing"},
+    {"sample-rate", 's', "SAMPLE_RATE", 0, "sample every N-th allocation to decrease to overhead"},
+    {"top", 'T', "TOP_STACKS", 0, "display only this many top allocationg stacks (by size)"},
+    {"min-size", 'z', "MIN_SIZE", 0, "capture only allocations larger than this size"},
+    {"max-size", 'Z', "MAX_SIZE", 0, "capture only allocations smaller than this size"},
+    {"obj", 'O', "OBJECT", 0, "attach to allocator functions in the specified object"},
+    {"percpu", 'P', NULL, 0, "trace percpu allocations"},
+    {"perf-max-stack-depth", OPT_PERF_MAX_STACK_DEPTH, "PERF_MAX_STACK_DEPTH",
+     0, "The limit for both kernel and user stack traces (default 127)"},
+    {"stack-map-max-entries", OPT_STACK_MAP_MAX_ENTRIES, "STACK_MAP_MAX_ENTRIES",
+     0, "The number of unique stack traces that can be stored and displayed (default 10240)"},
+    {NULL, 'h', NULL, OPTION_HIDDEN, "Show this full help"},
+    {}};
+
+static uint64_t *stack;
+static struct allocation *allocs;
+static const char default_object[] = "libc.so.6";
