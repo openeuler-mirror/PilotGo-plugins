@@ -231,3 +231,17 @@ static int fentry_set_attach_target(struct fsdist_bpf *obj)
 	}
 	return err;
 }
+
+static void disable_fentry(struct fsdist_bpf *obj)
+{
+	bpf_program__set_autoload(obj->progs.file_read_fentry, false);
+	bpf_program__set_autoload(obj->progs.file_read_fexit, false);
+	bpf_program__set_autoload(obj->progs.file_write_fentry, false);
+	bpf_program__set_autoload(obj->progs.file_write_fexit, false);
+	bpf_program__set_autoload(obj->progs.file_open_fentry, false);
+	bpf_program__set_autoload(obj->progs.file_open_fexit, false);
+	bpf_program__set_autoload(obj->progs.file_sync_fentry, false);
+	bpf_program__set_autoload(obj->progs.file_sync_fexit, false);
+	bpf_program__set_autoload(obj->progs.getattr_fentry, false);
+	bpf_program__set_autoload(obj->progs.getattr_fexit, false);
+}
