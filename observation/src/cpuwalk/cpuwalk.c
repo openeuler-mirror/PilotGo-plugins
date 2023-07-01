@@ -95,3 +95,15 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static struct hist zero;
+
+static void print_hist(struct cpuwalk_bpf__bss *bss)
+{
+	struct hist hist = bss->hist;
+
+	printf("\n");
+
+	bss->hist = zero;
+	print_linear_hist(hist.slots, MAX_CPU_NR, 0, 1, "cpuwalk");
+}
