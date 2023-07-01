@@ -85,3 +85,26 @@ static void sig_handler(int sig)
 {
 	exiting = 1;
 }
+
+static int handle_event(void *ctx, void *data, size_t data_sz)
+{
+	const struct event *e = data;
+	char mode_s[] = {
+		[LOOKUP_MISS] = 'M',
+		[LOOKUP_REFERENCE] = 'R',
+	};
+
+	if (env.timestamp) {
+		char ts[32];
+
+		strftime_now(ts, sizeof(ts), "%H:%M:%S");
+		printf("%-8s ", ts);
+	} else {
+		printf("%-11.6f ", time_since_start());
+	}
+
+	printf("%-7d %-7d %-16s %c %s\n",
+	       e->pid, e->tid, e->comm, mode_s[e->type], e->filename);
+
+	return 0;
+}
