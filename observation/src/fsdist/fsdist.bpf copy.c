@@ -245,3 +245,17 @@ static void disable_fentry(struct fsdist_bpf *obj)
 	bpf_program__set_autoload(obj->progs.getattr_fentry, false);
 	bpf_program__set_autoload(obj->progs.getattr_fexit, false);
 }
+
+static void disable_kprobes(struct fsdist_bpf *obj)
+{
+	bpf_program__set_autoload(obj->progs.file_read_entry, false);
+	bpf_program__set_autoload(obj->progs.file_read_exit, false);
+	bpf_program__set_autoload(obj->progs.file_write_entry, false);
+	bpf_program__set_autoload(obj->progs.file_write_exit, false);
+	bpf_program__set_autoload(obj->progs.file_open_entry, false);
+	bpf_program__set_autoload(obj->progs.file_open_exit, false);
+	bpf_program__set_autoload(obj->progs.file_sync_entry, false);
+	bpf_program__set_autoload(obj->progs.file_sync_exit, false);
+	bpf_program__set_autoload(obj->progs.getattr_entry, false);
+	bpf_program__set_autoload(obj->progs.getattr_exit, false);
+}
