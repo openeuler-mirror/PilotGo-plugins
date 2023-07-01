@@ -92,3 +92,33 @@ static int probe_exit(void *ctx, enum fs_file_op op, ssize_t size)
 	bpf_perf_event_output(ctx, &events, BPF_F_CURRENT_CPU, &event, sizeof(event));
 	return 0;
 }
+
+SEC("kprobe/dummy_file_read")
+int BPF_KPROBE(file_read_entry, struct kiocb *iocb)
+{
+	struct file *fp = BPF_CORE_READ(iocb, ki_filp);
+	loff_t start = BPF_CORE_READ(iocb, ki_pos);
+
+	return probe_entry(fp, start, 0);
+}
+
+SEC("kretprobe/dummy_file_read")
+int BPF_KRETPROBE(file_read_exit, ssize_t ret)
+{
+	return probe_exit(ctx, F_READ, ret);
+}
+
+SEC("kprobe/dummy_file_write")
+int BPF_KPROBE(file_write_entry, struct kiocb *iocb)
+{
+	struct file *fp = BPF_CORE_READ(iocb, ki_filp);
+	loff_t start = BPF_CORE_READ(iocb, ki_pos);
+
+	return probe_entry(fp, start, 0);
+}
+
+SEC("kretprobe/dummy_file_write")
+int BPF_KRETPROBE(file_write_exit, ssize_t ret)
+{
+	return probe_exit(ctx, F_WRITE, ret);
+}
