@@ -122,3 +122,27 @@ int BPF_KRETPROBE(file_write_exit, ssize_t ret)
 {
 	return probe_exit(ctx, F_WRITE, ret);
 }
+
+SEC("kprobe/dummy_file_open")
+int BPF_KPROBE(file_open_entry, struct inode *inode, struct file *file)
+{
+	return probe_entry(file, 0, 0);
+}
+
+SEC("kretprobe/dummy_file_open")
+int BPF_KRETPROBE(file_open_exit)
+{
+	return probe_exit(ctx, F_OPEN, 0);
+}
+
+SEC("kprobe/dummy_file_sync")
+int BPF_KPROBE(file_sync_entry, struct file *file, loff_t start, loff_t end)
+{
+	return probe_entry(file, start, end);
+}
+
+SEC("kretprobe/dummy_file_sync")
+int BPF_KRETPROBE(file_sync_exit)
+{
+	return probe_exit(ctx, F_FSYNC, 0);
+}
