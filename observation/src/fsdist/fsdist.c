@@ -348,6 +348,34 @@ int main(int argc, char *argv[])
 	obj->rodata->target_pid = target_pid;
 	obj->rodata->in_ms = timestamp_in_ms;
 
+	/*
+	 * before load
+	 * if fentry is supported, we set attach target and disable kprobes
+	 * otherwise, we disable fentry and attach kprobes after loading
+	 */
+	support_fentry = check_fentry();
+	if (support_fentry) {
+		err = fentry_set_attach_target(obj);
+		if (err) {
+			warning("Failed to set attach target: %d\n", err);
+			goto cleanup;
+		}
+		disable_kprobes(obj);
+	} else {
+		disable_fentry(obj);
+	}
+
+	err = fsdist_bpf__load(obj);
+	if (err) {
+		warning("Failed to load BPF object: %d\n", err);
+		goto cleanup;
+	}
+
+	if (!obj->bss) {
+		warning("Memory-mapping BPF maps is supported starting from Linux 5.7, please upgrade.\n");
+		goto cleanup;
+	}
+
 
 cleanup:
 	fsdist_bpf__destroy(obj);
