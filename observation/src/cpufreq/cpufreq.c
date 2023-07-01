@@ -109,6 +109,17 @@ static int open_and_attach_perf_event(int freq, struct bpf_program *prog,
 	return 0;
 }
 
+static int libbpf_print_fn(enum libbpf_print_level level, const char *format,
+			   va_list args)
+{
+	if (level == LIBBPF_DEBUG && !env.verbose)
+		return 0;
+	return vfprintf(stderr, format, args);
+}
+
+static void sig_handler(int sig)
+{}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
