@@ -308,3 +308,50 @@ errout:
 	warning("failed to attach kprobe: %ld\n", err);
 	return err;
 }
+
+int main(int argc, char *argv[])
+{
+	LIBBPF_OPTS(bpf_object_open_opts, open_opts);
+	static const struct argp argp = {
+		.options = opts,
+		.parser = parse_arg,
+		.doc = argp_program_doc,
+	};
+	struct fsdist_bpf *obj;
+	bool support_fentry;
+	int err;
+
+	alias_parse(argv[0]);
+	err = argp_parse(&argp, argc, argv, 0, NULL, NULL);
+	if (err)
+		return err;
+
+	if (fs_type == NONE) {
+		warning("Filesystem must be specified using -t option.\n");
+		return 1;
+	}
+
+	libbpf_set_print(libbpf_print_fn);
+
+	err = ensure_core_btf(&open_opts);
+	if (err) {
+		warning("Failed to fetch necessary BTF for CO-RE: %s\n", strerror(-err));
+		return 1;
+	}
+
+	obj = fsdist_bpf__open_opts(&open_opts);
+	if (!obj) {
+		warning("Failed to open BPF object\n");
+		return 1;
+	}
+
+	obj->rodata->target_pid = target_pid;
+	obj->rodata->in_ms = timestamp_in_ms;
+
+
+cleanup:
+	fsdist_bpf__destroy(obj);
+	cleanup_core_btf(&open_opts);
+
+	return err != 0;
+}
