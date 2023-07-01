@@ -376,6 +376,40 @@ int main(int argc, char *argv[])
 		goto cleanup;
 	}
 
+	/*
+	 * after load
+	 * if entry is supported, let libbpf do auto load otherwise, we attach
+	 * to kprobes manually
+	 */
+	err = support_fentry ? fsdist_bpf__attach(obj) : attach_kprobes(obj);
+	if (err) {
+		warning("Failed to attach BPF programs: %d\n", err);
+		goto cleanup;
+	}
+
+	signal(SIGINT, sig_handler);
+
+	printf("Tracing %s operation latency... Hit Ctrl-C to end.\n",
+	       fs_configs[fs_type].fs);
+
+	while (1) {
+		sleep(interval);
+		printf("\n");
+
+		if (emit_timestamp) {
+			char ts[32];
+
+			strftime_now(ts, sizeof(ts), "%H:%M:%S");
+			printf("%-8s\n", ts);
+		}
+
+		err = print_hists(obj->bss);
+		if (err)
+			break;
+
+		if (exiting || --count == 0)
+			break;
+	}
 
 cleanup:
 	fsdist_bpf__destroy(obj);
