@@ -155,6 +155,30 @@ static int init_freqs_mhz(__u32 *freqs_mhz, int nr_cpus)
 	return 0;
 }
 
+static void print_linear_hists(struct bpf_map *hists,
+			       struct cpufreq_bpf__bss *bss)
+{
+	struct hkey lookup_key = {}, next_key;
+	int err, fd = bpf_map__fd(hists);
+	struct hist hist;
+
+	while (!bpf_map_get_next_key(fd, &lookup_key, &next_key)) {
+		err = bpf_map_lookup_elem(fd, &next_key, &hist);
+		if (err < 0) {
+			warning("Failed to lookup hist: %d\n", err);
+			return;
+		}
+		print_linear_hist(hist.slots, MAX_SLOTS, 0, HIST_STEP_SIZE,
+				  next_key.comm);
+		printf("\n");
+		lookup_key = next_key;
+	}
+
+	printf("\n");
+	print_linear_hist(bss->syswide.slots, MAX_SLOTS, 0, HIST_STEP_SIZE,
+			  "syswide");
+}
+
 int main(int argc, char *argv[])
 {
 	static const struct argp argp = {
