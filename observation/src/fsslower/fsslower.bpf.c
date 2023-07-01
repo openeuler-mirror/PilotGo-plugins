@@ -146,3 +146,33 @@ int BPF_KRETPROBE(file_sync_exit)
 {
 	return probe_exit(ctx, F_FSYNC, 0);
 }
+
+SEC("fentry/dummy_file_read")
+int BPF_PROG(file_read_fentry, struct kiocb *iocb)
+{
+	struct file *fp = iocb->ki_filp;
+	loff_t start = iocb->ki_pos;
+
+	return probe_entry(fp, start, 0);
+}
+
+SEC("fexit/dummy_file_read")
+int BPF_PROG(file_read_fexit, struct kiocb *iocb, struct iov_iter *io, ssize_t ret)
+{
+	return probe_exit(ctx, F_READ, ret);
+}
+
+SEC("fentry/dummy_file_write")
+int BPF_PROG(file_write_fentry, struct kiocb *iocb)
+{
+	struct file *fp = iocb->ki_filp;
+	loff_t start = iocb->ki_pos;
+
+	return probe_entry(fp, start, 0);
+}
+
+SEC("fexit/dummy_file_write")
+int BPF_PROG(file_write_fexit, struct kiocb *iocb, struct iov_iter *io, ssize_t ret)
+{
+	return probe_exit(ctx, F_WRITE, ret);
+}
