@@ -46,15 +46,17 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, erro
 	return res.Data, nil
 }
 
-func (c *Client) RunScript(batch *common.Batch, script string) ([]*CmdResult, error) {
+func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*CmdResult, error) {
 	url := c.Server + "/api/v1/pluginapi/run_script"
 
 	p := &struct {
 		Batch  *common.Batch `json:"batch"`
 		Script string        `json:"script"`
+		Params []string      `json:"params"`
 	}{
 		Batch:  batch,
 		Script: base64.StdEncoding.EncodeToString([]byte(script)),
+		Params: params,
 	}
 
 	r, err := httputils.Post(url, &httputils.Params{
