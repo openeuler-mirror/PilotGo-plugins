@@ -1,13 +1,35 @@
 package client
 
-import "gitee.com/openeuler/PilotGo-plugins/sdk/common"
+import (
+	"encoding/json"
 
-func (c *Client) StartService(batch *common.Batch, cmd string) ([]*CmdResult, error) {
+	"gitee.com/openeuler/PilotGo-plugins/sdk/common"
+	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
+)
 
-	return nil, nil
-}
+func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*CmdResult, error) {
+	url := c.Server + "/api/v1/pluginapi/service/:name"
+	p := &struct {
+		Batch       *common.Batch `json:batch`
+		ServiceName string        `json:service`
+	}{
+		Batch:       batch,
+		ServiceName: servicename,
+	}
+	r, err := httputils.Put(url, &httputils.Params{
+		Body: p,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-func (c *Client) StopService(batch *common.Batch, cmd string) ([]*CmdResult, error) {
-
-	return nil, nil
+	res := &struct {
+		Code    int          `json:"code"`
+		Mseeage string       `json:"msg"`
+		Data    []*CmdResult `json:"data`
+	}{}
+	if err := json.Unmarshal(r.Body, res); err != nil {
+		return nil, err
+	}
+	return res.Data, nil
 }
