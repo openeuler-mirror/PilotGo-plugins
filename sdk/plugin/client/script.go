@@ -16,13 +16,15 @@ type CmdResult struct {
 	Stderr      string
 }
 
+type CmdStruct struct {
+	Batch   *common.Batch `json:"batch"`
+	Command string        `json:"command"`
+}
+
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, error) {
 	url := c.Server + "/api/v1/pluginapi/run_command"
 
-	p := &struct {
-		Batch   *common.Batch `json:"batch"`
-		Command string        `json:"command"`
-	}{
+	p := &CmdStruct{
 		Batch:   batch,
 		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
 	}
@@ -46,14 +48,16 @@ func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*CmdResult, erro
 	return res.Data, nil
 }
 
+type ScriptStruct struct {
+	Batch  *common.Batch `json:"batch"`
+	Script string        `json:"script"`
+	Params []string      `json:"params"`
+}
+
 func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*CmdResult, error) {
 	url := c.Server + "/api/v1/pluginapi/run_script"
 
-	p := &struct {
-		Batch  *common.Batch `json:"batch"`
-		Script string        `json:"script"`
-		Params []string      `json:"params"`
-	}{
+	p := &ScriptStruct{
 		Batch:  batch,
 		Script: base64.StdEncoding.EncodeToString([]byte(script)),
 		Params: params,

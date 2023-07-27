@@ -14,13 +14,20 @@ type ServiceResult struct {
 	ServiceStatus string
 }
 
+type PackageStruct struct {
+	Batch   *common.Batch `json:"batch"`
+	Package string
+}
+
+type ServiceStruct struct {
+	Batch       *common.Batch `json:batch`
+	ServiceName string        `json:service`
+}
+
 func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*ServiceResult, error) {
 	url := c.Server + "/api/v1/pluginapi/service/:name"
 
-	p := &struct {
-		Batch       *common.Batch `json:batch`
-		ServiceName string        `json:service`
-	}{
+	p := &ServiceStruct{
 		Batch:       batch,
 		ServiceName: servicename,
 	}
@@ -47,10 +54,7 @@ func (c *Client) ServiceStatus(batch *common.Batch, servicename string) ([]*Serv
 func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*ServiceResult, error) {
 	url := c.Server + "/api/v1/pluginapi/start_service"
 
-	p := &struct {
-		Batch       *common.Batch `json:batch`
-		ServiceName string        `json:service`
-	}{
+	p := &ServiceStruct{
 		Batch:       batch,
 		ServiceName: serviceName,
 	}
@@ -77,10 +81,7 @@ func (c *Client) StartService(batch *common.Batch, serviceName string) ([]*Servi
 func (c *Client) StopService(batch *common.Batch, serviceName string) ([]*ServiceResult, error) {
 	url := c.Server + "/api/v1/pluginapi/stop_service"
 
-	p := &struct {
-		Batch       *common.Batch `json:batch`
-		ServiceName string        `json:service`
-	}{
+	p := &ServiceStruct{
 		Batch:       batch,
 		ServiceName: serviceName,
 	}
