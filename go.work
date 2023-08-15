@@ -4,5 +4,7 @@ use (
 	./container/server
 	./grafana/
 	./prometheus/server
+	./topology/server
+	./topology/agent
 	./sdk
 )

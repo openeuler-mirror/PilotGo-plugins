@@ -1,0 +1,10 @@
+topo:
+  agent_addr: "0.0.0.0:9994"
+PilotGo:
+  addr: "localhost:8889"
+log:
+  level: debug
+  driver: file    
+  path: /var/log/topo.log
+  max_file: 1
+  max_size: 10485760

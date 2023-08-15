@@ -6,7 +6,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/clientmanager"
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/conf"
-	"gitee.com/openeuler/PilotGo-plugin-topology-server/router"
+	"gitee.com/openeuler/PilotGo-plugin-topology-server/handler"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
@@ -29,8 +29,8 @@ func main() {
 	// 设置router
 	engine := gin.Default()
 	clientmanager.Galaops.Sdkmethod.RegisterHandlers(engine)
-	router.InitRouter(engine)
-	if err := engine.Run(conf.Config().Http.Addr); err != nil {
+	handler.InitRouter(engine)
+	if err := engine.Run(conf.Config().Http.Server_addr); err != nil {
 		logger.Fatal("failed to run server")
 	}
 }
