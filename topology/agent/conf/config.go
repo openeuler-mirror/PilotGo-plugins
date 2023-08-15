@@ -10,24 +10,17 @@ import (
 )
 
 type TopoConf struct {
-	Server_addr   string `yaml:"server_addr"`
-	Period int    `yaml:"period"`
+	Agent_addr   string `yaml:"agent_addr"`
 }
 
 type PilotGoConf struct {
 	Addr string `yaml:"addr"`
 }
 
-type ArangodbConf struct {
-	Addr     string `yaml:"addr"`
-	Database string `yaml:"database"`
-}
-
 type ServerConfig struct {
 	Http     *TopoConf       `yaml:"topohttp"`
 	PilotGo  *PilotGoConf    `yaml:"PilotGo"`
 	Logopts  *logger.LogOpts `yaml:"log"`
-	Arangodb *ArangodbConf   `yaml:"arangodb"`
 }
 
 const config_file = "./conf/config.yml"
