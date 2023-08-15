@@ -2,7 +2,6 @@ go 1.19
 
 use (
 	./container/server
-	./gala-ops/server
 	./grafana/
 	./prometheus/server
 	./sdk

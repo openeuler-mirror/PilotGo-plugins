@@ -1,0 +1,14 @@
+topo:
+  addr: "http://0.0.0.0:9995"
+  period: 60
+PilotGo:
+  addr: "http://localhost:8889"
+log:
+  level: debug
+  driver: file    
+  path: /var/log/topo.log
+  max_file: 1
+  max_size: 10485760
+arangodb:
+  addr: "http://localhost:8529"
+  database: "pilotgo-topo"
