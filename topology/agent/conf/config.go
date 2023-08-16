@@ -33,6 +33,7 @@ func config_file() string {
 	_, thisfilepath, _, _ := runtime.Caller(0)
 	dirpath := filepath.Dir(thisfilepath)
 	configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
+
 	return configfilepath
 }
 
