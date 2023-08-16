@@ -5,8 +5,8 @@ import (
 )
 
 func InitRouter(router *gin.Engine) {
-	api := router.Group("/plugin/topo/api")
+	api := router.Group("/plugin/topo_a/api")
 	{
-		api.PUT("/", Temp)
+		api.PUT("/metric", Raw_metric_data)
 	}
 }
