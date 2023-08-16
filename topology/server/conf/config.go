@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
+	"path/filepath"
+	"runtime"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gopkg.in/yaml.v3"
 )
 
 type TopoConf struct {
-	Server_addr   string `yaml:"server_addr"`
-	Period int    `yaml:"period"`
+	Server_addr string `yaml:"server_addr"`
+	Period      int    `yaml:"period"`
 }
 
 type PilotGoConf struct {
@@ -30,12 +33,19 @@ type ServerConfig struct {
 	Arangodb *ArangodbConf   `yaml:"arangodb"`
 }
 
-const config_file = "./conf/config.yml"
+const config_type = "config_server.yaml"
+
+func config_file() string {
+	_, thisfilepath, _, _ := runtime.Caller(0)
+	dirpath := filepath.Dir(thisfilepath)
+	configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
+	return configfilepath
+}
 
 var global_config ServerConfig
 
 func init() {
-	err := readConfig(config_file, &global_config)
+	err := readConfig(config_file(), &global_config)
 	if err != nil {
 		fmt.Printf("")
 		os.Exit(-1)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"gitee.com/openeuler/PilotGo-plugin-topology-agent/collector"
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/conf"
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/handler"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
@@ -11,6 +12,13 @@ import (
 )
 
 func main() {
+	psutilcollector := &collector.PsutilCollector{}
+	if err := psutilcollector.Get_host_info(); err != nil {
+		fmt.Println(err)
+	}
+	fmt.Printf("%+v\n", psutilcollector.Host_0)
+
+	os.Exit(1)
 
 	InitLogger()
 
@@ -19,6 +27,7 @@ func main() {
 	if err := engine.Run(conf.Config().Http.Agent_addr); err != nil {
 		logger.Fatal("failed to run server")
 	}
+
 }
 
 func InitLogger() {
