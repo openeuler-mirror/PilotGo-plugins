@@ -3,28 +3,30 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/utils"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/shirou/gopsutil/process"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/net"
 )
 
 type PsutilCollector struct {
-	Host_0           *Host
-	Processes_0      []*Process
-	Netconnections_0 []*Netconnection
+	Host_1           *Host
+	Processes_1      []*Process
+	Netconnections_1 []*Netconnection
 }
 
 func (pc *PsutilCollector) Collect_host_data() error {
 	hostinit, err := host.Info()
 	if err != nil {
-		return fmt.Errorf("failed to get hostinfo by using gopsutil/v3/host.Info: %s", err)
+		return fmt.Errorf("(failed to get hostinfo by using gopsutil/v3/host.Info: %s)", err)
 	}
 
 	m_u_bytes, err := utils.FileReadBytes(utils.Agentuuid_filepath)
 	if err != nil {
-		return fmt.Errorf("failed to get agent machineuuid: %s", err)
+		return fmt.Errorf("(failed to get agent machineuuid: %s)", err)
 	}
 	type machineuuid struct {
 		Agentuuid string `json:"agent_uuid"`
@@ -32,7 +34,7 @@ func (pc *PsutilCollector) Collect_host_data() error {
 	m_u_struct := &machineuuid{}
 	json.Unmarshal(m_u_bytes, m_u_struct)
 
-	pc.Host_0 = &Host{
+	pc.Host_1 = &Host{
 		Hostname:             hostinit.Hostname,
 		Uptime:               hostinit.Uptime,
 		BootTime:             hostinit.BootTime,
@@ -54,13 +56,13 @@ func (pc *PsutilCollector) Collect_host_data() error {
 func (pc *PsutilCollector) Collect_process_instant_data() error {
 	Echo_process_err := func(method string, err error, processid int32) {
 		if err != nil {
-			logger.Debug("failed to run process.%s: %d, %s", method, processid, err)
+			logger.Debug("(failed to run process.%s: %d, %s)", method, processid, err)
 		}
 	}
 
 	processes_0, err := process.Processes()
 	if err != nil {
-		return fmt.Errorf("failed to run gopsutil/process.processes: %s", err)
+		return fmt.Errorf("(failed to run gopsutil/process.processes: %s)", err)
 	}
 
 	p1 := &Process{}
@@ -150,7 +152,29 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 		Echo_process_err("memorypercent", err, p0.Pid)
 		p1.MemoryPercent = float64(memorypercent)
 
-		pc.Processes_0 = append(pc.Processes_0, p1)
+		pc.Processes_1 = append(pc.Processes_1, p1)
+	}
+
+	return nil
+}
+
+func (pc *PsutilCollector) Collect_netconnection_all_data() error {
+	connections, err := net.Connections("all")
+	if err != nil {
+		return fmt.Errorf("(failed to run gopsutil/net.connections: %s)", err)
+	}
+
+	c1 := &Netconnection{}
+	for _, c := range connections {
+		c1.Fd = c.Fd
+		c1.Family = c.Family
+		c1.Type = c.Type
+		c1.Laddr = map[string]string{"IP": c.Laddr.IP, "Port": strconv.Itoa(int(c.Laddr.Port))}
+		c1.Raddr = map[string]string{"IP": c.Raddr.IP, "Port": strconv.Itoa(int(c.Raddr.Port))}
+		c1.Status = c.Status
+		c1.Uids = c.Uids
+		c1.Pid = c.Pid
+		pc.Netconnections_1 = append(pc.Netconnections_1, c1)
 	}
 
 	return nil
