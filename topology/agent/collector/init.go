@@ -1,9 +1,14 @@
 package collector
 
+import (
+	"github.com/shirou/gopsutil/net"
+	"github.com/shirou/gopsutil/process"
+)
+
 type Data_collector interface {
-	Get_process_instant_info()
-	Get_host_info()
-	Get_net_info()
+	Collect_process_instant_data() error
+	Collect_host_data() error
+	Collect_net_data() error
 }
 
 type Host struct {
@@ -23,12 +28,46 @@ type Host struct {
 }
 
 type Process struct {
+	Pid  int32   `json:"pid"`
+	Ppid int32   `json:"ppid"`
+	Cpid  []int32 `json:"cpid"`
+	Tid  []int32 `json:"tid"`
+	Uids []int32 `json:"uids"`
+	Gids []int32 `json:"gids"`
+
+	Username   string `json:"username"`
+	Status     string `json:"status"`
+	CreateTime int64  `json:"createtime"`
+	ExePath    string `json:"exepath"`
+	ExeName    string `json:"exename"`
+	Cmdline    string `json:"cmdline"`
+	Cwd        string `json:"cwd"`
+
+	Nice   int32 `json:"nice"`
+	IOnice int32 `json:"ionice"`
+
+	Connections   []net.ConnectionStat `json:"connections"`
+	NetIOCounters []net.IOCountersStat `json:"netiocounters"`
+
+	IOCounters process.IOCountersStat `json:"iocounters"`
+
+	OpenFiles []process.OpenFilesStat `json:"openfiles"`
+	NumFDs    int32                   `json:"numfds"`
+
+	NumCtxSwitches process.NumCtxSwitchesStat `json:"numctxswitches"`
+	PageFaults     process.PageFaultsStat     `json:"pagefaults"`
+	MemoryInfo     process.MemoryInfoStat     `json:"memoryinfo"`
+	CPUPercent     float64                    `json:"cpupercent"`
+	MemoryPercent  float64                    `json:"memorypercent"`
 }
 
 type Thread struct {
 }
 
 type Netconnection struct {
+}
+
+type NetIOcounters struct {
 }
 
 type Resource struct {
