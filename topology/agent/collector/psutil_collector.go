@@ -65,8 +65,9 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 		return fmt.Errorf("(failed to run gopsutil/process.processes: %s)", err)
 	}
 
-	p1 := &Process{}
 	for _, p0 := range processes_0 {
+		p1 := &Process{}
+
 		p1.Pid = p0.Pid
 
 		p1.Ppid, err = p0.Ppid()
@@ -74,14 +75,18 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 
 		children, err := p0.Children()
 		Echo_process_err("children", err, p0.Pid)
-		for _, c := range children {
-			p1.Cpid = append(p1.Cpid, c.Pid)
+		if len(children) != 0 {
+			for _, c := range children {
+				p1.Cpid = append(p1.Cpid, c.Pid)
+			}
 		}
 
 		thread, err := p0.Threads()
 		Echo_process_err("thread", err, p0.Pid)
-		for k := range thread {
-			p1.Tid = append(p1.Tid, k)
+		if len(thread) != 0 {
+			for k := range thread {
+				p1.Tid = append(p1.Tid, k)
+			}
 		}
 
 		p1.Uids, err = p0.Uids()
@@ -117,8 +122,14 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 		p1.IOnice, err = p0.IOnice()
 		Echo_process_err("ionice", err, p0.Pid)
 
-		p1.Connections, err = p0.Connections()
+		connections, err := p0.Connections()
 		Echo_process_err("connections", err, p0.Pid)
+		for _, c := range connections {
+			if c.Status == "NONE" {
+				continue
+			}
+			p1.Connections = append(p1.Connections, c)
+		}
 
 		p1.NetIOCounters, err = p0.NetIOCounters(true)
 		Echo_process_err("netiocounters", err, p0.Pid)
@@ -164,8 +175,12 @@ func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 		return fmt.Errorf("(failed to run gopsutil/net.connections: %s)", err)
 	}
 
-	c1 := &Netconnection{}
 	for _, c := range connections {
+		c1 := &Netconnection{}
+		if c.Status == "NONE" {
+			continue
+		}
+
 		c1.Fd = c.Fd
 		c1.Family = c.Family
 		c1.Type = c.Type

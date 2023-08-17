@@ -2,7 +2,6 @@ package conf
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -22,7 +21,7 @@ type PilotGoConf struct {
 }
 
 type ServerConfig struct {
-	Topo    *TopoConf       `yaml:"topohttp"`
+	Topo    *TopoConf       `yaml:"topo"`
 	PilotGo *PilotGoConf    `yaml:"PilotGo"`
 	Logopts *logger.LogOpts `yaml:"log"`
 }
@@ -52,7 +51,7 @@ func Config() *ServerConfig {
 }
 
 func readConfig(file string, config interface{}) error {
-	bytes, err := ioutil.ReadFile(file)
+	bytes, err := os.ReadFile(file)
 	if err != nil {
 		fmt.Printf("open %s failed! err = %s\n", file, err.Error())
 		return err
