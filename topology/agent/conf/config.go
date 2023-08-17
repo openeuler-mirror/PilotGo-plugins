@@ -22,7 +22,7 @@ type PilotGoConf struct {
 }
 
 type ServerConfig struct {
-	Http    *TopoConf       `yaml:"topohttp"`
+	Topo    *TopoConf       `yaml:"topohttp"`
 	PilotGo *PilotGoConf    `yaml:"PilotGo"`
 	Logopts *logger.LogOpts `yaml:"log"`
 }
