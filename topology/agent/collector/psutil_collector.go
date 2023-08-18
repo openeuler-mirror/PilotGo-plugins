@@ -84,8 +84,27 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 		thread, err := p0.Threads()
 		Echo_process_err("thread", err, p0.Pid)
 		if len(thread) != 0 {
-			for k := range thread {
-				p1.Tid = append(p1.Tid, k)
+			tgid, err := p0.Tgid()
+			Echo_process_err("tgid", err, p0.Pid)
+
+			for k, v := range thread {
+				p1.Tids = append(p1.Tids, k)
+				t := &Thread{
+					Tid:       k,
+					Tgid:      tgid,
+					CPU:       v.CPU,
+					User:      v.User,
+					System:    v.System,
+					Idle:      v.Idle,
+					Nice:      v.Nice,
+					Iowait:    v.Iowait,
+					Irq:       v.Irq,
+					Softirq:   v.Softirq,
+					Steal:     v.Steal,
+					Guest:     v.Guest,
+					GuestNice: v.GuestNice,
+				}
+				p1.Threads = append(p1.Threads, *t)
 			}
 		}
 

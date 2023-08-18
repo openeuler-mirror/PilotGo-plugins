@@ -19,14 +19,14 @@ func main() {
 
 	// TODO: init arangodb
 
+	// plugin client
 	PluginClient := client.DefaultClient(clientmanager.PluginInfo)
-	// 临时给server赋值
-	PluginClient.Server = "http://192.168.75.100:8887"
-	clientmanager.Galaops = &clientmanager.Opsclient{
+	PluginClient.Server = "http://" + conf.Config().PilotGo.Addr
+	clientmanager.Galaops = &clientmanager.Topoclient{
 		Sdkmethod: PluginClient,
 	}
 
-	// 设置router
+	// web server
 	engine := gin.Default()
 	clientmanager.Galaops.Sdkmethod.RegisterHandlers(engine)
 	handler.InitRouter(engine)

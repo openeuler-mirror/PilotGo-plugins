@@ -18,7 +18,7 @@ type TopoConf struct {
 }
 
 type PilotGoConf struct {
-	Addr string `yaml:"addr"`
+	Addr string `yaml:"http_addr"`
 }
 
 type ArangodbConf struct {

@@ -6,9 +6,9 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 )
 
-var Galaops *Opsclient
+var Galaops *Topoclient
 
-type Opsclient struct {
+type Topoclient struct {
 	Sdkmethod *client.Client
 	AgentMap  sync.Map
 }

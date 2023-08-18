@@ -13,11 +13,11 @@ type Agent struct {
 	State      int    `gorm:"not null" json:"State"` // true:running false:not running
 }
 
-func (o *Opsclient) AddAgent(a *Agent) {
+func (o *Topoclient) AddAgent(a *Agent) {
 	o.AgentMap.Store(a.UUID, a)
 }
 
-func (o *Opsclient) GetAgent(uuid string) *Agent {
+func (o *Topoclient) GetAgent(uuid string) *Agent {
 	agent, ok := o.AgentMap.Load(uuid)
 	if ok {
 		return agent.(*Agent)
@@ -25,7 +25,7 @@ func (o *Opsclient) GetAgent(uuid string) *Agent {
 	return nil
 }
 
-func (o *Opsclient) DeleteAgent(uuid string) {
+func (o *Topoclient) DeleteAgent(uuid string) {
 	if _, ok := o.AgentMap.LoadAndDelete(uuid); !ok {
 		logger.Warn("delete known agent:%s", uuid)
 	}

@@ -28,12 +28,13 @@ type Host struct {
 }
 
 type Process struct {
-	Pid  int32   `json:"pid"`
-	Ppid int32   `json:"ppid"`
-	Cpid []int32 `json:"cpid"`
-	Tid  []int32 `json:"tid"`
-	Uids []int32 `json:"uids"`
-	Gids []int32 `json:"gids"`
+	Pid     int32    `json:"pid"`
+	Ppid    int32    `json:"ppid"`
+	Cpid    []int32  `json:"cpid"`
+	Tids     []int32  `json:"tid"`
+	Threads []Thread `json:"threads"`
+	Uids    []int32  `json:"uids"`
+	Gids    []int32  `json:"gids"`
 
 	Username   string `json:"username"`
 	Status     string `json:"status"`
@@ -62,6 +63,19 @@ type Process struct {
 }
 
 type Thread struct {
+	Tid       int32   `json:"tid"`
+	Tgid      int32   `json:"tgid"`
+	CPU       string  `json:"cpu"`
+	User      float64 `json:"user"`
+	System    float64 `json:"system"`
+	Idle      float64 `json:"idle"`
+	Nice      float64 `json:"nice"`
+	Iowait    float64 `json:"iowait"`
+	Irq       float64 `json:"irq"`
+	Softirq   float64 `json:"softirq"`
+	Steal     float64 `json:"steal"`
+	Guest     float64 `json:"guest"`
+	GuestNice float64 `json:"guestNice"`
 }
 
 type Netconnection struct {

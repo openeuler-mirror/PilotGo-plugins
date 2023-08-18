@@ -1,8 +1,8 @@
 topo:
-  agent_addr: "0.0.0.0:9994"
+  agent_addr: "localhost:9992"
   datasource: "gopsutil"
 PilotGo:
-  addr: "localhost:8889"
+  http_addr: "localhost:8887"
 log:
   level: debug
   driver: stdout    
