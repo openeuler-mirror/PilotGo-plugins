@@ -3,6 +3,7 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/utils"
@@ -13,20 +14,24 @@ import (
 )
 
 type PsutilCollector struct {
-	Host_1           *Host
-	Processes_1      []*Process
-	Netconnections_1 []*Netconnection
+	Host_1           *utils.Host
+	Processes_1      []*utils.Process
+	Netconnections_1 []*utils.Netconnection
 }
 
 func (pc *PsutilCollector) Collect_host_data() error {
 	hostinit, err := host.Info()
 	if err != nil {
-		return fmt.Errorf("(failed to get hostinfo by using gopsutil/v3/host.Info: %s)", err)
+		filepath, line, funcname := utils.CallerInfo(err)
+		logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
+		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
 	}
 
 	m_u_bytes, err := utils.FileReadBytes(utils.Agentuuid_filepath)
 	if err != nil {
-		return fmt.Errorf("(failed to get agent machineuuid: %s)", err)
+		filepath, line, funcname := utils.CallerInfo(err)
+		logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
+		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
 	}
 	type machineuuid struct {
 		Agentuuid string `json:"agent_uuid"`
@@ -34,7 +39,7 @@ func (pc *PsutilCollector) Collect_host_data() error {
 	m_u_struct := &machineuuid{}
 	json.Unmarshal(m_u_bytes, m_u_struct)
 
-	pc.Host_1 = &Host{
+	pc.Host_1 = &utils.Host{
 		Hostname:             hostinit.Hostname,
 		Uptime:               hostinit.Uptime,
 		BootTime:             hostinit.BootTime,
@@ -56,17 +61,20 @@ func (pc *PsutilCollector) Collect_host_data() error {
 func (pc *PsutilCollector) Collect_process_instant_data() error {
 	Echo_process_err := func(method string, err error, processid int32) {
 		if err != nil {
-			logger.Debug("(failed to run process.%s: %d, %s)", method, processid, err)
+			_, filepath, line, _ := runtime.Caller(1)
+			fmt.Printf("file: %s, line: %d, func: %s, processid: %d, err: %s\n", filepath, line-1, method, processid, err.Error())
 		}
 	}
 
 	processes_0, err := process.Processes()
 	if err != nil {
-		return fmt.Errorf("(failed to run gopsutil/process.processes: %s)", err)
+		pro_c, filepath, line, _ := runtime.Caller(0)
+		logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
 	}
 
 	for _, p0 := range processes_0 {
-		p1 := &Process{}
+		p1 := &utils.Process{}
 
 		p1.Pid = p0.Pid
 
@@ -82,14 +90,14 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 		}
 
 		thread, err := p0.Threads()
-		Echo_process_err("thread", err, p0.Pid)
+		Echo_process_err("threads", err, p0.Pid)
 		if len(thread) != 0 {
 			tgid, err := p0.Tgid()
 			Echo_process_err("tgid", err, p0.Pid)
 
 			for k, v := range thread {
 				p1.Tids = append(p1.Tids, k)
-				t := &Thread{
+				t := &utils.Thread{
 					Tid:       k,
 					Tgid:      tgid,
 					CPU:       v.CPU,
@@ -191,11 +199,15 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 	connections, err := net.Connections("all")
 	if err != nil {
-		return fmt.Errorf("(failed to run gopsutil/net.connections: %s)", err)
+		pro_c, filepath, line, ok := runtime.Caller(0)
+		if ok {
+			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		}
+		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
 	}
 
 	for _, c := range connections {
-		c1 := &Netconnection{}
+		c1 := &utils.Netconnection{}
 		if c.Status == "NONE" {
 			continue
 		}
@@ -203,8 +215,8 @@ func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 		c1.Fd = c.Fd
 		c1.Family = c.Family
 		c1.Type = c.Type
-		c1.Laddr = map[string]string{"IP": c.Laddr.IP, "Port": strconv.Itoa(int(c.Laddr.Port))}
-		c1.Raddr = map[string]string{"IP": c.Raddr.IP, "Port": strconv.Itoa(int(c.Raddr.Port))}
+		c1.Laddr = c.Laddr.IP + ":" + strconv.Itoa(int(c.Laddr.Port))
+		c1.Raddr = c.Raddr.IP + ":" + strconv.Itoa(int(c.Raddr.Port))
 		c1.Status = c.Status
 		c1.Uids = c.Uids
 		c1.Pid = c.Pid
