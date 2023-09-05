@@ -51,10 +51,10 @@ func (d *DataCollector) Collect_instant_data() error {
 	return nil
 }
 
-func (d *DataCollector) GetCollectDataFromTopoAgent(a *agentmanager.Agent_m) error {
-	url := "http://" + a.IP + ":" + a.Port + "/plugin/api/rawdata"
+func (d *DataCollector) GetCollectDataFromTopoAgent(agent *agentmanager.Agent_m) error {
+	url := "http://" + agent.IP + ":" + agent.Port + "/plugin/api/rawdata"
 
-	r, err := httputils.Get(url, nil)
+	resp, err := httputils.Get(url, nil)
 	if err != nil {
 		filepath, line, funcname := utils.CallerInfo()
 		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
@@ -62,66 +62,35 @@ func (d *DataCollector) GetCollectDataFromTopoAgent(a *agentmanager.Agent_m) err
 	}
 
 	results := &struct {
-		Code   int         `json:"code"`
-		Status string      `json:"status"`
-		Data   interface{} `json:"data"`
+		Code  int         `json:"code"`
+		Error string      `json:"error"`
+		Data  interface{} `json:"data"`
 	}{}
 
-	err = json.Unmarshal(r.Body, &results)
+	err = json.Unmarshal(resp.Body, &results)
 	if err != nil {
 		filepath, line, funcname := utils.CallerInfo()
 		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
 		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
 	}
 
-	type collectdata struct {
+	statuscode := results.Code
+	if statuscode != 0 {
+		filepath, line, funcname := utils.CallerInfo()
+		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
+		return fmt.Errorf(results.Error)
+	}
+
+	collectdata := &struct {
 		Host_1           *meta.Host
 		Processes_1      []*meta.Process
 		Netconnections_1 []*meta.Netconnection
-	}
+	}{}
+	mapstructure.Decode(results.Data, collectdata)
 
-	if results.Code == -1 {
-		return fmt.Errorf(results.Status)
-	}
-
-	var collectdata_entity collectdata
-	mapstructure.Decode(results.Data, &collectdata_entity)
-
-	// mapstructure.decode映射之后collectdata.Netconnections_1中的网络连接地址字符串为空:
-	// mapstructure.decode(input, output): input中的字段为源结构体字段的json别名，当两者不一致时会映射失败（大小写可不一致）
-	// data := results.Data.(map[string]interface{})
-	// temp_netconnections := []*meta.Netconnection{}
-	// for _, net := range data["Netconnections_1"].([]interface{}) {
-	// 	net_struct := &meta.Netconnection{}
-	// 	net_map := net.(map[string]interface{})
-	// 	for k, v := range net_map {
-	// 		switch k {
-	// 		case "family":
-	// 			net_struct.Family = uint32(v.(float64))
-	// 		case "fd":
-	// 			net_struct.Fd = uint32(v.(float64))
-	// 		case "localaddr":
-	// 			net_struct.Laddr = v.(string)
-	// 		case "remoteaddr":
-	// 			net_struct.Raddr = v.(string)
-	// 		case "pid":
-	// 			net_struct.Pid = int32(v.(float64))
-	// 		case "status":
-	// 			net_struct.Status = v.(string)
-	// 		case "type":
-	// 			net_struct.Type = uint32(v.(float64))
-	// 		case "uids":
-	// 			for _, vuid := range v.([]interface{}) {
-	// 				net_struct.Uids = append(net_struct.Uids, int32(vuid.(float64)))
-	// 			}
-	// 		}
-	// 	}
-	// 	temp_netconnections = append(temp_netconnections, net_struct)
-	// }
-
-	a.Host_2 = collectdata_entity.Host_1
-	a.Processes_2 = collectdata_entity.Processes_1
-	a.Netconnections_2 = collectdata_entity.Netconnections_1
+	agent.Host_2 = collectdata.Host_1
+	agent.Processes_2 = collectdata.Processes_1
+	agent.Netconnections_2 = collectdata.Netconnections_1
 
 	return nil
 }
