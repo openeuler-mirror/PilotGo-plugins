@@ -34,7 +34,7 @@ func (d *DataCollector) Collect_instant_data() error {
 				agent.Port = conf.Config().Topo.Agent_port
 				err := d.GetCollectDataFromTopoAgent(agent)
 				if err != nil {
-					filepath, line, funcname := utils.CallerInfo(err)
+					filepath, line, funcname := utils.CallerInfo()
 					logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n", filepath, line, funcname)
 				}
 				agentmanager.Topo.AddAgent(agent)
@@ -56,7 +56,7 @@ func (d *DataCollector) GetCollectDataFromTopoAgent(a *agentmanager.Agent_m) err
 
 	r, err := httputils.Get(url, nil)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo(err)
+		filepath, line, funcname := utils.CallerInfo()
 		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
 		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
 	}
@@ -69,7 +69,7 @@ func (d *DataCollector) GetCollectDataFromTopoAgent(a *agentmanager.Agent_m) err
 
 	err = json.Unmarshal(r.Body, &results)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo(err)
+		filepath, line, funcname := utils.CallerInfo()
 		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
 		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
 	}
