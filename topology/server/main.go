@@ -2,42 +2,58 @@ package main
 
 import (
 	"fmt"
-	"os"
 
-	"gitee.com/openeuler/PilotGo-plugin-topology-server/clientmanager"
-	"gitee.com/openeuler/PilotGo-plugin-topology-server/conf"
-	"gitee.com/openeuler/PilotGo-plugin-topology-server/handler"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
-	"github.com/gin-gonic/gin"
+	"gitee.com/openeuler/PilotGo-plugin-topology-server/agentmanager"
+	"gitee.com/openeuler/PilotGo-plugin-topology-server/collector"
 )
 
 func main() {
 	fmt.Println("hello topology")
 
-	InitLogger()
+	/*
+		init plugin client
+	*/
+	agentmanager.Topo.InitPluginClient()
 
-	// TODO: init arangodb
+	/*
+		init logger
+	*/
+	agentmanager.Topo.InitLogger()
 
-	PluginClient := client.DefaultClient(clientmanager.PluginInfo)
-	// 临时给server赋值
-	PluginClient.Server = "http://192.168.75.100:8887"
-	clientmanager.Galaops = &clientmanager.Opsclient{
-		Sdkmethod: PluginClient,
+	/*
+		init arangodb
+		TODO:
+	*/
+
+	/*
+		init machine agent list
+		TODO: 实时更新machine agent、topo agent的状态
+	*/
+	agentmanager.Topo.InitMachineList()
+
+	/*
+		init topo agent status
+		TODO:
+	*/
+
+	// ttcode
+	datacollector := collector.CreateDataCollector()
+	err := datacollector.Collect_instant_data()
+	if err == nil {
+		agentmanager.Topo.AgentMap.Range(
+			func(key, value any) bool {
+				agent := value.(*agentmanager.Agent_m)
+				fmt.Printf("\033[32m%s\033[0m: \n", agent.UUID)
+				for _, net := range agent.Netconnections_2 {
+					fmt.Printf("\t%+v\n", net)
+				}
+				return true
+			},
+		)
 	}
 
-	// 设置router
-	engine := gin.Default()
-	clientmanager.Galaops.Sdkmethod.RegisterHandlers(engine)
-	handler.InitRouter(engine)
-	if err := engine.Run(conf.Config().Http.Server_addr); err != nil {
-		logger.Fatal("failed to run server")
-	}
-}
-
-func InitLogger() {
-	if err := logger.Init(conf.Config().Logopts); err != nil {
-		fmt.Printf("logger init failed, please check the config file: %s", err)
-		os.Exit(1)
-	}
+	/*
+		init web server
+	*/
+	agentmanager.Topo.InitWebServer()
 }

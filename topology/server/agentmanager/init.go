@@ -1,4 +1,4 @@
-package clientmanager
+package agentmanager
 
 import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"

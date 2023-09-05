@@ -1,8 +1,9 @@
 topo:
-  server_addr: "0.0.0.0:9995"
+  server_addr: "192.168.75.100:9991"
+  agent_port: "9992"
   period: 60
 PilotGo:
-  addr: "localhost:8889"
+  http_addr: "192.168.75.100:8887"
 log:
   level: debug
   driver: stdout    

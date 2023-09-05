@@ -14,11 +14,12 @@ import (
 
 type TopoConf struct {
 	Server_addr string `yaml:"server_addr"`
+	Agent_port  string `yaml:"agent_port"`
 	Period      int    `yaml:"period"`
 }
 
 type PilotGoConf struct {
-	Addr string `yaml:"addr"`
+	Addr string `yaml:"http_addr"`
 }
 
 type ArangodbConf struct {
@@ -27,7 +28,7 @@ type ArangodbConf struct {
 }
 
 type ServerConfig struct {
-	Http     *TopoConf       `yaml:"topohttp"`
+	Topo     *TopoConf       `yaml:"topo"`
 	PilotGo  *PilotGoConf    `yaml:"PilotGo"`
 	Logopts  *logger.LogOpts `yaml:"log"`
 	Arangodb *ArangodbConf   `yaml:"arangodb"`

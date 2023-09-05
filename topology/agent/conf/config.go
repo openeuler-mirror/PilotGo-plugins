@@ -3,9 +3,6 @@ package conf
 import (
 	"fmt"
 	"os"
-	"path"
-	"path/filepath"
-	"runtime"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gopkg.in/yaml.v3"
@@ -29,10 +26,12 @@ type ServerConfig struct {
 const config_type = "config_agent.yaml"
 
 func config_file() string {
-	_, thisfilepath, _, _ := runtime.Caller(0)
-	dirpath := filepath.Dir(thisfilepath)
-	configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
+	// _, thisfilepath, _, _ := runtime.Caller(0)
+	// dirpath := filepath.Dir(thisfilepath)
+	// configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
 
+	// ttcode:
+	configfilepath := "./" + config_type
 	return configfilepath
 }
 

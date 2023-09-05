@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"gitee.com/openeuler/PilotGo-plugin-topology-agent/collector"
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/service"
-	"gitee.com/openeuler/PilotGo-plugin-topology-agent/utils"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +22,6 @@ func Raw_metric_data(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":   0,
 		"status": "ok",
-		"size":   utils.GetSize(*data.(*collector.PsutilCollector)),
 		"data":   data,
 	})
 }
