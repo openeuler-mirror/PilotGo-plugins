@@ -1,3 +1,5 @@
 
 .vscode/
 !build
+topology/server/vendor/
+topology/pkg/
