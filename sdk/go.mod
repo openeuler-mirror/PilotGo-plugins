@@ -18,7 +18,7 @@ require (
 	github.com/goccy/go-json v0.10.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirects
+	github.com/json-iterator/go v1.1.12 // indirect; indirects
 	github.com/klauspost/cpuid/v2 v2.0.9 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lestrrat-go/strftime v1.0.6 // indirect

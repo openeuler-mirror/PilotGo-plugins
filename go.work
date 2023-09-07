@@ -1,10 +1,11 @@
 go 1.19
 
 use (
+	./atune
 	./container/server
 	./grafana/
 	./prometheus/server
-	./topology/server
-	./topology/agent
 	./sdk
+	./topology/agent
+	./topology/server
 )
