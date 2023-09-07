@@ -1,1 +1,0 @@
-# PilotGo prometheus 插件
