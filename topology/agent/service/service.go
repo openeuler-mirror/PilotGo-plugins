@@ -35,6 +35,13 @@ func DataCollectorService() (utils.Data_collector, error) {
 			return nil, fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
 		}
 
+		err = gops.Collect_addrInterfaceMap_data()
+		if err != nil {
+			filepath, line, funcname := utils.CallerInfo(err)
+			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
+			return nil, fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+		}
+
 		return gops, nil
 	case "ebpf":
 

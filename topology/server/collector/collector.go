@@ -80,15 +80,17 @@ func (d *DataCollector) GetCollectDataFromTopoAgent(agent *agentmanager.Agent_m)
 	}
 
 	collectdata := &struct {
-		Host_1           *meta.Host
-		Processes_1      []*meta.Process
-		Netconnections_1 []*meta.Netconnection
+		Host_1             *meta.Host
+		Processes_1        []*meta.Process
+		Netconnections_1   []*meta.Netconnection
+		AddrInterfaceMap_1 map[string][]string
 	}{}
 	mapstructure.Decode(results.Data, collectdata)
 
 	agent.Host_2 = collectdata.Host_1
 	agent.Processes_2 = collectdata.Processes_1
 	agent.Netconnections_2 = collectdata.Netconnections_1
+	agent.AddrInterfaceMap_2 = collectdata.AddrInterfaceMap_1
 
 	return nil
 }
