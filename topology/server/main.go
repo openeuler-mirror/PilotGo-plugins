@@ -5,6 +5,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/agentmanager"
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/collector"
+	"github.com/pkg/errors"
 )
 
 func main() {
@@ -38,19 +39,24 @@ func main() {
 
 	// ttcode
 	datacollector := collector.CreateDataCollector()
-	err := datacollector.Collect_instant_data()
-	if err == nil {
-		agentmanager.Topo.AgentMap.Range(
-			func(key, value any) bool {
-				agent := value.(*agentmanager.Agent_m)
-				fmt.Printf("\033[32m%s\033[0m: \n", agent.UUID)
-				for _, net := range agent.Netconnections_2 {
-					fmt.Printf("\t%+v\n", net)
-				}
-				return true
-			},
-		)
+	errorlist := datacollector.Collect_instant_data()
+	if len(errorlist) != 0 {
+		for _, err := range errorlist {
+			err = errors.Wrap(err, "**3")
+			// errors.EORE(err)
+			fmt.Printf("%+v\n", err)
+		}
 	}
+	agentmanager.Topo.AgentMap.Range(
+		func(key, value any) bool {
+			agent := value.(*agentmanager.Agent_m)
+			fmt.Printf("\033[32m%s\033[0m: \n", agent.UUID)
+			for _, net := range agent.Netconnections_2 {
+				fmt.Printf("\t%+v\n", net)
+			}
+			return true
+		},
+	)
 
 	/*
 		init web server

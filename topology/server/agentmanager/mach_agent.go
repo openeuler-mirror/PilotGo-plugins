@@ -34,6 +34,6 @@ func (t *Topoclient) GetAgent(uuid string) *Agent_m {
 
 func (t *Topoclient) DeleteAgent(uuid string) {
 	if _, ok := t.AgentMap.LoadAndDelete(uuid); !ok {
-		logger.Warn("delete known agent:%s", uuid)
+		logger.Warn("delete unknown agent:%s", uuid)
 	}
 }

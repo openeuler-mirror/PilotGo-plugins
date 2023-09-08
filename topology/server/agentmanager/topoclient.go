@@ -2,17 +2,18 @@ package agentmanager
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"sync"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/conf"
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/handler"
-	"gitee.com/openeuler/PilotGo-plugin-topology-server/utils"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 var Topo *Topoclient
@@ -27,16 +28,14 @@ func (t *Topoclient) InitMachineList() {
 
 	resp, err := httputils.Get(url, nil)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo()
-		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
-		return
+		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
+		os.Exit(1)
 	}
 
 	statuscode := resp.StatusCode
 	if statuscode != 200 {
-		filepath, line, funcname := utils.CallerInfo()
-		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, string(resp.Body))
-		return
+		fmt.Printf("%+v\n", errors.New("http返回状态码异常**2")) // err top
+
 	}
 
 	result := &struct {
@@ -46,8 +45,7 @@ func (t *Topoclient) InitMachineList() {
 
 	err = json.Unmarshal(resp.Body, result)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo()
-		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
+		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
 	}
 
 	for _, m := range result.Data.([]interface{}) {
@@ -61,8 +59,7 @@ func (t *Topoclient) InitMachineList() {
 func (t *Topoclient) InitLogger() {
 	err := logger.Init(conf.Config().Logopts)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo()
-		logger.Error("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
+		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
 		os.Exit(1)
 	}
 }
@@ -73,8 +70,8 @@ func (t *Topoclient) InitWebServer() {
 	handler.InitRouter(engine)
 	err := engine.Run(conf.Config().Topo.Server_addr)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo()
-		logger.Fatal("\n\tfile: %s\n\tline: %d\n\tfunc: %s\n\terr: %s\n", filepath, line, funcname, err.Error())
+		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
+		os.Exit(1)
 	}
 }
 

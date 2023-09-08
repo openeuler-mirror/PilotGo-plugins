@@ -6,6 +6,7 @@ require (
 	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230815015659-4fdcce82d047
 	github.com/gin-gonic/gin v1.9.1
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -30,7 +31,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tklauser/go-sysconf v0.3.12 // indirect
 	github.com/tklauser/numcpus v0.6.1 // indirect
@@ -44,3 +44,5 @@ require (
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )
+
+// replace github.com/pkg/errors v0.9.1 => /home/wjq/a-disk/mypkg/study/tool/errors@v1.2.3
