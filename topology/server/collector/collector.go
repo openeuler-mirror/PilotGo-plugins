@@ -35,7 +35,7 @@ func (d *DataCollector) Collect_instant_data() []error {
 				agent.Port = conf.Config().Topo.Agent_port
 				err := d.GetCollectDataFromTopoAgent(agent)
 				if err != nil {
-					errorlist = append(errorlist, errors.Wrap(err, "**2"))
+					errorlist = append(errorlist, errors.Wrapf(err, "%s**2", agent.IP))
 				}
 				agentmanager.Topo.AddAgent(agent)
 			}()

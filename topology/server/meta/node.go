@@ -12,7 +12,7 @@ type Nodes struct {
 }
 
 type Node struct {
-	ID      string            `json:"id"`
+	ID      string            `json:"id"` // uuid-type-basicinfo
 	Name    string            `json:"name"`
 	Type    string            `json:"type"`
 	UUID    string            `json:"uuid"`
