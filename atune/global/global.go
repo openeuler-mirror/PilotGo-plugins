@@ -1,0 +1,25 @@
+package global
+
+var TuneObjects = []string{
+	"compress",
+	"compress_Except",
+	"ffmpeg",
+	"fio",
+	"gcc_compile",
+	"go_gc",
+	"graphicsmagick",
+	"iozone",
+	"key_parameters_select",
+	"key_parameters_select_variant",
+	"mariadb",
+	"memcached",
+	"memory",
+	"mysql_sysbench",
+	"nginx",
+	"openGauss",
+	"redis",
+	"spark",
+	"tensorflow_train",
+	"tidb",
+	"tomcat",
+}
