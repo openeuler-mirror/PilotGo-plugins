@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"openeuler.org/PilotGo/atune-plugin/utils"
+)
 
 func main() {
-	fmt.Println("hello atune")
+	info := utils.GetTuneInfo("gcc_compile")
+	fmt.Printf("%#v", info)
 }
