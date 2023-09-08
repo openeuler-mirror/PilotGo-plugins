@@ -32,6 +32,19 @@ func StructToMap(obj interface{}) map[string]string {
 	return m
 }
 
+func HostToMap(host *meta.Host, a_i_map *map[string][]string) *map[string]string {
+	host_metrics := StructToMap(host)
+	interfaces_string := []string{}
+
+	for key, value := range *a_i_map {
+		interfaces_string = append(interfaces_string, key+":"+strings.Join(value, "**"))
+	}
+
+	host_metrics["interfaces"] = strings.Join(interfaces_string, "***")
+
+	return &host_metrics
+}
+
 func ProcessToMap(process *meta.Process) *map[string]string {
 	uids_string := []string{}
 	for _, u := range process.Uids {
@@ -100,3 +113,40 @@ func ThreadToMap(thread *meta.Thread) *map[string]string {
 		"GuestNice": strconv.FormatFloat(thread.GuestNice, 'f', -1, 64),
 	}
 }
+
+// net节点的metrics字段 临时定义
+func NetToMap(net *meta.Netconnection) *map[string]string {
+	return &map[string]string{
+		"Fd": strconv.Itoa(int(net.Fd)),
+		"Family": strconv.Itoa(int(net.Family)),
+		"Type": strconv.Itoa(int(net.Type)),
+		"Laddr": net.Laddr,
+		"Raddr": net.Raddr,  
+		"Status": net.Status, 
+		"Uids": strconv.Itoa(int(net.Uids[])),
+		"Pid": strconv.Itoa(int(net.Pid)),  
+	}
+}
+// func NetToMap(net *net.IOCountersStat, a_i_map *map[string][]string) *map[string]string {
+// 	addrs := []string{}
+// 	for key, value := range *a_i_map {
+// 		if net.Name == key {
+// 			addrs = value
+// 		}
+// 	}
+
+// 	return &map[string]string{
+// 		"Name":        net.Name,
+// 		"addrs":       addrs[0],
+// 		"BytesSent":   strconv.Itoa(int(net.BytesSent)),
+// 		"BytesRecv":   strconv.Itoa(int(net.BytesRecv)),
+// 		"PacketsSent": strconv.Itoa(int(net.PacketsSent)),
+// 		"PacketsRecv": strconv.Itoa(int(net.PacketsRecv)),
+// 		"Errin":       strconv.Itoa(int(net.Errin)),
+// 		"Errout":      strconv.Itoa(int(net.Errout)),
+// 		"Dropin":      strconv.Itoa(int(net.Dropin)),
+// 		"Dropout":     strconv.Itoa(int(net.Dropout)),
+// 		"Fifoin":      strconv.Itoa(int(net.Fifoin)),
+// 		"Fifoout":     strconv.Itoa(int(net.Fifoout)),
+// 	}
+// }

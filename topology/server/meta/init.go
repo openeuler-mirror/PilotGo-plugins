@@ -9,9 +9,9 @@ const (
 )
 
 const (
-	EDGE_BELONG = "belong_to"
-	EDGE_SERVER = "server_to"
-	EDGE_CLIENT = "client_to"
+	EDGE_BELONG = "belong"
+	EDGE_SERVER = "server"
+	EDGE_CLIENT = "client"
 	EDGE_TCP    = "tcp"
 	EDGE_UDP    = "udp"
 )

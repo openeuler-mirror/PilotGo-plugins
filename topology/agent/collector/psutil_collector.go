@@ -17,6 +17,7 @@ type PsutilCollector struct {
 	Host_1           *utils.Host
 	Processes_1      []*utils.Process
 	Netconnections_1 []*utils.Netconnection
+	AddrInterfaceMap_1 map[string][]string
 }
 
 func (pc *PsutilCollector) Collect_host_data() error {
@@ -221,6 +222,25 @@ func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 		c1.Uids = c.Uids
 		c1.Pid = c.Pid
 		pc.Netconnections_1 = append(pc.Netconnections_1, c1)
+	}
+
+	return nil
+}
+
+func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		pro_c, filepath, line, ok := runtime.Caller(0)
+		if ok {
+			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		}
+		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+	}
+
+	for _, iface := range interfaces {
+		for _, addr := range iface.Addrs {
+			pc.AddrInterfaceMap_1[iface.Name] = append(pc.AddrInterfaceMap_1[iface.Name], addr.Addr)
+		}
 	}
 
 	return nil

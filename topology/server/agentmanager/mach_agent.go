@@ -15,9 +15,10 @@ type Agent_m struct {
 	State      int    `gorm:"not null" json:"state"`
 	TAState    int    `json:"TAstate"` // topo agent state: true(running) false(not runnings)
 
-	Host_2           *meta.Host            `json:"host"`
-	Processes_2      []*meta.Process       `json:"processes"`
-	Netconnections_2 []*meta.Netconnection `json:"netconnections"`
+	Host_2             *meta.Host            `json:"host"`
+	Processes_2        []*meta.Process       `json:"processes"`
+	Netconnections_2   []*meta.Netconnection `json:"netconnections"`
+	AddrInterfaceMap_2 map[string][]string   `json:"addrinterfacemap"`
 }
 
 func (t *Topoclient) AddAgent(a *Agent_m) {
