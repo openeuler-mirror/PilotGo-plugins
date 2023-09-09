@@ -2,17 +2,16 @@
 
 html {
   height: 100%;
-  display: flex;
+  width: 100%;
+  overflow: hidden;
 }
 
 body {
-  display: flex;
-  place-items: center;
-  flex-grow: 1;
+  height: 100%;
+  width: 100%;
 }
 
 #app {
-  display: grid;
   height: 100%;
   width: 100%;
   font-weight: normal;

@@ -1,8 +1,6 @@
 <template>
-  <div class="about">
-    <h1 class="h1">拓扑图演示页面</h1>
-    <div id="topo-container" class="container" ref="to"></div>
-  </div>
+  <h1 class="h1">拓扑图演示页面</h1>
+  <div id="topo-container" class="container"></div>
 </template>
 
 <script setup lang="ts">
@@ -11,8 +9,8 @@ import { onMounted } from "vue";
 
 onMounted(() => {
   const data = {
-    canvasWidth:0,
-    canvasHeight:0,
+    canvasWidth: 0,
+    canvasHeight: 0,
 
     // 节点
     nodes: [
@@ -41,20 +39,26 @@ onMounted(() => {
   let height = document.getElementById("topo-container")!.clientHeight;
   console.log("canvas width: " + width + " height: " + height)
 
-  const graph = new G6.Graph({
+  let graph = new G6.Graph({
     container: "topo-container",
-    width: width,
-    height: height,
+    width: document.getElementById("topo-container")!.clientWidth,
+    height: document.getElementById("topo-container")!.clientHeight,
+    modes: {
+      default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
+    }
   });
   graph.data(data);
   graph.render();
+  graph.fitCenter();
 
-  window.onresize = ()=> {
+  window.onresize = () => {
     let width = document.getElementById("topo-container")!.clientWidth;
     let height = document.getElementById("topo-container")!.clientHeight;
-    graph.changeSize(width, height)
+    graph.changeSize(
+      document.getElementById("topo-container")!.clientWidth,
+      document.getElementById("topo-container")!.clientHeight)
     graph.fitCenter()
-    console.log("resize: " + width + ","+ height);
+    console.log("resize: " + width + "," + height);
   }
 
 })
@@ -62,21 +66,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.about {
-  display: flex;
-  flex-direction: column;
-
-  width: 100%;
-  height: 100%;
-}
-
 .h1 {
   width: 100%;
   text-align: center;
 }
 
 .container {
-  flex-grow: 1;
+  width: 100%;
+  height: 100%;
   background-color: white;
 }
 </style>
