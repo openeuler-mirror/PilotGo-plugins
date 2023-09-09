@@ -1,6 +1,7 @@
 package meta
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -24,6 +25,15 @@ type Edge struct {
 
 // TODO: 考虑多个goruntine并发添加、访问、修改相同的edge实例
 func (e *Edges) Add(edge *Edge) {
+	id_slice := strings.Split(edge.ID, "_")
+	id_slice[0], id_slice[2] = id_slice[2], id_slice[0]
+
+	mirror_id := strings.Join(id_slice, "_")
+
+	if _, ok := e.Lookup.Load(mirror_id); ok {
+		return
+	}
+
 	e.Lookup.Store(edge.ID, edge)
 	e.Edges = append(e.Edges, edge)
 }
