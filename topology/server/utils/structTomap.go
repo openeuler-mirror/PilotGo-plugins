@@ -37,10 +37,10 @@ func HostToMap(host *meta.Host, a_i_map *map[string][]string) *map[string]string
 	interfaces_string := []string{}
 
 	for key, value := range *a_i_map {
-		interfaces_string = append(interfaces_string, key+":"+strings.Join(value, "**"))
+		interfaces_string = append(interfaces_string, key+":"+strings.Join(value, " "))
 	}
 
-	host_metrics["interfaces"] = strings.Join(interfaces_string, "***")
+	host_metrics["interfaces"] = strings.Join(interfaces_string, ";")
 
 	return &host_metrics
 }
@@ -69,9 +69,9 @@ func ProcessToMap(process *meta.Process) *map[string]string {
 	return &map[string]string{
 		"Pid":                         strconv.Itoa(int(process.Pid)),
 		"Ppid":                        strconv.Itoa(int(process.Ppid)),
-		"Cpid":                        strings.Join(cpid_string, "-"),
-		"Uids":                        strings.Join(uids_string, "-"),
-		"Gids":                        strings.Join(gids_string, "-"),
+		"Cpid":                        strings.Join(cpid_string, " "),
+		"Uids":                        strings.Join(uids_string, " "),
+		"Gids":                        strings.Join(gids_string, " "),
 		"Status":                      process.Status,
 		"CreateTime":                  strconv.Itoa(int(process.CreateTime)),
 		"Cwd":                         process.Cwd,
@@ -83,7 +83,7 @@ func ProcessToMap(process *meta.Process) *map[string]string {
 		"DISK-rb":                     strconv.Itoa(int(process.IOCounters.ReadBytes)),
 		"DISK-wc":                     strconv.Itoa(int(process.IOCounters.WriteCount)),
 		"DISK-wb":                     strconv.Itoa(int(process.IOCounters.WriteBytes)),
-		"fd":                          strings.Join(openfiles_string, "-"),
+		"fd":                          strings.Join(openfiles_string, " "),
 		"NumCtxSwitches-v":            strconv.Itoa(int(process.NumCtxSwitches.Voluntary)),
 		"NumCtxSwitches-inv":          strconv.Itoa(int(process.NumCtxSwitches.Involuntary)),
 		"PageFaults-MinorFaults":      strconv.Itoa(int(process.PageFaults.MinorFaults)),
@@ -116,17 +116,23 @@ func ThreadToMap(thread *meta.Thread) *map[string]string {
 
 // net节点的metrics字段 临时定义
 func NetToMap(net *meta.Netconnection) *map[string]string {
+	uids_string := []string{}
+	for _, uid := range net.Uids {
+		uids_string = append(uids_string, strconv.Itoa(int(uid)))
+	}
+
 	return &map[string]string{
-		"Fd": strconv.Itoa(int(net.Fd)),
+		"Fd":     strconv.Itoa(int(net.Fd)),
 		"Family": strconv.Itoa(int(net.Family)),
-		"Type": strconv.Itoa(int(net.Type)),
-		"Laddr": net.Laddr,
-		"Raddr": net.Raddr,  
-		"Status": net.Status, 
-		"Uids": strconv.Itoa(int(net.Uids[])),
-		"Pid": strconv.Itoa(int(net.Pid)),  
+		"Type":   strconv.Itoa(int(net.Type)),
+		"Laddr":  net.Laddr,
+		"Raddr":  net.Raddr,
+		"Status": net.Status,
+		"Uids":   strings.Join(uids_string, " "),
+		"Pid":    strconv.Itoa(int(net.Pid)),
 	}
 }
+
 // func NetToMap(net *net.IOCountersStat, a_i_map *map[string][]string) *map[string]string {
 // 	addrs := []string{}
 // 	for key, value := range *a_i_map {
