@@ -14,9 +14,9 @@ import (
 )
 
 type PsutilCollector struct {
-	Host_1           *utils.Host
-	Processes_1      []*utils.Process
-	Netconnections_1 []*utils.Netconnection
+	Host_1             *utils.Host
+	Processes_1        []*utils.Process
+	Netconnections_1   []*utils.Netconnection
 	AddrInterfaceMap_1 map[string][]string
 }
 
@@ -237,11 +237,14 @@ func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
 	}
 
+	addrinterfacemap := map[string][]string{}
 	for _, iface := range interfaces {
 		for _, addr := range iface.Addrs {
-			pc.AddrInterfaceMap_1[iface.Name] = append(pc.AddrInterfaceMap_1[iface.Name], addr.Addr)
+			addrinterfacemap[iface.Name] = append(pc.AddrInterfaceMap_1[iface.Name], addr.Addr)
 		}
 	}
+
+	pc.AddrInterfaceMap_1 = addrinterfacemap
 
 	return nil
 }

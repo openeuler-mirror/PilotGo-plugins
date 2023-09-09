@@ -26,7 +26,13 @@ func StructToMap(obj interface{}) map[string]string {
 		field := objType.Field(i)
 		fieldValue := objValue.Field(i)
 
-		m[field.Name] = fieldValue.Interface().(string)
+		switch fieldValue.Kind() {
+		case reflect.String:
+			m[field.Name] = fieldValue.Interface().(string)
+		case reflect.Uint64:
+			fieldvalue_uint64 := fieldValue.Interface().(uint64)
+			m[field.Name] = strconv.Itoa(int(fieldvalue_uint64))
+		}
 	}
 
 	return m
@@ -34,8 +40,8 @@ func StructToMap(obj interface{}) map[string]string {
 
 func HostToMap(host *meta.Host, a_i_map *map[string][]string) *map[string]string {
 	host_metrics := StructToMap(host)
-	interfaces_string := []string{}
 
+	interfaces_string := []string{}
 	for key, value := range *a_i_map {
 		interfaces_string = append(interfaces_string, key+":"+strings.Join(value, " "))
 	}

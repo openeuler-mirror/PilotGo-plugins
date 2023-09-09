@@ -19,8 +19,16 @@ func CreateDataProcesser() *DataProcesser {
 }
 
 func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []error) {
-	var Nodes *meta.Nodes
-	var Edges *meta.Edges
+	nodes := &meta.Nodes{
+		Lookup: make(map[string]*meta.Node, 0),
+		Nodes:  make([]*meta.Node, 0),
+	}
+	edges := &meta.Edges{
+		SrcToDsts: make(map[string][]string, 0),
+		DstToSrcs: make(map[string][]string, 0),
+		Edges:     make([]*meta.Edge, 0),
+	}
+
 	var wg sync.WaitGroup
 	var collect_errorlist []error
 	var process_errorlist []error
@@ -31,6 +39,8 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 		for i, err := range collect_errorlist {
 			collect_errorlist[i] = errors.Wrap(err, "**7")
 		}
+
+		// return nil, nil, collect_errorlist, nil
 	}
 
 	agentmanager.Topo.AgentMap.Range(
@@ -41,14 +51,16 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 				defer wg.Done()
 				agent := value.(*agentmanager.Agent_m)
 
-				err := d.Create_node_entities(agent, Nodes)
-				if err != nil {
-					process_errorlist = append(process_errorlist, errors.Wrap(err, "**2"))
-				}
+				if agent.Host_2 != nil && agent.Processes_2 != nil && agent.Netconnections_2 != nil {
+					err := d.Create_node_entities(agent, nodes)
+					if err != nil {
+						process_errorlist = append(process_errorlist, errors.Wrap(err, "**2"))
+					}
 
-				err = d.Create_edge_entities(agent, Edges, Nodes)
-				if err != nil {
-					process_errorlist = append(process_errorlist, errors.Wrap(err, "**2"))
+					err = d.Create_edge_entities(agent, edges, nodes)
+					if err != nil {
+						process_errorlist = append(process_errorlist, errors.Wrap(err, "**2"))
+					}
 				}
 			}()
 
@@ -57,12 +69,12 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 	)
 	wg.Wait()
 
-	return Nodes, Edges, collect_errorlist, process_errorlist
+	return nodes, edges, collect_errorlist, process_errorlist
 }
 
 func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes *meta.Nodes) error {
 	host_node := &meta.Node{
-		ID:      fmt.Sprintf("%s-%s-%s", agent.UUID, meta.NODE_HOST, agent.IP),
+		ID:      fmt.Sprintf("%s_%s_%s", agent.UUID, meta.NODE_HOST, agent.IP),
 		Name:    agent.UUID,
 		Type:    meta.NODE_HOST,
 		UUID:    agent.UUID,
@@ -73,7 +85,7 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 
 	for _, process := range agent.Processes_2 {
 		proc_node := &meta.Node{
-			ID:      fmt.Sprintf("%s-%s-%d", agent.UUID, meta.NODE_PROCESS, process.Pid),
+			ID:      fmt.Sprintf("%s_%s_%d", agent.UUID, meta.NODE_PROCESS, process.Pid),
 			Name:    process.ExeName,
 			Type:    meta.NODE_PROCESS,
 			UUID:    agent.UUID,
@@ -84,7 +96,7 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 
 		for _, thread := range process.Threads {
 			thre_node := &meta.Node{
-				ID:      fmt.Sprintf("%s-%s-%d", agent.UUID, meta.NODE_THREAD, thread.Tid),
+				ID:      fmt.Sprintf("%s_%s_%d", agent.UUID, meta.NODE_THREAD, thread.Tid),
 				Name:    strconv.Itoa(int(thread.Tid)),
 				Type:    meta.NODE_THREAD,
 				UUID:    agent.UUID,
@@ -110,7 +122,7 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 	// 临时定义不含网络流量metric的网络节点
 	for _, net := range agent.Netconnections_2 {
 		net_node := &meta.Node{
-			ID:      fmt.Sprintf("%s-%s-%d", agent.UUID, meta.NODE_NET, net.Pid),
+			ID:      fmt.Sprintf("%s_%s_%d", agent.UUID, meta.NODE_NET, net.Pid),
 			Name:    net.Laddr,
 			Type:    meta.NODE_NET,
 			UUID:    agent.UUID,
