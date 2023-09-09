@@ -7,11 +7,9 @@ import (
 	"sync"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/conf"
-	"gitee.com/openeuler/PilotGo-plugin-topology-server/handler"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
-	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
@@ -58,17 +56,6 @@ func (t *Topoclient) InitMachineList() {
 
 func (t *Topoclient) InitLogger() {
 	err := logger.Init(conf.Config().Logopts)
-	if err != nil {
-		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
-		os.Exit(1)
-	}
-}
-
-func (t *Topoclient) InitWebServer() {
-	engine := gin.Default()
-	Topo.Sdkmethod.RegisterHandlers(engine)
-	handler.InitRouter(engine)
-	err := engine.Run(conf.Config().Topo.Server_addr)
 	if err != nil {
 		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
 		os.Exit(1)

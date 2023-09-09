@@ -18,11 +18,11 @@ type Edge struct {
 	Type    string
 	Src     string
 	Dst     string
-	UUID    string
 	Dir     bool
 	Metrics map[string]string
 }
 
+// TODO: 考虑多个goruntine并发添加、访问、修改相同的edge实例
 func (e *Edges) Add(edge *Edge) {
 	e.Lookup.Store(edge.ID, edge)
 	e.Edges = append(e.Edges, edge)
