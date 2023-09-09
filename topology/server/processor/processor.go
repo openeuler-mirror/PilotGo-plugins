@@ -14,6 +14,9 @@ import (
 
 type DataProcesser struct{}
 
+var agent_node_count int
+var agent_node_count_rwlock *sync.RWMutex
+
 func CreateDataProcesser() *DataProcesser {
 	return &DataProcesser{}
 }
@@ -30,8 +33,22 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 	}
 
 	var wg sync.WaitGroup
+	agent_count := 0
+	create_node_rwlock := &sync.RWMutex{}
+	agent_node_count = 0
+	agent_node_count_rwlock = &sync.RWMutex{}
 	var collect_errorlist []error
 	var process_errorlist []error
+
+	// 获取运行状态agent的数目
+	agentmanager.Topo.AgentMap.Range(func(key, value any) bool {
+		agent := value.(*agentmanager.Agent_m)
+		if agent.State != 2 {
+			agent_count++
+		}
+
+		return true
+	})
 
 	datacollector := collector.CreateDataCollector()
 	collect_errorlist = datacollector.Collect_instant_data()
@@ -50,11 +67,24 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 			go func() {
 				defer wg.Done()
 				agent := value.(*agentmanager.Agent_m)
+				var wgnode sync.WaitGroup
 
 				if agent.Host_2 != nil && agent.Processes_2 != nil && agent.Netconnections_2 != nil {
-					err := d.Create_node_entities(agent, nodes)
+					err := d.Create_node_entities(agent, nodes, create_node_rwlock)
 					if err != nil {
 						process_errorlist = append(process_errorlist, errors.Wrap(err, "**2"))
+					}
+
+					for {
+						if agent_node_count == agent_count {
+							wgnode.Add(1)
+							wgnode.Done()
+							wgnode.Wait()
+							break
+						}
+						// ttcode
+						// fmt.Printf("\033[32m agent_node_count\033[0m: %d\n", agent_node_count)
+						// fmt.Printf("\033[32magent_count\033[0m: %d\n", agent_count)
 					}
 
 					err = d.Create_edge_entities(agent, edges, nodes)
@@ -72,7 +102,7 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 	return nodes, edges, collect_errorlist, process_errorlist
 }
 
-func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes *meta.Nodes) error {
+func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes *meta.Nodes, mu *sync.RWMutex) error {
 	host_node := &meta.Node{
 		ID:      fmt.Sprintf("%s_%s_%s", agent.UUID, meta.NODE_HOST, agent.IP),
 		Name:    agent.UUID,
@@ -81,7 +111,9 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 		Metrics: *utils.HostToMap(agent.Host_2, &agent.AddrInterfaceMap_2),
 	}
 
+	mu.Lock()
 	nodes.Add(host_node)
+	mu.Unlock()
 
 	for _, process := range agent.Processes_2 {
 		proc_node := &meta.Node{
@@ -92,7 +124,9 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 			Metrics: *utils.ProcessToMap(process),
 		}
 
+		mu.Lock()
 		nodes.Add(proc_node)
+		mu.Unlock()
 
 		for _, thread := range process.Threads {
 			thre_node := &meta.Node{
@@ -103,7 +137,9 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 				Metrics: *utils.ThreadToMap(&thread),
 			}
 
+			mu.Lock()
 			nodes.Add(thre_node)
+			mu.Unlock()
 		}
 
 		// for _, net := range process.NetIOCounters {
@@ -129,8 +165,14 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 			Metrics: *utils.NetToMap(net),
 		}
 
+		mu.Lock()
 		nodes.Add(net_node)
+		mu.Unlock()
 	}
+
+	agent_node_count_rwlock.Lock()
+	agent_node_count++
+	agent_node_count_rwlock.Unlock()
 
 	return nil
 }
@@ -164,6 +206,78 @@ func (d *DataProcesser) Create_edge_entities(agent *agentmanager.Agent_m, edges 
 
 				edges.Add(belong_edge)
 			}
+		}
+	}
+
+	for _, sub := range nodes_map[meta.NODE_PROCESS] {
+		for _, obj := range nodes_map[meta.NODE_PROCESS] {
+			if obj.Metrics["Pid"] == sub.Metrics["Ppid"] {
+				belong_edge := &meta.Edge{
+					ID:   fmt.Sprintf("%s_%s_%s", sub.ID, meta.EDGE_BELONG, obj.ID),
+					Type: meta.EDGE_BELONG,
+					Src:  sub.ID,
+					Dst:  obj.ID,
+					Dir:  true,
+				}
+
+				edges.Add(belong_edge)
+			}
+		}
+	}
+
+	// TODO: 暂定net节点关系的type均为server，暂时无法判断socket连接中的server端和agent端，需要借助其他网络工具
+	for _, sub := range nodes_map[meta.NODE_NET] {
+		for _, obj := range nodes_map[meta.NODE_PROCESS] {
+			if obj.Metrics["Pid"] == sub.Metrics["Pid"] {
+				server_edge := &meta.Edge{
+					ID:   fmt.Sprintf("%s_%s_%s", sub.ID, meta.EDGE_SERVER, obj.ID),
+					Type: meta.EDGE_SERVER,
+					Src:  sub.ID,
+					Dst:  obj.ID,
+					Dir:  true,
+				}
+
+				edges.Add(server_edge)
+			}
+		}
+	}
+
+	// TODO: 生成跨主机对等网络关系实例，待验证，多个goroutine同步向nodes数组中添加node实例
+	for _, net := range agent.Netconnections_2 {
+		var peernode1 *meta.Node
+		var peernode2 *meta.Node
+
+		for _, netnode := range nodes_map[meta.NODE_NET] {
+			switch netnode.Metrics["Laddr"] {
+			case net.Laddr:
+				peernode1 = netnode
+			case net.Raddr:
+				peernode2 = netnode
+			}
+
+			if peernode1 != nil && peernode2 != nil {
+				break
+			}
+		}
+
+		if peernode1 != nil && peernode2 != nil {
+			var edgetype string
+			switch peernode1.Metrics["Type"] {
+			case "1":
+				edgetype = meta.EDGE_TCP
+			case "2":
+				edgetype = meta.EDGE_UDP
+			}
+
+			peernet_edge := &meta.Edge{
+				ID:   fmt.Sprintf("%s_%s_%s", peernode1.ID, edgetype, peernode2.ID),
+				Type: edgetype,
+				Src:  peernode1.ID,
+				Dst:  peernode2.ID,
+				Dir:  false,
+			}
+
+			edges.Add(peernet_edge)
 		}
 	}
 
