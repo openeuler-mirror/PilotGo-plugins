@@ -1,5 +1,5 @@
 <template>
-  <h1 class="h1">拓扑图演示页面</h1>
+  <h1 class="h1">集群拓扑图演示页面</h1>
   <div id="topo-container" class="container"></div>
 
   <el-drawer class="drawer" v-model="drawer" :title="title" :direction="direction" :before-close="handleClose">
@@ -17,7 +17,7 @@ const direction = 'rtl'
 const title = ref("")
 
 function handleClose() {
- drawer.value = false
+  drawer.value = false
 }
 
 onMounted(() => {
@@ -58,8 +58,9 @@ function initGraph() {
     width: document.getElementById("topo-container")!.clientWidth,
     height: document.getElementById("topo-container")!.clientHeight,
     modes: {
-      default: ['drag-canvas', 'zoom-canvas', 'drag-node', 'click-select'],
-    }
+      default: ['drag-canvas', 'zoom-canvas', "click-select",
+       ],
+    },
   });
   graph.on("nodeselectchange", (e) => {
     if (e.select) {
@@ -67,7 +68,7 @@ function initGraph() {
       console.log("click node:", node_id);
 
       title.value = "I am " + node_id;
-      drawer.value = drawer.value?false:true;
+      drawer.value = drawer.value ? false : true;
     } else {
       console.log("node unselected")
     }
@@ -102,5 +103,4 @@ function initGraph() {
 .drawer {
   height: 100%;
 }
-
 </style>
