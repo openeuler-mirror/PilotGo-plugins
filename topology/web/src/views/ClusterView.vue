@@ -1,7 +1,6 @@
 <template>
   <h1 class="h1">集群拓扑图演示页面</h1>
   <div id="topo-container" class="container"></div>
-
   <el-drawer class="drawer" v-model="drawer" :title="title" :direction="direction" :before-close="handleClose">
     <span>Hi, there!</span>
   </el-drawer>
@@ -21,8 +20,7 @@ function handleClose() {
 }
 
 onMounted(() => {
-  initGraph()
-
+  initGraph();
 })
 
 function initGraph() {
@@ -59,7 +57,7 @@ function initGraph() {
     height: document.getElementById("topo-container")!.clientHeight,
     modes: {
       default: ['drag-canvas', 'zoom-canvas', "click-select",
-       ],
+      ],
     },
   });
   graph.on("nodeselectchange", (e) => {
