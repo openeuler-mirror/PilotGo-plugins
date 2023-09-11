@@ -64,7 +64,7 @@ function initGraph() {
   });
   graph.on("nodeselectchange", (e) => {
     if (e.select) {
-      let node_id = e.target._cfg!.id
+      let node_id = (e.target as any)._cfg!.id
       console.log("click node:", node_id);
 
       title.value = "I am " + node_id;
