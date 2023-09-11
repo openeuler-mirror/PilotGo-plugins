@@ -41,6 +41,7 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 	var process_errorlist []error
 
 	// 获取运行状态agent的数目
+	// TODO: 暂时默认topo agent运行状态的数目与pilotgo agent运行状态的数目一致
 	agentmanager.Topo.AgentMap.Range(func(key, value any) bool {
 		agent := value.(*agentmanager.Agent_m)
 		if agent.State != 2 {
@@ -67,7 +68,6 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 			go func() {
 				defer wg.Done()
 				agent := value.(*agentmanager.Agent_m)
-				var wgnode sync.WaitGroup
 
 				if agent.Host_2 != nil && agent.Processes_2 != nil && agent.Netconnections_2 != nil {
 					err := d.Create_node_entities(agent, nodes, create_node_rwlock)
@@ -77,9 +77,6 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 
 					for {
 						if agent_node_count == agent_count {
-							wgnode.Add(1)
-							wgnode.Done()
-							wgnode.Wait()
 							break
 						}
 						// ttcode
@@ -211,7 +208,7 @@ func (d *DataProcesser) Create_edge_entities(agent *agentmanager.Agent_m, edges 
 
 	for _, sub := range nodes_map[meta.NODE_PROCESS] {
 		for _, obj := range nodes_map[meta.NODE_PROCESS] {
-			if obj.Metrics["Pid"] == sub.Metrics["Ppid"] {
+			if obj.Metrics["Pid"] == sub.Metrics["Ppid"] && obj.UUID == sub.UUID {
 				belong_edge := &meta.Edge{
 					ID:   fmt.Sprintf("%s_%s_%s", sub.ID, meta.EDGE_BELONG, obj.ID),
 					Type: meta.EDGE_BELONG,
