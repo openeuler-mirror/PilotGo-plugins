@@ -19,6 +19,8 @@ type Agent_m struct {
 	Processes_2        []*meta.Process       `json:"processes"`
 	Netconnections_2   []*meta.Netconnection `json:"netconnections"`
 	AddrInterfaceMap_2 map[string][]string   `json:"addrinterfacemap"`
+	Disks_2            []*meta.Disk          `json:"disks"`
+	Cpus_2             []*meta.Cpu           `json:"cpus"`
 }
 
 func (t *Topoclient) AddAgent(a *Agent_m) {

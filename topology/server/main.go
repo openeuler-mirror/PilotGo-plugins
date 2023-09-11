@@ -24,6 +24,7 @@ func main() {
 		init arangodb
 		TODO:
 	*/
+	agentmanager.Topo.InitArangodb()
 
 	/*
 		init machine agent list

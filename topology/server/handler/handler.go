@@ -10,7 +10,7 @@ import (
 )
 
 func SingleHostHandle(ctx *gin.Context) {
-	nodes, edges, collect_errlist, process_errlist := service.DataProcessService()
+	nodes, edges, collect_errlist, process_errlist := service.SingleHostService()
 
 	if len(collect_errlist) != 0 || len(process_errlist) != 0 {
 		for i, cerr := range collect_errlist {

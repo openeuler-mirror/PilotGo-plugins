@@ -6,40 +6,48 @@ import (
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/collector"
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/conf"
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/utils"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"github.com/pkg/errors"
 )
 
 func DataCollectorService() (utils.Data_collector, error) {
 	datasource := conf.Config().Topo.Datasource
 	switch datasource {
 	case "gopsutil":
-		gops := &collector.PsutilCollector{}
+		gops := collector.CreatePsutilCollector()
 		err := gops.Collect_host_data()
 		if err != nil {
-			filepath, line, funcname := utils.CallerInfo(err)
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
-			return nil, fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+			err = errors.Wrap(err, "**2")
+			return nil, err
 		}
 
 		err = gops.Collect_netconnection_all_data()
 		if err != nil {
-			filepath, line, funcname := utils.CallerInfo(err)
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
-			return nil, fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+			err = errors.Wrap(err, "**2")
+			return nil, err
 		}
 
 		err = gops.Collect_process_instant_data()
 		if err != nil {
-			filepath, line, funcname := utils.CallerInfo(err)
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
-			return nil, fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+			err = errors.Wrap(err, "**2")
+			return nil, err
 		}
 
 		err = gops.Collect_addrInterfaceMap_data()
 		if err != nil {
-			filepath, line, funcname := utils.CallerInfo(err)
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
-			return nil, fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+			err = errors.Wrap(err, "**2")
+			return nil, err
+		}
+
+		err = gops.Collect_disk_data()
+		if err != nil {
+			err = errors.Wrap(err, "**2")
+			return nil, err
+		}
+
+		err = gops.Collect_cpu_data()
+		if err != nil {
+			err = errors.Wrap(err, "**2")
+			return nil, err
 		}
 
 		return gops, nil

@@ -26,14 +26,17 @@ func (t *Topoclient) InitMachineList() {
 
 	resp, err := httputils.Get(url, nil)
 	if err != nil {
-		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
+		err = errors.Errorf("%s**2", err)
+		fmt.Printf("%+v\n", err) // err top
+		// errors.EORE(err)
 		os.Exit(1)
 	}
 
 	statuscode := resp.StatusCode
 	if statuscode != 200 {
-		fmt.Printf("%+v\n", errors.New("http返回状态码异常**2")) // err top
-
+		err = errors.New("http返回状态码异常**2")
+		fmt.Printf("%+v\n", err) // err top
+		// errors.EORE(err)
 	}
 
 	result := &struct {
@@ -43,7 +46,9 @@ func (t *Topoclient) InitMachineList() {
 
 	err = json.Unmarshal(resp.Body, result)
 	if err != nil {
-		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
+		err = errors.Errorf("%s**2", err.Error())
+		fmt.Printf("%+v\n", err) // err top
+		// errors.EORE(err)
 	}
 
 	for _, m := range result.Data.([]interface{}) {
@@ -57,7 +62,9 @@ func (t *Topoclient) InitMachineList() {
 func (t *Topoclient) InitLogger() {
 	err := logger.Init(conf.Config().Logopts)
 	if err != nil {
-		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
+		err = errors.Errorf("%s**2", err.Error())
+		fmt.Printf("%+v\n", err) // err top
+		// errors.EORE(err)
 		os.Exit(1)
 	}
 }
@@ -68,4 +75,8 @@ func (t *Topoclient) InitPluginClient() {
 	Topo = &Topoclient{
 		Sdkmethod: PluginClient,
 	}
+}
+
+func (t *Topoclient) InitArangodb() {
+
 }

@@ -1,11 +1,12 @@
 package meta
 
 const (
-	NODE_HOST    = "host"
-	NODE_PROCESS = "process"
-	NODE_THREAD  = "thread"
-	NODE_NET     = "net"
-	NODE_APP     = "app"
+	NODE_HOST     = "host"
+	NODE_PROCESS  = "process"
+	NODE_THREAD   = "thread"
+	NODE_NET      = "net"
+	NODE_APP      = "app"
+	NODE_RESOURCE = "resource"
 )
 
 const (

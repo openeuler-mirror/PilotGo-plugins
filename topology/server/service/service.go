@@ -6,20 +6,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-func DataProcessService() ([]*meta.Node, []*meta.Edge, []error, []error) {
+func SingleHostService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 	dataprocesser := processor.CreateDataProcesser()
 	nodes, edges, collect_errlist, process_errlist := dataprocesser.Process_data()
 
 	if len(collect_errlist) != 0 || len(process_errlist) != 0 {
 		for i, cerr := range collect_errlist {
-			collect_errlist[i] = errors.Wrap(cerr, "**3")
+			collect_errlist[i] = errors.Wrap(cerr, "**4")
 		}
 
 		for i, perr := range process_errlist {
-			process_errlist[i] = errors.Wrap(perr, "**7")
+			process_errlist[i] = errors.Wrap(perr, "**8")
 		}
 	}
 
+	return nodes.Nodes, edges.Edges, collect_errlist, process_errlist
 	// if len(collect_errlist) != 0 && len(process_errlist) != 0 {
 	// 	for i, cerr := range collect_errlist {
 	// 		collect_errlist[i] = errors.Wrap(cerr, "**3")
@@ -43,6 +44,4 @@ func DataProcessService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 
 	// 	return nil, nil, nil, process_errlist
 	// }
-
-	return nodes.Nodes, edges.Edges, collect_errlist, process_errlist
 }

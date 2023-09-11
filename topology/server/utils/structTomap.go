@@ -32,6 +32,9 @@ func StructToMap(obj interface{}) map[string]string {
 		case reflect.Uint64:
 			fieldvalue_uint64 := fieldValue.Interface().(uint64)
 			m[field.Name] = strconv.Itoa(int(fieldvalue_uint64))
+		case reflect.Float64:
+			fieldvalue_float64 := fieldValue.Interface().(float64)
+			m[field.Name] = strconv.FormatFloat(fieldvalue_float64, 'f', -1, 64)
 		}
 	}
 
@@ -162,3 +165,48 @@ func NetToMap(net *meta.Netconnection) *map[string]string {
 // 		"Fifoout":     strconv.Itoa(int(net.Fifoout)),
 // 	}
 // }
+
+func DiskToMap(disk *meta.Disk) *map[string]string {
+	disk_map := make(map[string]string)
+	partition_map := StructToMap(disk.Partition)
+	iocounter_map := StructToMap(disk.IOcounter)
+	usage_map := StructToMap(disk.Usage)
+
+	for k, v := range partition_map {
+		disk_map[k] = v
+	}
+
+	for k, v := range iocounter_map {
+		if k != "Name" {
+			disk_map[k] = v
+		}
+	}
+
+	for k, v := range usage_map {
+		if k != "Path" && k != "Fstype" {
+			disk_map[k] = v
+		}
+	}
+
+	return &disk_map
+}
+
+func CpuToMap(cpu *meta.Cpu) *map[string]string {
+	cpu_map := make(map[string]string)
+	info_map := StructToMap(cpu.Info)
+	time_map := StructToMap(cpu.Time)
+
+	for k, v := range info_map {
+		if k != "Flags" {
+			cpu_map[k] = v
+		}
+	}
+
+	for k, v := range time_map {
+		if k != "CPU" {
+			cpu_map[k] = v
+		}
+	}
+
+	return &cpu_map
+}
