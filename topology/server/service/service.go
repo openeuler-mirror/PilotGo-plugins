@@ -22,16 +22,34 @@ func SingleHostService(uuid string) ([]*meta.Node, []*meta.Edge, []error, []erro
 	}
 
 	single_nodes := []*meta.Node{}
-	for _, node := range nodes.Nodes {
-		if node.UUID == uuid {
-			single_nodes = append(single_nodes, node)
+	for _, node1 := range nodes.Nodes {
+		if node1.UUID == uuid {
+			repeat_node := false
+			for _, node2 := range single_nodes {
+				if node2.ID == node1.ID {
+					repeat_node = true
+				}
+			}
+
+			if !repeat_node {
+				single_nodes = append(single_nodes, node1)
+			}
 		}
 	}
 
 	single_edges := []*meta.Edge{}
-	for _, edge := range edges.Edges {
-		if strings.Split(edge.Src, "_")[0] == uuid {
-			single_edges = append(single_edges, edge)
+	for _, edge1 := range edges.Edges {
+		if strings.Split(edge1.Src, "_")[0] == uuid {
+			repeat_edge := false
+			for _, edge2 := range single_edges {
+				if edge2.ID == edge1.ID {
+					repeat_edge = true
+				}
+			}
+
+			if !repeat_edge {
+				single_edges = append(single_edges, edge1)
+			}
 		}
 	}
 
@@ -86,8 +104,26 @@ func MultiHostService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 		if edge.Type == "server" || edge.Type == "client" || edge.Type == "tcp" || edge.Type == "udp" {
 			multi_edges = append(multi_edges, edge)
 
-			multi_nodes = append(multi_nodes, nodes.Lookup[edge.Src])
-			multi_nodes = append(multi_nodes, nodes.Lookup[edge.Dst])
+			repeat_src := false
+			repeat_dst := false
+			for _, node := range multi_nodes {
+				if node.ID == nodes.Lookup[edge.Src].ID {
+					repeat_src = true
+				}
+
+				if node.ID == nodes.Lookup[edge.Dst].ID {
+					repeat_dst = true
+				}
+			}
+
+			if !repeat_src {
+				multi_nodes = append(multi_nodes, nodes.Lookup[edge.Src])
+			}
+
+			if !repeat_dst {
+				multi_nodes = append(multi_nodes, nodes.Lookup[edge.Dst])
+			}
+
 		}
 	}
 
