@@ -44,7 +44,7 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 	// TODO: 暂时默认topo agent运行状态的数目与pilotgo agent运行状态的数目一致
 	agentmanager.Topo.AgentMap.Range(func(key, value any) bool {
 		agent := value.(*agentmanager.Agent_m)
-		if agent.State != 2 {
+		if agent.Host_2 != nil {
 			agent_count++
 		}
 
