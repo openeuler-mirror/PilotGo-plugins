@@ -24,6 +24,7 @@ func InitWebServer() {
 func InitRouter(router *gin.Engine) {
 	api := router.Group("/plugin/api")
 	{
-		api.GET("/single_host", SingleHostHandle)
+		api.GET("/single_host/:uuid", SingleHostHandle)
+		api.GET("/multi_host", MultiHostHandle)
 	}
 }
