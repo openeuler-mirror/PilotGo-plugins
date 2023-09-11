@@ -1,6 +1,8 @@
 package meta
 
 import (
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
 )
@@ -86,8 +88,13 @@ type Netconnection struct {
 type NetIOcounters struct {
 }
 
-type Resource struct {
+type Disk struct {
+	Partition disk.PartitionStat  `json:"partition"`
+	IOcounter disk.IOCountersStat `json:"iocounter"`
+	Usage     disk.UsageStat      `json:"usage"`
 }
 
-type Container struct {
+type Cpu struct {
+	Info cpu.InfoStat  `json:"info"`
+	Time cpu.TimesStat `json:"time"`
 }

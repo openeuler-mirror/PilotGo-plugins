@@ -167,6 +167,33 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 		mu.Unlock()
 	}
 
+	for _, disk := range agent.Disks_2 {
+		disk_node := &meta.Node{
+			ID:      fmt.Sprintf("%s_%s_%s", agent.UUID, meta.NODE_RESOURCE, disk.Partition.Device),
+			Name:    disk.Partition.Device,
+			Type:    meta.NODE_RESOURCE,
+			UUID:    agent.UUID,
+			Metrics: *utils.DiskToMap(disk),
+		}
+
+		mu.Lock()
+		nodes.Add(disk_node)
+		mu.Unlock()
+	}
+
+	for _, cpu := range agent.Cpus_2 {
+		cpu_node := &meta.Node{
+			ID:      fmt.Sprintf("%s_%s_%s", agent.UUID, meta.NODE_RESOURCE, "CPU"+strconv.Itoa(int(cpu.Info.CPU))),
+			Name:    "CPU" + strconv.Itoa(int(cpu.Info.CPU)),
+			Type:    meta.NODE_RESOURCE,
+			UUID:    agent.UUID,
+			Metrics: *utils.CpuToMap(cpu),
+		}
+
+		mu.Lock()
+		nodes.Add(cpu_node)
+		mu.Unlock()
+	}
 	agent_node_count_rwlock.Lock()
 	agent_node_count++
 	agent_node_count_rwlock.Unlock()
@@ -187,12 +214,30 @@ func (d *DataProcesser) Create_edge_entities(agent *agentmanager.Agent_m, edges 
 			nodes_map[meta.NODE_THREAD] = append(nodes_map[meta.NODE_THREAD], node)
 		case meta.NODE_NET:
 			nodes_map[meta.NODE_NET] = append(nodes_map[meta.NODE_NET], node)
+		case meta.NODE_RESOURCE:
+			nodes_map[meta.NODE_RESOURCE] = append(nodes_map[meta.NODE_RESOURCE], node)
 		}
 	}
 
 	for _, obj := range nodes_map[meta.NODE_HOST] {
 		for _, sub := range nodes_map[meta.NODE_PROCESS] {
-			if sub.Metrics["Ppid"] == "1" && sub.UUID == obj.UUID {
+			if sub.Metrics["Pid"] == "1" && sub.UUID == obj.UUID {
+				belong_edge := &meta.Edge{
+					ID:   fmt.Sprintf("%s_%s_%s", sub.ID, meta.EDGE_BELONG, obj.ID),
+					Type: meta.EDGE_BELONG,
+					Src:  sub.ID,
+					Dst:  obj.ID,
+					Dir:  true,
+				}
+
+				edges.Add(belong_edge)
+			}
+		}
+	}
+
+	for _, obj := range nodes_map[meta.NODE_HOST] {
+		for _, sub := range nodes_map[meta.NODE_RESOURCE] {
+			if sub.UUID == obj.UUID {
 				belong_edge := &meta.Edge{
 					ID:   fmt.Sprintf("%s_%s_%s", sub.ID, meta.EDGE_BELONG, obj.ID),
 					Type: meta.EDGE_BELONG,

@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/net"
 	"github.com/shirou/gopsutil/process"
 )
@@ -9,6 +11,7 @@ type Data_collector interface {
 	Collect_process_instant_data() error
 	Collect_host_data() error
 	Collect_netconnection_all_data() error
+	Collect_addrInterfaceMap_data() error
 }
 
 type Host struct {
@@ -92,8 +95,13 @@ type Netconnection struct {
 type NetIOcounters struct {
 }
 
-type Resource struct {
+type Disk struct {
+	Partition disk.PartitionStat  `json:"partition"`
+	IOcounter disk.IOCountersStat `json:"iocounter"`
+	Usage     disk.UsageStat      `json:"usage"`
 }
 
-type Container struct {
+type Cpu struct {
+	Info cpu.InfoStat  `json:"info"`
+	Time cpu.TimesStat `json:"time"`
 }

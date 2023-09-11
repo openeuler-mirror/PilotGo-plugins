@@ -8,6 +8,9 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/utils"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"github.com/pkg/errors"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/process"
 	"github.com/shirou/gopsutil/v3/host"
 	"github.com/shirou/gopsutil/v3/net"
@@ -18,6 +21,12 @@ type PsutilCollector struct {
 	Processes_1        []*utils.Process
 	Netconnections_1   []*utils.Netconnection
 	AddrInterfaceMap_1 map[string][]string
+	Disks_1            []*utils.Disk
+	Cpus_1             []*utils.Cpu
+}
+
+func CreatePsutilCollector() *PsutilCollector {
+	return &PsutilCollector{}
 }
 
 func (pc *PsutilCollector) Collect_host_data() error {
@@ -245,6 +254,72 @@ func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 	}
 
 	pc.AddrInterfaceMap_1 = addrinterfacemap
+
+	return nil
+}
+
+func (pc *PsutilCollector) Collect_disk_data() error {
+	partitions, err := disk.Partitions(false)
+	if err != nil {
+		pro_c, filepath, line, ok := runtime.Caller(0)
+		if ok {
+			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		}
+		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+	}
+
+	for _, partition := range partitions {
+		disk_entity := &utils.Disk{}
+		disk_entity.Partition = partition
+
+		iocounter, err := disk.IOCounters([]string{disk_entity.Partition.Device}...)
+		if err != nil {
+			pro_c, filepath, line, ok := runtime.Caller(0)
+			if ok {
+				logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+			}
+			return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		}
+
+		disk_entity.IOcounter = iocounter[partition.Device]
+
+		usage, err := disk.Usage(partition.Mountpoint)
+		if err != nil {
+			pro_c, filepath, line, ok := runtime.Caller(0)
+			if ok {
+				logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+			}
+			return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		}
+
+		disk_entity.Usage = *usage
+
+		pc.Disks_1 = append(pc.Disks_1, disk_entity)
+	}
+
+	return nil
+}
+
+func (pc *PsutilCollector) Collect_cpu_data() error {
+	cputimes, err := cpu.Times(true)
+	if err != nil {
+		err = errors.Errorf("failed to collect cpu times: %s", err.Error())
+		return err
+	}
+
+	for i, cputime := range cputimes {
+		cpu_entity := &utils.Cpu{}
+		cpu_entity.Time = cputime
+
+		cpuinfos, err := cpu.Info()
+		if err != nil {
+			err = errors.Errorf("failed to collect cpu info: %s", err.Error())
+			return err
+		}
+		cpu_entity.Info = cpuinfos[i]
+
+		pc.Cpus_1 = append(pc.Cpus_1, cpu_entity)
+	}
 
 	return nil
 }
