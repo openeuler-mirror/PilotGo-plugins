@@ -13,6 +13,7 @@
     "@antv/g6": "^4.8.21",
     "@vue/reactivity": "^3.3.4",
     "@vue/shared": "^3.3.4",
+    "axios": "^1.5.0",
     "element-plus": "^2.3.12",
     "pinia": "^2.1.4",
     "vue": "^3.3.4",

@@ -76,6 +76,7 @@ func MultiHostHandle(ctx *gin.Context) {
 			"error": err,
 			"data":  nil,
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
