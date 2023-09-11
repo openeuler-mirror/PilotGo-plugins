@@ -29,6 +29,7 @@ func SingleHostHandle(ctx *gin.Context) {
 	if len(nodes) == 0 || len(edges) == 0 {
 		err := errors.New("nodes list is null or edges list is null**0")
 		fmt.Printf("%+v\n", err)
+		// errors.EORE(err)
 
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":  -1,
