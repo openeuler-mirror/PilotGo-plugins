@@ -18,6 +18,7 @@ type Agent_m struct {
 	Host_2             *meta.Host            `json:"host"`
 	Processes_2        []*meta.Process       `json:"processes"`
 	Netconnections_2   []*meta.Netconnection `json:"netconnections"`
+	NetIOcounters_2    []*meta.NetIOcounter  `json:"netiocounters"`
 	AddrInterfaceMap_2 map[string][]string   `json:"addrinterfacemap"`
 	Disks_2            []*meta.Disk          `json:"disks"`
 	Cpus_2             []*meta.Cpu           `json:"cpus"`

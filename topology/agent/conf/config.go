@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
 
@@ -40,7 +41,9 @@ var global_config ServerConfig
 func init() {
 	err := readConfig(config_file(), &global_config)
 	if err != nil {
-		fmt.Printf("")
+		err = errors.Wrap(err, "**2")
+		fmt.Printf("%+v\n", err) // err top
+		// errors.EORE(err)
 		os.Exit(-1)
 	}
 }
@@ -52,13 +55,13 @@ func Config() *ServerConfig {
 func readConfig(file string, config interface{}) error {
 	bytes, err := os.ReadFile(file)
 	if err != nil {
-		fmt.Printf("open %s failed! err = %s\n", file, err.Error())
+		err = errors.Errorf("open %s failed! err = %s**2", file, err.Error())
 		return err
 	}
 
 	err = yaml.Unmarshal(bytes, config)
 	if err != nil {
-		fmt.Printf("yaml Unmarshal %s failed!\n", string(bytes))
+		err = errors.Errorf("yaml Unmarshal %s failed**2", string(bytes))
 		return err
 	}
 	return nil

@@ -34,9 +34,10 @@ func SingleHostHandle(ctx *gin.Context) {
 
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":  -1,
-			"error": err,
+			"error": err.Error(),
 			"data":  nil,
 		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
@@ -73,7 +74,7 @@ func MultiHostHandle(ctx *gin.Context) {
 
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"code":  -1,
-			"error": err,
+			"error": err.Error(),
 			"data":  nil,
 		})
 		return

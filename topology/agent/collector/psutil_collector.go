@@ -20,6 +20,7 @@ type PsutilCollector struct {
 	Host_1             *utils.Host
 	Processes_1        []*utils.Process
 	Netconnections_1   []*utils.Netconnection
+	NetIOcounters_1    []*utils.NetIOcounter
 	AddrInterfaceMap_1 map[string][]string
 	Disks_1            []*utils.Disk
 	Cpus_1             []*utils.Cpu
@@ -78,9 +79,8 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 
 	processes_0, err := process.Processes()
 	if err != nil {
-		pro_c, filepath, line, _ := runtime.Caller(0)
-		logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
-		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		err = errors.Errorf("failed to get processes: %s", err)
+		return err
 	}
 
 	for _, p0 := range processes_0 {
@@ -209,11 +209,8 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 	connections, err := net.Connections("all")
 	if err != nil {
-		pro_c, filepath, line, ok := runtime.Caller(0)
-		if ok {
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
-		}
-		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		err = errors.Errorf("failed to run net.connections: %s", err)
+		return err
 	}
 
 	for _, c := range connections {
@@ -239,11 +236,8 @@ func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		pro_c, filepath, line, ok := runtime.Caller(0)
-		if ok {
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
-		}
-		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		err = errors.Errorf("failed to run net.interfaces: %s", err)
+		return err
 	}
 
 	addrinterfacemap := map[string][]string{}
@@ -258,14 +252,39 @@ func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 	return nil
 }
 
+func (pc *PsutilCollector) Collect_interfaces_io_data() error {
+	iocounters, err := net.IOCounters(true)
+	if err != nil {
+		err = errors.Errorf("failed to collect interfaces io: %s", err.Error())
+		return err
+	}
+
+	for _, iocounter := range iocounters {
+		interfaceIO := &utils.NetIOcounter{}
+
+		interfaceIO.Name = iocounter.Name
+		interfaceIO.BytesRecv = iocounter.BytesRecv
+		interfaceIO.BytesSent = iocounter.BytesSent
+		interfaceIO.Dropin = iocounter.Dropin
+		interfaceIO.Dropout = iocounter.Dropout
+		interfaceIO.Errin = iocounter.Errin
+		interfaceIO.Errout = iocounter.Errout
+		interfaceIO.Fifoin = iocounter.Fifoin
+		interfaceIO.Fifoout = iocounter.Fifoout
+		interfaceIO.PacketsRecv = iocounter.PacketsRecv
+		interfaceIO.PacketsSent = iocounter.PacketsSent
+
+		pc.NetIOcounters_1 = append(pc.NetIOcounters_1, interfaceIO)
+	}
+
+	return nil
+}
+
 func (pc *PsutilCollector) Collect_disk_data() error {
 	partitions, err := disk.Partitions(false)
 	if err != nil {
-		pro_c, filepath, line, ok := runtime.Caller(0)
-		if ok {
-			logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
-		}
-		return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+		err = errors.Errorf("failed to collect disk partitions: %s", err.Error())
+		return err
 	}
 
 	for _, partition := range partitions {
@@ -274,22 +293,16 @@ func (pc *PsutilCollector) Collect_disk_data() error {
 
 		iocounter, err := disk.IOCounters([]string{disk_entity.Partition.Device}...)
 		if err != nil {
-			pro_c, filepath, line, ok := runtime.Caller(0)
-			if ok {
-				logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
-			}
-			return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+			err = errors.Errorf("failed to collect disk io: %s", err.Error())
+			return err
 		}
 
 		disk_entity.IOcounter = iocounter[partition.Device]
 
 		usage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
-			pro_c, filepath, line, ok := runtime.Caller(0)
-			if ok {
-				logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
-			}
-			return fmt.Errorf("file: %s, line: %d, func: %s, err: %s", filepath, line-2, runtime.FuncForPC(pro_c).Name(), err.Error())
+			err = errors.Errorf("failed to collect disk usage: %s", err.Error())
+			return err
 		}
 
 		disk_entity.Usage = *usage
