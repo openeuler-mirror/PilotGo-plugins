@@ -76,115 +76,6 @@ function parse(data: any) {
 }
 
 function initGraph(data: any) {
-  // const data = {
-  //   "id": "Modeling Methods",
-  //   "children": [
-  //     {
-  //       "id": "Classification",
-  //       "children": [
-  //         {
-  //           "id": "Logistic regression"
-  //         },
-  //         {
-  //           "id": "Linear discriminant analysis"
-  //         },
-  //         {
-  //           "id": "Rules"
-  //         },
-  //         {
-  //           "id": "Decision trees"
-  //         },
-  //         {
-  //           "id": "Naive Bayes"
-  //         },
-  //         {
-  //           "id": "K nearest neighbor"
-  //         },
-  //         {
-  //           "id": "Probabilistic neural network"
-  //         },
-  //         {
-  //           "id": "Support vector machine"
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       "id": "Consensus",
-  //       "children": [
-  //         {
-  //           "id": "Models diversity",
-  //           "children": [
-  //             {
-  //               "id": "Different initializations"
-  //             },
-  //             {
-  //               "id": "Different parameter choices"
-  //             },
-  //             {
-  //               "id": "Different architectures"
-  //             },
-  //             {
-  //               "id": "Different modeling methods"
-  //             },
-  //             {
-  //               "id": "Different training sets"
-  //             },
-  //             {
-  //               "id": "Different feature sets"
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           "id": "Methods",
-  //           "children": [
-  //             {
-  //               "id": "Classifier selection"
-  //             },
-  //             {
-  //               "id": "Classifier fusion"
-  //             }
-  //           ]
-  //         },
-  //         {
-  //           "id": "Common",
-  //           "children": [
-  //             {
-  //               "id": "Bagging"
-  //             },
-  //             {
-  //               "id": "Boosting"
-  //             },
-  //             {
-  //               "id": "AdaBoost"
-  //             }
-  //           ]
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       "id": "Regression",
-  //       "children": [
-  //         {
-  //           "id": "Multiple linear regression"
-  //         },
-  //         {
-  //           "id": "Partial least squares"
-  //         },
-  //         {
-  //           "id": "Multi-layer feedforward neural network"
-  //         },
-  //         {
-  //           "id": "General regression neural network"
-  //         },
-  //         {
-  //           "id": "Support vector regression"
-  //         }
-  //       ]
-  //     }
-  //   ]
-  // }
-
-  // let graph = new G6.Graph({
   let graph = new G6.TreeGraph({
     container: "topo-container",
     width: document.getElementById("topo-container")!.clientWidth,
@@ -194,7 +85,7 @@ function initGraph(data: any) {
       // default: ['drag-canvas', 'zoom-canvas',
         {
           type: 'collapse-expand',
-          onChange: function onChange(item, collapsed) {
+          onChange: function onChange(item:any, collapsed) {
             const data = item.getModel();
             data.collapsed = collapsed;
             return true;
@@ -204,7 +95,7 @@ function initGraph(data: any) {
     },
     layout: {
       type: 'dendrogram',
-      direction: 'LR', // H / V / LR / RL / TB / BT
+      direction: 'LR',
       nodeSep: 30,
       rankSep: 100,
     },
