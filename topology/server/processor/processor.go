@@ -194,6 +194,21 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 		nodes.Add(cpu_node)
 		mu.Unlock()
 	}
+
+	for _, ifaceio := range agent.NetIOcounters_2 {
+		iface_node := &meta.Node{
+			ID:      fmt.Sprintf("%s_%s_%s", agent.UUID, meta.NODE_RESOURCE, "NC"+ifaceio.Name),
+			Name:    "NC" + ifaceio.Name,
+			Type:    meta.NODE_RESOURCE,
+			UUID:    agent.UUID,
+			Metrics: *utils.InterfaceToMap(ifaceio),
+		}
+
+		mu.Lock()
+		nodes.Add(iface_node)
+		mu.Unlock()
+	}
+
 	agent_node_count_rwlock.Lock()
 	agent_node_count++
 	agent_node_count_rwlock.Unlock()
@@ -219,6 +234,7 @@ func (d *DataProcesser) Create_edge_entities(agent *agentmanager.Agent_m, edges 
 		}
 	}
 
+	// TODO: edge实例重复
 	for _, obj := range nodes_map[meta.NODE_HOST] {
 		for _, sub := range nodes_map[meta.NODE_PROCESS] {
 			if sub.Metrics["Pid"] == "1" && sub.UUID == obj.UUID {

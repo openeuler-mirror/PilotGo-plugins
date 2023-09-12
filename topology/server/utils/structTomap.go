@@ -210,3 +210,16 @@ func CpuToMap(cpu *meta.Cpu) *map[string]string {
 
 	return &cpu_map
 }
+
+func InterfaceToMap(iface *meta.NetIOcounter) *map[string]string {
+	iface_map := make(map[string]string)
+	old_map := StructToMap(iface)
+
+	for k, v := range old_map {
+		if k != "Name" {
+			iface_map[k] = v
+		}
+	}
+
+	return &iface_map
+}

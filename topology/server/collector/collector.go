@@ -83,6 +83,7 @@ func (d *DataCollector) GetCollectDataFromTopoAgent(agent *agentmanager.Agent_m)
 		Host_1             *meta.Host
 		Processes_1        []*meta.Process
 		Netconnections_1   []*meta.Netconnection
+		NetIOcounters_1    []*meta.NetIOcounter
 		AddrInterfaceMap_1 map[string][]string
 		Disks_1            []*meta.Disk
 		Cpus_1             []*meta.Cpu
@@ -92,6 +93,7 @@ func (d *DataCollector) GetCollectDataFromTopoAgent(agent *agentmanager.Agent_m)
 	agent.Host_2 = collectdata.Host_1
 	agent.Processes_2 = collectdata.Processes_1
 	agent.Netconnections_2 = collectdata.Netconnections_1
+	agent.NetIOcounters_2 = collectdata.NetIOcounters_1
 	agent.AddrInterfaceMap_2 = collectdata.AddrInterfaceMap_1
 	agent.Disks_2 = collectdata.Disks_1
 	agent.Cpus_2 = collectdata.Cpus_1

@@ -85,7 +85,18 @@ type Netconnection struct {
 	Pid    int32   `json:"pid"`
 }
 
-type NetIOcounters struct {
+type NetIOcounter struct {
+	Name        string `json:"name"`
+	BytesSent   uint64 `json:"bytesSent"`
+	BytesRecv   uint64 `json:"bytesRecv"`
+	PacketsSent uint64 `json:"packetsSent"`
+	PacketsRecv uint64 `json:"packetsRecv"`
+	Errin       uint64 `json:"errin"`
+	Errout      uint64 `json:"errout"`
+	Dropin      uint64 `json:"dropin"`
+	Dropout     uint64 `json:"dropout"`
+	Fifoin      uint64 `json:"fifoin"`
+	Fifoout     uint64 `json:"fifoout"`
 }
 
 type Disk struct {
