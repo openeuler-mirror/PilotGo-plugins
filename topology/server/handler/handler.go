@@ -50,6 +50,46 @@ func SingleHostHandle(ctx *gin.Context) {
 	})
 }
 
+func SingleHostTreeHandle(ctx *gin.Context) {
+	uuid := ctx.Param("uuid")
+	nodes, collect_errlist, process_errlist := service.SingleHostTreeService(uuid)
+
+	if len(collect_errlist) != 0 || len(process_errlist) != 0 {
+		for i, cerr := range collect_errlist {
+			collect_errlist[i] = errors.Wrap(cerr, "**4")
+			fmt.Printf("%+v\n", collect_errlist[i])
+			// errors.EORE(collect_errlist[i])
+		}
+
+		for i, perr := range process_errlist {
+			process_errlist[i] = errors.Wrap(perr, "**10")
+			fmt.Printf("%+v\n", perr)
+			// errors.EORE(process_errlist[i])
+		}
+	}
+
+	if nodes == nil {
+		err := errors.New("node tree is null**0")
+		fmt.Printf("%+v\n", err)
+		// errors.EORE(err)
+
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":  -1,
+			"error": err.Error(),
+			"data":  nil,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":  0,
+		"error": nil,
+		"data": map[string]interface{}{
+			"tree": nodes,
+		},
+	})
+}
+
 func MultiHostHandle(ctx *gin.Context) {
 	nodes, edges, collect_errlist, process_errlist := service.MultiHostService()
 
