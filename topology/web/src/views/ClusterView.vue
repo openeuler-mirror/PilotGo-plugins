@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import G6 from '@antv/g6';
 import { ref, onMounted } from "vue";
-
+import { topo } from '../request/api';
 
 let drawer = ref(false)
 const direction = 'rtl'
@@ -19,45 +19,53 @@ function handleClose() {
   drawer.value = false
 }
 
-onMounted(() => {
-  initGraph();
+onMounted(async () => {
+  try {
+    const data = await topo.multi_host_topo();
+    console.log(data.data);
+    let d = data.data
+    for (let i = 0; i < d.edges.length; i++) {
+      d.edges[i].source = d.edges[i].Src
+      d.edges[i].target = d.edges[i].Dst
+    }
+
+    initGraph(d);
+  } catch (error) {
+    console.error(error)
+  }
 })
 
-function initGraph() {
-  const data = {
-    canvasWidth: 0,
-    canvasHeight: 0,
-
-    // 节点
-    nodes: [
-      {
-        id: 'node1',
-        x: 100,
-        y: 200,
-      },
-      {
-        id: 'node2',
-        x: 300,
-        y: 200,
-      },
-    ],
-    // 边集
-    edges: [
-      // 表示一条从 node1 节点连接到 node2 节点的边
-      {
-        source: 'node1',
-        target: 'node2',
-      },
-    ],
-  };
+function initGraph(data: any) {
+  // const data = {
+  //   // 节点
+  //   nodes: [
+  //     {
+  //       id: 'node1',
+  //       x: 100,
+  //       y: 200,
+  //     },
+  //     {
+  //       id: 'node2',
+  //       x: 300,
+  //       y: 200,
+  //     },
+  //   ],
+  //   // 边集
+  //   edges: [
+  //     // 表示一条从 node1 节点连接到 node2 节点的边
+  //     {
+  //       source: 'node1',
+  //       target: 'node2',
+  //     },
+  //   ],
+  // };
 
   let graph = new G6.Graph({
     container: "topo-container",
     width: document.getElementById("topo-container")!.clientWidth,
     height: document.getElementById("topo-container")!.clientHeight,
     modes: {
-      default: ['drag-canvas', 'zoom-canvas', "click-select",
-      ],
+      default: ['drag-canvas', 'zoom-canvas', "click-select", "drag-node"],
     },
   });
   graph.on("nodeselectchange", (e) => {
