@@ -22,58 +22,14 @@ function handleClose() {
 
 onMounted(async () => {
   try {
-    const data = await topo.single_host_topo("8140418e-dd3e-44f6-b769-1b2b9e562a3e");
-    console.log(data.data);
-    let d = data.data
+    const data = await topo.single_host_tree("8140418e-dd3e-44f6-b769-1b2b9e562a3e");
+    console.log(data.data.tree);
 
-    initGraph(parse(d));
+    initGraph(data.data.tree);
   } catch (error) {
     console.error(error)
   }
 })
-
-function parse(data: any) {
-  let root = {
-    id: "8140418e-dd3e-44f6-b769-1b2b9e562a3e",
-    children: [
-      {
-        id: "process",
-        children: [] as any[],
-      },
-      {
-        id: "resource",
-        children: [] as any[],
-      },
-    ],
-  }
-
-  for (const node of data.nodes) {
-    const words: string[] = node.id.split("_");
-    // let id = words[0];
-    let resource_type = words[1];
-    let resource = words[2];
-
-    if (resource_type == "process") {
-      root.children[0].children.push(node)
-    } else if (resource_type == "resource") {
-      root.children[1].children.push(node)
-    }
-  }
-
-  // for (const node of data.nodes) {
-  //   const words:string[] = node.id.split("_");
-  //   let id = words[0];
-  //   let resource_type = words[1];
-  //   let resource = words[2];
-  //   if (resource_type == "net") {
-
-  //   } else if (resource_type == "thread") {
-
-  //   }
-  // }
-
-  return root
-}
 
 function initGraph(data: any) {
   let graph = new G6.TreeGraph({
@@ -82,7 +38,6 @@ function initGraph(data: any) {
     height: document.getElementById("topo-container")!.clientHeight,
     modes: {
       default: ['drag-canvas', 'zoom-canvas', "click-select", "drag-node",
-      // default: ['drag-canvas', 'zoom-canvas',
         {
           type: 'collapse-expand',
           onChange: function onChange(item:any, collapsed) {

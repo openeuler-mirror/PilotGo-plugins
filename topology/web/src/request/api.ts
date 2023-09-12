@@ -17,6 +17,15 @@ export const topo = {
       throw error;
     }
   },
+
+  async single_host_tree(node:string) {
+    try {
+      const response = await request.get('/single_host_tree/'+node);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
   
   // 添加其他API请求方法
 };
