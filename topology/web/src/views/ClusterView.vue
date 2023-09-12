@@ -22,48 +22,23 @@ function handleClose() {
 onMounted(async () => {
   try {
     const data = await topo.multi_host_topo();
-    console.log(data.data);
-    let d = data.data
-    for (let i = 0; i < d.edges.length; i++) {
-      d.edges[i].source = d.edges[i].Src
-      d.edges[i].target = d.edges[i].Dst
-    }
+    // console.log(data.data);
 
-    initGraph(d);
+    initGraph(data.data);
   } catch (error) {
     console.error(error)
   }
 })
 
 function initGraph(data: any) {
-  // const data = {
-  //   // 节点
-  //   nodes: [
-  //     {
-  //       id: 'node1',
-  //       x: 100,
-  //       y: 200,
-  //     },
-  //     {
-  //       id: 'node2',
-  //       x: 300,
-  //       y: 200,
-  //     },
-  //   ],
-  //   // 边集
-  //   edges: [
-  //     // 表示一条从 node1 节点连接到 node2 节点的边
-  //     {
-  //       source: 'node1',
-  //       target: 'node2',
-  //     },
-  //   ],
-  // };
-
   let graph = new G6.Graph({
     container: "topo-container",
     width: document.getElementById("topo-container")!.clientWidth,
     height: document.getElementById("topo-container")!.clientHeight,
+    layout: {
+      type: 'force',
+      preventOverlap: true,
+    },
     modes: {
       default: ['drag-canvas', 'zoom-canvas', "click-select", "drag-node"],
     },
@@ -82,7 +57,6 @@ function initGraph(data: any) {
   });
   graph.data(data);
   graph.render();
-  graph.fitCenter();
 
   window.onresize = () => {
     graph.changeSize(
