@@ -17,8 +17,8 @@ type Edges struct {
 type Edge struct {
 	ID      string
 	Type    string
-	Src     string
-	Dst     string
+	Src     string `json:"source"`
+	Dst     string `json:"target"`
 	Dir     bool
 	Metrics map[string]string
 }
