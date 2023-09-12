@@ -1,6 +1,6 @@
-package utils
+package templete
 
-import "openeuler.org/PilotGo/atune-plugin/utils/tune"
+import "openeuler.org/PilotGo/atune-plugin/templete/tune"
 
 const (
 	Compress                   = "compress"

@@ -1,7 +1,7 @@
 go 1.19
 
 use (
-	./atune
+	./atune/server
 	./container/server
 	./sdk
 	./topology/agent
