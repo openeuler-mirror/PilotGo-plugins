@@ -54,6 +54,9 @@ func SingleHostService(uuid string) ([]*meta.Node, []*meta.Edge, []error, []erro
 	}
 
 	return single_nodes, single_edges, collect_errlist, process_errlist
+}
+
+/*
 	// if len(collect_errlist) != 0 && len(process_errlist) != 0 {
 	// 	for i, cerr := range collect_errlist {
 	// 		collect_errlist[i] = errors.Wrap(cerr, "**3")
@@ -77,4 +80,4 @@ func SingleHostService(uuid string) ([]*meta.Node, []*meta.Edge, []error, []erro
 
 	// 	return nil, nil, nil, process_errlist
 	// }
-}
+*/

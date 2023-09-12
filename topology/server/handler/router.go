@@ -25,6 +25,8 @@ func InitRouter(router *gin.Engine) {
 	api := router.Group("/plugin/api")
 	{
 		api.GET("/single_host/:uuid", SingleHostHandle)
+		api.GET("/single_host_tree/:uuid", SingleHostTreeHandle)
+
 		api.GET("/multi_host", MultiHostHandle)
 	}
 }
