@@ -2,83 +2,11 @@ package service
 
 import (
 	"fmt"
-	"strings"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/meta"
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/processor"
 	"github.com/pkg/errors"
 )
-
-func SingleHostService(uuid string) ([]*meta.Node, []*meta.Edge, []error, []error) {
-	dataprocesser := processor.CreateDataProcesser()
-	nodes, edges, collect_errlist, process_errlist := dataprocesser.Process_data()
-	if len(collect_errlist) != 0 || len(process_errlist) != 0 {
-		for i, cerr := range collect_errlist {
-			collect_errlist[i] = errors.Wrap(cerr, "**3")
-		}
-
-		for i, perr := range process_errlist {
-			process_errlist[i] = errors.Wrap(perr, "**7")
-		}
-	}
-
-	single_nodes := []*meta.Node{}
-	for _, node1 := range nodes.Nodes {
-		if node1.UUID == uuid {
-			repeat_node := false
-			for _, node2 := range single_nodes {
-				if node2.ID == node1.ID {
-					repeat_node = true
-				}
-			}
-
-			if !repeat_node {
-				single_nodes = append(single_nodes, node1)
-			}
-		}
-	}
-
-	single_edges := []*meta.Edge{}
-	for _, edge1 := range edges.Edges {
-		if strings.Split(edge1.Src, "_")[0] == uuid {
-			repeat_edge := false
-			for _, edge2 := range single_edges {
-				if edge2.ID == edge1.ID {
-					repeat_edge = true
-				}
-			}
-
-			if !repeat_edge {
-				single_edges = append(single_edges, edge1)
-			}
-		}
-	}
-
-	return single_nodes, single_edges, collect_errlist, process_errlist
-	// if len(collect_errlist) != 0 && len(process_errlist) != 0 {
-	// 	for i, cerr := range collect_errlist {
-	// 		collect_errlist[i] = errors.Wrap(cerr, "**3")
-	// 	}
-
-	// 	for i, perr := range process_errlist {
-	// 		process_errlist[i] = errors.Wrap(perr, "**7")
-	// 	}
-
-	// 	return nil, nil, collect_errlist, process_errlist
-	// } else if len(collect_errlist) != 0 && len(process_errlist) == 0 {
-	// 	for i, cerr := range collect_errlist {
-	// 		collect_errlist[i] = errors.Wrap(cerr, "**3")
-	// 	}
-
-	// 	return nil, nil, collect_errlist, nil
-	// } else if len(collect_errlist) == 0 && len(process_errlist) != 0 {
-	// 	for i, perr := range process_errlist {
-	// 		process_errlist[i] = errors.Wrap(perr, "**7")
-	// 	}
-
-	// 	return nil, nil, nil, process_errlist
-	// }
-}
 
 func MultiHostService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 	dataprocesser := processor.CreateDataProcesser()
@@ -101,9 +29,6 @@ func MultiHostService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 			hostids = append(hostids, node.ID)
 		}
 	}
-
-	// ttcode
-	fmt.Printf("\033[32mhostids\033[0m: %v\n", hostids)
 
 	multi_edges := []*meta.Edge{}
 	for _, edge := range edges.Edges {
@@ -174,6 +99,19 @@ func MultiHostService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 						multi_edges = append(multi_edges, edge1.(*meta.Edge))
 					}
 
+					// 添加 target process node
+					target_node := nodes.Lookup[edge1.(*meta.Edge).Dst]
+					repeat_node := false
+					for _, node2 := range multi_nodes {
+						if node2.ID == target_node.ID {
+							repeat_node = true
+						}
+					}
+
+					if !repeat_node {
+						multi_nodes = append(multi_nodes, target_node)
+					}
+
 					start_nodeid = nodes.Lookup[start_nodeid].UUID + "_process_" + nodes.Lookup[start_nodeid].Metrics["Ppid"]
 
 					continue
@@ -221,6 +159,19 @@ func MultiHostService() ([]*meta.Node, []*meta.Edge, []error, []error) {
 
 				if !repeat_edge_to_host {
 					multi_edges = append(multi_edges, edge_to_host.(*meta.Edge))
+				}
+
+				// 添加 process 1 node
+				target_node := nodes.Lookup[start_nodeid]
+				repeat_node := false
+				for _, node2 := range multi_nodes {
+					if node2.ID == target_node.ID {
+						repeat_node = true
+					}
+				}
+
+				if !repeat_node {
+					multi_nodes = append(multi_nodes, target_node)
 				}
 
 				break
