@@ -26,6 +26,15 @@ export const topo = {
       throw error;
     }
   },
+
+  async host_list() {
+    try {
+      const response = await request.get('/agentlist');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
   
   // 添加其他API请求方法
 };
