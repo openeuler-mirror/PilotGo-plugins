@@ -243,7 +243,7 @@ func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 	addrinterfacemap := map[string][]string{}
 	for _, iface := range interfaces {
 		for _, addr := range iface.Addrs {
-			addrinterfacemap[iface.Name] = append(pc.AddrInterfaceMap_1[iface.Name], addr.Addr)
+			addrinterfacemap[iface.Name] = append(addrinterfacemap[iface.Name], addr.Addr)
 		}
 	}
 
