@@ -16,9 +16,13 @@ func InitWebServer() {
 	engine := gin.Default()
 	agentmanager.Topo.Sdkmethod.RegisterHandlers(engine)
 	InitRouter(engine)
+	StaticRouter(engine)
 	err := engine.Run(conf.Config().Topo.Server_addr)
 	if err != nil {
-		fmt.Printf("%+v\n", errors.Errorf("%s**2", err.Error())) // err top
+		err = errors.Errorf("%s**2", err.Error()) // err top
+		fmt.Printf("%+v\n", err)
+		// errors.EORE(err)
+
 		os.Exit(1)
 	}
 }
@@ -26,13 +30,17 @@ func InitWebServer() {
 func InitRouter(router *gin.Engine) {
 	api := router.Group("/plugin/topology/api")
 	{
+		api.GET("/agentlist", AgentListHandle)
+
 		api.GET("/single_host/:uuid", SingleHostHandle)
 		api.GET("/single_host_tree/:uuid", SingleHostTreeHandle)
 
 		api.GET("/multi_host", MultiHostHandle)
 	}
+}
 
-	static := router.Group("/plugin/topology/")
+func StaticRouter(router *gin.Engine) {
+	static := router.Group("/plugin/topology")
 	{
 		// static.Static("/assets", "./frontend/assets")
 		// static.StaticFile("/", "./frontend/index.html")
@@ -41,7 +49,7 @@ func InitRouter(router *gin.Engine) {
 
 		// 解决页面刷新404的问题
 		router.NoRoute(func(c *gin.Context) {
-			if !strings.HasPrefix(c.Request.RequestURI, "/plugin/topology/api/") {
+			if strings.HasPrefix(c.Request.RequestURI, "/plugin/topology") {
 				// c.File("./frontend/index.html")
 				c.File("../web/dist/index.html")
 				return
