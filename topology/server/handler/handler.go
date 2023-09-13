@@ -97,22 +97,11 @@ func SingleHostTreeHandle(ctx *gin.Context) {
 		return
 	}
 
-	agentmap := make(map[string]string)
-	agentmanager.Topo.AgentMap.Range(func(key, value any) bool {
-		agent := value.(*agentmanager.Agent_m)
-		if agent.Host_2 != nil {
-			agentmap[agent.UUID] = agent.IP + ":" + agent.Port
-		}
-
-		return true
-	})
-
 	ctx.JSON(http.StatusOK, gin.H{
 		"code":  0,
 		"error": nil,
 		"data": map[string]interface{}{
-			"tree":      nodes,
-			"agentlist": agentmap,
+			"tree": nodes,
 		},
 	})
 }
@@ -153,6 +142,26 @@ func MultiHostHandle(ctx *gin.Context) {
 		"data": map[string]interface{}{
 			"nodes": nodes,
 			"edges": edges,
+		},
+	})
+}
+
+func AgentListHandle(ctx *gin.Context) {
+	agentmap := make(map[string]string)
+	agentmanager.Topo.AgentMap.Range(func(key, value any) bool {
+		agent := value.(*agentmanager.Agent_m)
+		if agent.Host_2 != nil {
+			agentmap[agent.UUID] = agent.IP + ":" + agent.Port
+		}
+
+		return true
+	})
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"code":  0,
+		"error": nil,
+		"data": map[string]interface{}{
+			"agentlist": agentmap,
 		},
 	})
 }
