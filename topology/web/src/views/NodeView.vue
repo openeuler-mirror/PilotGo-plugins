@@ -11,6 +11,7 @@
 import G6 from '@antv/g6';
 import { ref, onMounted } from "vue";
 import { topo } from '../request/api';
+import server_logo from "@/assets/icon/server.png";
 
 let drawer = ref(false)
 const direction = 'rtl'
@@ -22,8 +23,13 @@ function handleClose() {
 
 onMounted(async () => {
   try {
-    const data = await topo.single_host_tree("8140418e-dd3e-44f6-b769-1b2b9e562a3e");
+    const data = await topo.single_host_tree("d6900229-971b-482c-b1a5-cf108777c6db");
     console.log(data.data.tree);
+
+    let root = data.data.tree
+    root.img = server_logo;
+    root.type = "image";
+    root.size = 40
 
     initGraph(data.data.tree);
   } catch (error) {
@@ -40,7 +46,7 @@ function initGraph(data: any) {
       default: ['drag-canvas', 'zoom-canvas', "click-select", "drag-node",
         {
           type: 'collapse-expand',
-          onChange: function onChange(item:any, collapsed) {
+          onChange: function onChange(item: any, collapsed) {
             const data = item.getModel();
             data.collapsed = collapsed;
             return true;
@@ -55,9 +61,10 @@ function initGraph(data: any) {
       rankSep: 100,
     },
   });
-  graph.node(function (node) {
+  graph.node(function (node: any) {
+    // console.log(node);
     return {
-      label: node.id,
+      label: node.node.type + ":" + node.node.name,
       labelCfg: {
         position: node.children && node.children.length > 0 ? 'left' : 'right',
         offset: 5,

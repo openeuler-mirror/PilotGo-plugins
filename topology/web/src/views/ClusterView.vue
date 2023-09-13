@@ -10,6 +10,7 @@
 import G6 from '@antv/g6';
 import { ref, onMounted } from "vue";
 import { topo } from '../request/api';
+import server_logo from "@/assets/icon/server.png";
 
 let drawer = ref(false)
 const direction = 'rtl'
@@ -23,6 +24,21 @@ onMounted(async () => {
   try {
     const data = await topo.multi_host_topo();
     // console.log(data.data);
+
+    for (let i = 0; i < data.data.nodes.length; i++) {
+      let node = data.data.nodes[i];
+      if (node.type === "host") {
+        node.img = server_logo;
+        node.type = "image";
+        node.size = 40;
+        let ip = node.id.split("_").pop()
+        node.label = ip;
+      } else if (node.type === "process") {
+        node.label = node.name + ":" + node.metrics.Pid;
+      } else if (node.type === "net") {
+        node.label = node.name;
+      }
+    };
 
     initGraph(data.data);
   } catch (error) {
@@ -38,10 +54,19 @@ function initGraph(data: any) {
     layout: {
       type: 'force',
       preventOverlap: true,
+      linkDistance: 100,
     },
     modes: {
       default: ['drag-canvas', 'zoom-canvas', "click-select", "drag-node"],
     },
+  });
+  graph.node(function (node) {
+    return {
+      labelCfg: {
+        position: "bottom",
+        offset: 5,
+      },
+    };
   });
   graph.on("nodeselectchange", (e) => {
     if (e.select) {
