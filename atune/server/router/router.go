@@ -4,6 +4,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/atune-plugin/config"
+	"openeuler.org/PilotGo/atune-plugin/httphandler"
 	"openeuler.org/PilotGo/atune-plugin/plugin"
 )
 
@@ -35,10 +36,9 @@ func registerAPIs(router *gin.Engine) {
 	logger.Debug("router register")
 	plugin.GlobalClient.RegisterHandlers(router)
 
-	DBTarget := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
+	atune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
 	{
-		DBTarget.GET("", func(ctx *gin.Context) {
-			ctx.JSON(200, `{"hello","world"}`)
-		})
+		atune.GET("all", httphandler.GetAtuneAll)
+		atune.GET("info", httphandler.GetAtuneInfo)
 	}
 }
