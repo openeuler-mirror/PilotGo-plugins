@@ -74,6 +74,9 @@ async function handleNodeSelected(node: any) {
 }
 
 function initGraph(data: any) {
+  if (graph.value != null) {
+    graph.value.destroy();
+  }
   graph.value = new G6.TreeGraph({
     container: "topo-container",
     width: document.getElementById("topo-container")!.clientWidth,
@@ -135,6 +138,7 @@ function updateDrawer(node: any) {
   drawer.value = drawer.value ? false : true;
 
   // console.log(node);
+  table_data = [];
   let metrics = node.model.node.metrics;
   for (let key in metrics) {
     table_data.push({
