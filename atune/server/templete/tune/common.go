@@ -27,7 +27,9 @@ type TuneGroup struct {
 }
 
 type TuneInfo struct {
-	Prepare string `json:"prepare"`
-	Tune    string `json:"tune"`
-	Restore string `json:"restore"`
+	TuneName      string `json:"tuneName"`
+	WorkDirectory string `json:"workDir"`
+	Prepare       string `json:"prepare"`
+	Tune          string `json:"tune"`
+	Restore       string `json:"restore"`
 }
