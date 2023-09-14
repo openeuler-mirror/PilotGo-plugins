@@ -104,7 +104,7 @@ function initGraph(data: any) {
       },
     };
   });
-  graph.value.on("nodeselectchange", (e) => {
+  graph.value.on("nodeselectchange", (e:any) => {
     if (e.select) {
       let node = (e.target as any)._cfg!;
       let node_id = node.id
