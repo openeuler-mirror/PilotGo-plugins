@@ -98,6 +98,7 @@ function updateDrawer(node: any) {
   drawer.value = drawer.value ? false : true;
 
   // console.log(node)
+  table_data = [];
   let metrics = node.model.metrics;
   for (let key in metrics) {
     table_data.push({
