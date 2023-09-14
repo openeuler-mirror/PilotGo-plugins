@@ -1,20 +1,23 @@
 <template>
   <h1 class="h1">集群拓扑图演示页面</h1>
   <div id="topo-container" class="container"></div>
-  <el-drawer class="drawer" v-model="drawer" :title="title" :direction="direction" :before-close="handleClose">
-    <span>Hi, there!</span>
+  <el-drawer class="drawer" v-model="drawer" :title="title" direction="rtl" :before-close="handleClose">
+    <el-table :data="table_data" stripe style="width: 100%">
+      <el-table-column prop="name" label="属性" width="180" />
+      <el-table-column prop="value" label="值"/>
+    </el-table>
   </el-drawer>
 </template>
 
 <script setup lang="ts">
 import G6 from '@antv/g6';
-import { ref, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { topo } from '../request/api';
 import server_logo from "@/assets/icon/server.png";
 
 let drawer = ref(false)
-const direction = 'rtl'
-const title = ref("")
+let title = ref("")
+let table_data = reactive<any>([])
 
 function handleClose() {
   drawer.value = false
@@ -70,11 +73,10 @@ function initGraph(data: any) {
   });
   graph.on("nodeselectchange", (e) => {
     if (e.select) {
-      let node_id = (e.target as any)._cfg!.id
-      console.log("click node:", node_id);
+      let node = (e.target as any)._cfg
+      console.log("click node:", node.id);
 
-      title.value = "I am " + node_id;
-      drawer.value = drawer.value ? false : true;
+      updateDrawer(node)
     } else {
       console.log("node unselected")
     }
@@ -89,6 +91,20 @@ function initGraph(data: any) {
       document.getElementById("topo-container")!.clientHeight)
     graph.fitCenter()
   }
+}
+
+function updateDrawer(node: any) {
+  title.value = node.id + "节点属性";
+  drawer.value = drawer.value ? false : true;
+
+  // console.log(node)
+  let metrics = node.model.metrics;
+  for (let key in metrics) {
+    table_data.push({
+      name: key,
+      value: metrics[key],
+    })
+  };
 }
 
 </script>
