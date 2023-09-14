@@ -70,6 +70,7 @@ func (t *Topoclient) InitLogger() {
 }
 
 func (t *Topoclient) InitPluginClient() {
+	PluginInfo.Url = "http://" + conf.Config().Topo.Server_addr + "/plugin/topology"
 	PluginClient := client.DefaultClient(PluginInfo)
 	PluginClient.Server = "http://" + conf.Config().PilotGo.Addr
 	Topo = &Topoclient{

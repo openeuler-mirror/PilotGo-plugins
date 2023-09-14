@@ -219,6 +219,10 @@ func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 			continue
 		}
 
+		if c.Laddr.Port == 22 || c.Raddr.Port == 22 {
+			continue
+		}
+
 		c1.Fd = c.Fd
 		c1.Family = c.Family
 		c1.Type = c.Type

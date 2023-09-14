@@ -3,6 +3,7 @@ package processor
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/agentmanager"
@@ -155,7 +156,7 @@ func (d *DataProcesser) Create_node_entities(agent *agentmanager.Agent_m, nodes 
 	// 临时定义不含网络流量metric的网络节点
 	for _, net := range agent.Netconnections_2 {
 		net_node := &meta.Node{
-			ID:      fmt.Sprintf("%s_%s_%d", agent.UUID, meta.NODE_NET, net.Pid),
+			ID:      fmt.Sprintf("%s_%s_%d:%s", agent.UUID, meta.NODE_NET, net.Pid, strings.Split(net.Laddr, ":")[1]),
 			Name:    net.Laddr,
 			Type:    meta.NODE_NET,
 			UUID:    agent.UUID,
