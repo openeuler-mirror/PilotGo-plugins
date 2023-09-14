@@ -10,29 +10,33 @@
       </span>
       <template #dropdown>
         <el-dropdown-menu>
-          <el-dropdown-item :command=node v-for="node in node_list">{{node.id}}</el-dropdown-item>
+          <el-dropdown-item :command=node v-for="node in node_list">{{ node.id }}</el-dropdown-item>
         </el-dropdown-menu>
       </template>
     </el-dropdown>
   </div>
 
   <div id="topo-container" class="container"></div>
-  <el-drawer class="drawer" v-model="drawer" :title="title" :direction="direction" :before-close="handleClose">
-    <span>Hi, there</span>
+  <el-drawer class="drawer" v-model="drawer" :title="title" direction="rtl" :before-close="handleClose">
+    <el-table :data="table_data" stripe style="width: 100%">
+      <el-table-column prop="name" label="属性" width="180" />
+      <el-table-column prop="value" label="值" />
+    </el-table>
   </el-drawer>
 </template>
 
 <script setup lang="ts">
 import G6 from '@antv/g6';
-import { ref,reactive, onMounted } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { topo } from '../request/api';
 import server_logo from "@/assets/icon/server.png";
 
-let drawer = ref(false)
-const direction = 'rtl'
-const title = ref("")
 const node_list = reactive<any>([])
 let graph = ref()
+
+let drawer = ref(false)
+let title = ref("")
+let table_data = reactive<any>([])
 
 function handleClose() {
   drawer.value = false
@@ -41,7 +45,6 @@ function handleClose() {
 onMounted(async () => {
   try {
     updateNodeList()
-
   } catch (error) {
     console.error(error)
   }
@@ -50,7 +53,7 @@ onMounted(async () => {
 async function updateNodeList() {
   const data = await topo.host_list()
   // console.log(data);
-  for (let key in data.data.agentlist){
+  for (let key in data.data.agentlist) {
     node_list.push({
       id: key,
     })
@@ -60,14 +63,14 @@ async function updateNodeList() {
 
 async function handleNodeSelected(node: any) {
   const data = await topo.single_host_tree(node.id);
-    // console.log(data.data.tree);
+  // console.log(data.data.tree);
 
-    let root = data.data.tree
-    root.img = server_logo;
-    root.type = "image";
-    root.size = 40
+  let root = data.data.tree
+  root.img = server_logo;
+  root.type = "image";
+  root.size = 40
 
-    initGraph(data.data.tree);
+  initGraph(data.data.tree);
 }
 
 function initGraph(data: any) {
@@ -104,14 +107,12 @@ function initGraph(data: any) {
       },
     };
   });
-  graph.value.on("nodeselectchange", (e:any) => {
+  graph.value.on("nodeselectchange", (e: any) => {
     if (e.select) {
-      let node = (e.target as any)._cfg!;
-      let node_id = node.id
-      console.log("click node:", node_id, e);
+      let node = (e.target as any)._cfg
+      console.log("click node:", node.id);
 
-      title.value = "I am " + node_id;
-      drawer.value = drawer.value ? false : true;
+      updateDrawer(node)
     } else {
       console.log("node unselected")
     }
@@ -129,13 +130,27 @@ function initGraph(data: any) {
   }
 }
 
+function updateDrawer(node: any) {
+  title.value = node.id + "节点属性";
+  drawer.value = drawer.value ? false : true;
+
+  // console.log(node);
+  let metrics = node.model.node.metrics;
+  for (let key in metrics) {
+    table_data.push({
+      name: key,
+      value: metrics[key],
+    })
+  };
+}
+
 </script>
 
 <style scoped>
-
 .title {
-  position:relative;
+  position: relative;
 }
+
 .h1 {
   width: 100%;
   margin: 0;
