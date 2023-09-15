@@ -26,7 +26,7 @@ func (d *DataCollector) Collect_instant_data() []error {
 	var errorlist []error
 
 	agentmanager.Topo.AgentMap.Range(
-		func(key, value any) bool {
+		func(key, value interface{}) bool {
 			wg.Add(1)
 
 			go func() {

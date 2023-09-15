@@ -1,6 +1,6 @@
 module gitee.com/openeuler/PilotGo-plugin-topology-server
 
-go 1.20
+go 1.17
 
 require (
 	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230815015659-4fdcce82d047

@@ -148,7 +148,7 @@ func MultiHostHandle(ctx *gin.Context) {
 
 func AgentListHandle(ctx *gin.Context) {
 	agentmap := make(map[string]string)
-	agentmanager.Topo.AgentMap.Range(func(key, value any) bool {
+	agentmanager.Topo.AgentMap.Range(func(key, value interface{}) bool {
 		agent := value.(*agentmanager.Agent_m)
 		if agent.Host_2 != nil {
 			agentmap[agent.UUID] = agent.IP + ":" + agent.Port
