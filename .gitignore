@@ -1,5 +1,5 @@
 
 .vscode/
 !build
-topology/server/vendor/
+.DS_Store
 topology/pkg/
