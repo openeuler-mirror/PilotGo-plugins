@@ -3,7 +3,7 @@ package httphandler
 import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
 	"github.com/gin-gonic/gin"
-	"openeuler.org/PilotGo/atune-plugin/templete"
+	"openeuler.org/PilotGo/atune-plugin/template"
 )
 
 func GetAtuneAll(c *gin.Context) {
@@ -33,7 +33,7 @@ func GetAtuneAll(c *gin.Context) {
 }
 func GetAtuneInfo(c *gin.Context) {
 	tuneName := c.Query("name")
-	tune := templete.GetTuneInfo(tuneName)
+	tune := template.GetTuneInfo(tuneName)
 	if tune == nil {
 		response.Fail(c, nil, "未找到可调优的业务名称")
 		return
