@@ -1,10 +1,11 @@
 module gitee.com/openeuler/PilotGo-plugin-topology-agent
 
-go 1.20
+go 1.17
 
 require (
 	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230816095049-1964124218b1
 	github.com/gin-gonic/gin v1.9.1
+	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/shirou/gopsutil/v3 v3.23.7
 	gopkg.in/yaml.v3 v3.0.1
@@ -30,7 +31,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
