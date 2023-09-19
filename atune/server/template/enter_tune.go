@@ -1,6 +1,6 @@
-package templete
+package template
 
-import "openeuler.org/PilotGo/atune-plugin/templete/tune"
+import "openeuler.org/PilotGo/atune-plugin/template/tune"
 
 const (
 	Compress                   = "compress"
@@ -11,6 +11,7 @@ const (
 	GoGc                       = "go_gc"
 	Graphicsmagick             = "graphicsmagick"
 	Iozone                     = "iozone"
+	Kafka                      = "kafka"
 	KeyParametersSelect        = "key_parameters_select"
 	KeyParametersSelectVariant = "key_parameters_select_variant"
 	Mariadb                    = "mariadb"
@@ -44,6 +45,8 @@ func GetTuneInfo(tuneName string) interface{} {
 		return tune.TuneGroupApp.Graphicsmagick.Info()
 	case Iozone:
 		return tune.TuneGroupApp.Iozone.Info()
+	case Kafka:
+		return tune.TuneGroupApp.Kafka.Info()
 	case KeyParametersSelect:
 		return tune.TuneGroupApp.KeyParametersSelect.Info()
 	case KeyParametersSelectVariant:

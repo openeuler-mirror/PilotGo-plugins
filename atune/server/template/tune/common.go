@@ -11,6 +11,7 @@ type TuneGroup struct {
 	GoGc                       GoGcApp
 	Graphicsmagick             GraphicsmagickApp
 	Iozone                     IozoneApp
+	Kafka                      KafkaApp
 	KeyParametersSelect        KeyParametersSelectApp
 	KeyParametersSelectVariant KeyParametersSelectVariantApp
 	Mariadb                    MariadbApp
