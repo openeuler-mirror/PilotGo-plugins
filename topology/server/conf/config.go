@@ -1,13 +1,7 @@
 package conf
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os"
-
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 )
 
 type TopoConf struct {
@@ -34,7 +28,7 @@ type ServerConfig struct {
 
 const config_type = "config_server.yaml"
 
-func config_file() string {
+func Config_file() string {
 	// _, thisfilepath, _, _ := runtime.Caller(0)
 	// dirpath := filepath.Dir(thisfilepath)
 	// configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
@@ -44,31 +38,8 @@ func config_file() string {
 	return configfilepath
 }
 
-var global_config ServerConfig
-
-func init() {
-	err := readConfig(config_file(), &global_config)
-	if err != nil {
-		err = errors.Wrap(err, "**2")
-		// errors.EROE(err)
-		fmt.Printf("%+v\n", err)
-		os.Exit(-1)
-	}
-}
+var Global_config ServerConfig
 
 func Config() *ServerConfig {
-	return &global_config
-}
-
-func readConfig(file string, config interface{}) error {
-	bytes, err := ioutil.ReadFile(file)
-	if err != nil {
-		return errors.Errorf("open file failed: %s, %s**2", file, err.Error())
-	}
-
-	err = yaml.Unmarshal(bytes, config)
-	if err != nil {
-		return errors.Errorf("yaml unmarshal failed: %s**2", string(bytes))
-	}
-	return nil
+	return &Global_config
 }

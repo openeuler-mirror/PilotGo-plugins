@@ -45,4 +45,4 @@ require (
 	google.golang.org/protobuf v1.30.0 // indirect
 )
 
-// replace github.com/pkg/errors v0.9.1 => /home/wjq/a-disk/mypkg/study/tool/errors@v1.2.3
+// replace github.com/pkg/errors v0.9.1 => /usr/local/lib/errors@v1.2.3
