@@ -2,7 +2,7 @@ package agentmanager
 
 import (
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/meta"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"github.com/pkg/errors"
 )
 
 type Agent_m struct {
@@ -38,6 +38,7 @@ func (t *Topoclient) GetAgent(uuid string) *Agent_m {
 
 func (t *Topoclient) DeleteAgent(uuid string) {
 	if _, ok := t.AgentMap.LoadAndDelete(uuid); !ok {
-		logger.Warn("delete unknown agent:%s", uuid)
+		err := errors.Errorf("delete unknown agent:%s **warn**2", uuid) // err top
+		t.ErrCh <- err
 	}
 }

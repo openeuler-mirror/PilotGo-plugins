@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -19,10 +18,11 @@ func InitWebServer() {
 	StaticRouter(engine)
 	err := engine.Run(conf.Config().Topo.Server_addr)
 	if err != nil {
-		err = errors.Errorf("%s**2", err.Error()) // err top
-		fmt.Printf("%+v\n", err)
-		// errors.EORE(err)
-
+		err = errors.Errorf("%s **fatal**2", err.Error()) // err top
+		agentmanager.Topo.ErrCh <- err
+		agentmanager.Topo.ErrGroup.Add(1)
+		agentmanager.Topo.ErrGroup.Wait()
+		close(agentmanager.Topo.ErrCh)
 		os.Exit(1)
 	}
 }

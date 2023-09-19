@@ -11,9 +11,19 @@ func main() {
 	fmt.Println("hello topology")
 
 	/*
+		init config
+	*/
+	agentmanager.Topo.InitConfig()
+
+	/*
 		init plugin client
 	*/
 	agentmanager.Topo.InitPluginClient()
+
+	/*
+		init error control
+	*/
+	agentmanager.Topo.InitErrorControl(agentmanager.Topo.ErrCh, agentmanager.Topo.ErrGroup)
 
 	/*
 		init logger

@@ -3,7 +3,9 @@ package agentmanager
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/conf"
@@ -12,6 +14,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
 var Topo *Topoclient
@@ -19,6 +22,8 @@ var Topo *Topoclient
 type Topoclient struct {
 	Sdkmethod *client.Client
 	AgentMap  sync.Map
+	ErrGroup  *sync.WaitGroup
+	ErrCh     chan error
 }
 
 func (t *Topoclient) InitMachineList() {
@@ -26,17 +31,22 @@ func (t *Topoclient) InitMachineList() {
 
 	resp, err := httputils.Get(url, nil)
 	if err != nil {
-		err = errors.Errorf("%s**2", err)
-		fmt.Printf("%+v\n", err) // err top
-		// errors.EORE(err)
+		err = errors.Errorf("%s **fatal**2", err.Error()) // err top
+		t.ErrCh <- err
+		t.ErrGroup.Add(1)
+		t.ErrGroup.Wait()
+		close(t.ErrCh)
 		os.Exit(1)
 	}
 
 	statuscode := resp.StatusCode
 	if statuscode != 200 {
-		err = errors.New("http返回状态码异常**2")
-		fmt.Printf("%+v\n", err) // err top
-		// errors.EORE(err)
+		err = errors.Errorf("http返回状态码异常: %d **fatal**2", statuscode) // err top
+		t.ErrCh <- err
+		t.ErrGroup.Add(1)
+		t.ErrGroup.Wait()
+		close(t.ErrCh)
+		os.Exit(1)
 	}
 
 	result := &struct {
@@ -46,9 +56,12 @@ func (t *Topoclient) InitMachineList() {
 
 	err = json.Unmarshal(resp.Body, result)
 	if err != nil {
-		err = errors.Errorf("%s**2", err.Error())
-		fmt.Printf("%+v\n", err) // err top
-		// errors.EORE(err)
+		err = errors.Errorf("%s **fatal**2", err.Error()) // err top
+		t.ErrCh <- err
+		t.ErrGroup.Add(1)
+		t.ErrGroup.Wait()
+		close(t.ErrCh)
+		os.Exit(1)
 	}
 
 	for _, m := range result.Data.([]interface{}) {
@@ -62,9 +75,11 @@ func (t *Topoclient) InitMachineList() {
 func (t *Topoclient) InitLogger() {
 	err := logger.Init(conf.Config().Logopts)
 	if err != nil {
-		err = errors.Errorf("%s**2", err.Error())
-		fmt.Printf("%+v\n", err) // err top
-		// errors.EORE(err)
+		err = errors.Errorf("%s **fatal**2", err.Error()) // err top
+		t.ErrCh <- err
+		t.ErrGroup.Add(1)
+		t.ErrGroup.Wait()
+		close(t.ErrCh)
 		os.Exit(1)
 	}
 }
@@ -75,9 +90,51 @@ func (t *Topoclient) InitPluginClient() {
 	PluginClient.Server = "http://" + conf.Config().PilotGo.Addr
 	Topo = &Topoclient{
 		Sdkmethod: PluginClient,
+		ErrGroup:  &sync.WaitGroup{},
+		ErrCh:     make(chan error, 10),
 	}
 }
 
 func (t *Topoclient) InitArangodb() {
 
+}
+
+func (t *Topoclient) InitErrorControl(errch <-chan error, errgroup *sync.WaitGroup) {
+	go func(ch <-chan error, group *sync.WaitGroup) {
+		for {
+			err, ok := <-errch
+			if !ok {
+				break
+			}
+
+			if err != nil {
+				errarr := strings.Split(err.Error(), "**")
+				switch errarr[1] {
+				case "warn":
+					fmt.Printf("%+v\n", err)
+					// errors.EORE(err)
+				case "fatal":
+					fmt.Printf("%+v\n", err)
+					// errors.EORE(err)
+					errgroup.Done()
+				}
+			}
+		}
+	}(errch, errgroup)
+}
+
+func (t *Topoclient) InitConfig() {
+	bytes, err := ioutil.ReadFile(conf.Config_file())
+	if err != nil {
+		err = errors.Errorf("open file failed: %s, %s", conf.Config_file(), err.Error()) // err top
+		fmt.Printf("%+v\n", err)
+		os.Exit(-1)
+	}
+
+	err = yaml.Unmarshal(bytes, &conf.Global_config)
+	if err != nil {
+		err = errors.Errorf("yaml unmarshal failed: %s", err.Error()) // err top
+		fmt.Printf("%+v\n", err)
+		os.Exit(-1)
+	}
 }
