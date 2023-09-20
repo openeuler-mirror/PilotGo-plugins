@@ -1,6 +1,8 @@
 package conf
 
 import (
+	"path"
+
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 )
 
@@ -28,13 +30,16 @@ type ServerConfig struct {
 
 const config_type = "config_server.yaml"
 
+var Config_dir string
+
 func Config_file() string {
 	// _, thisfilepath, _, _ := runtime.Caller(0)
 	// dirpath := filepath.Dir(thisfilepath)
 	// configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
 
 	// ttcode:
-	configfilepath := "./" + config_type
+	configfilepath := path.Join(Config_dir, config_type)
+
 	return configfilepath
 }
 

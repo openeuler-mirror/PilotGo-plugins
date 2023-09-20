@@ -42,7 +42,6 @@ func (d *DataProcesser) Process_data() (*meta.Nodes, *meta.Edges, []error, []err
 	var process_errorlist []error
 
 	// 获取运行状态agent的数目
-	// TODO: 暂时默认topo agent运行状态的数目与pilotgo agent运行状态的数目一致
 	agentmanager.Topo.AgentMap.Range(func(key, value interface{}) bool {
 		agent := value.(*agentmanager.Agent_m)
 		if agent.Host_2 != nil {
@@ -301,7 +300,7 @@ func (d *DataProcesser) Create_edge_entities(agent *agentmanager.Agent_m, edges 
 		}
 	}
 
-	// TODO: 生成跨主机对等网络关系实例，待验证，多个goroutine同步向nodes数组中添加node实例
+	// 生成跨主机对等网络关系实例
 	for _, net := range agent.Netconnections_2 {
 		var peernode1 *meta.Node
 		var peernode2 *meta.Node

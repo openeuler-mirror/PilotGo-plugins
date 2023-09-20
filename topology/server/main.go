@@ -31,10 +31,10 @@ func main() {
 	agentmanager.Topo.InitLogger()
 
 	/*
-		init arangodb
-		TODO:
+		init JanusGraph
+		TODO: 图数据库
 	*/
-	agentmanager.Topo.InitArangodb()
+	agentmanager.Topo.InitJanusGraph()
 
 	/*
 		init machine agent list
@@ -44,7 +44,6 @@ func main() {
 
 	/*
 		init topo agent status
-		TODO:
 	*/
 
 	/*

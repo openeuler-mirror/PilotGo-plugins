@@ -2,8 +2,8 @@ package agentmanager
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -95,7 +95,7 @@ func (t *Topoclient) InitPluginClient() {
 	}
 }
 
-func (t *Topoclient) InitArangodb() {
+func (t *Topoclient) InitJanusGraph() {
 
 }
 
@@ -124,7 +124,10 @@ func (t *Topoclient) InitErrorControl(errch <-chan error, errgroup *sync.WaitGro
 }
 
 func (t *Topoclient) InitConfig() {
-	bytes, err := ioutil.ReadFile(conf.Config_file())
+	flag.StringVar(&conf.Config_dir, "conf", "/etc/PilotGo/plugin/topology/server", "topo-server configuration directory")
+	flag.Parse()
+
+	bytes, err := os.ReadFile(conf.Config_file())
 	if err != nil {
 		err = errors.Errorf("open file failed: %s, %s", conf.Config_file(), err.Error()) // err top
 		fmt.Printf("%+v\n", err)
