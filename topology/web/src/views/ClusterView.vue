@@ -4,7 +4,7 @@
   <el-drawer class="drawer" v-model="drawer" :title="title" direction="rtl" :before-close="handleClose">
     <el-table :data="table_data" stripe style="width: 100%">
       <el-table-column prop="name" label="属性" width="180" />
-      <el-table-column prop="value" label="值"/>
+      <el-table-column prop="value" label="值" />
     </el-table>
   </el-drawer>
 </template>
@@ -28,12 +28,26 @@ onMounted(async () => {
     const data = await topo.multi_host_topo();
     // console.log(data.data);
 
+    for (let i = 0; i < data.data.edges.length; i++) {
+      let edge = data.data.edges[i];
+      if (edge.Type === "belong") {
+        edge.style = {
+          stroke: "red",
+          lineWidth: 2,
+        }
+      } else if (edge.Type === "server") {
+
+      }
+    };
+
     for (let i = 0; i < data.data.nodes.length; i++) {
       let node = data.data.nodes[i];
+      node.nodeStrength = -30;
       if (node.type === "host") {
         node.img = server_logo;
         node.type = "image";
         node.size = 40;
+        node.nodeStrength = -200;
         let ip = node.id.split("_").pop()
         node.label = ip;
       } else if (node.type === "process") {
@@ -81,6 +95,9 @@ function initGraph(data: any) {
       console.log("node unselected")
     }
     return false
+  });
+  graph.on('node:dragstart', (e) => {
+    graph.layout();
   });
   graph.data(data);
   graph.render();
