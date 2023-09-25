@@ -37,6 +37,7 @@ func main() {
 
 	plugin.GlobalClient = client.DefaultClient(plugin.Init(config.Config().PluginAtune))
 	plugin.GlobalClient.Server = config.Config().HttpServer.Addr
+	config.PilotGo_Server = config.Config().PilotGoServer.Addr
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
