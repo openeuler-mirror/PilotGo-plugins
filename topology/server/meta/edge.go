@@ -23,7 +23,7 @@ type Edge struct {
 	Metrics map[string]string
 }
 
-// TODO: 考虑多个goruntine并发添加、访问、修改相同的edge实例
+// 镜像id检测：多个goruntine并发添加、访问、修改相同的edge实例
 func (e *Edges) Add(edge *Edge) {
 	id_slice := strings.Split(edge.ID, "_")
 	id_slice[0], id_slice[2] = id_slice[2], id_slice[0]

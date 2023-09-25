@@ -1,8 +1,10 @@
 package conf
 
 import (
+	"flag"
 	"fmt"
 	"os"
+	"path"
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
 	"github.com/pkg/errors"
@@ -26,19 +28,24 @@ type ServerConfig struct {
 
 const config_type = "config_agent.yaml"
 
+var Config_dir string
+
 func config_file() string {
 	// _, thisfilepath, _, _ := runtime.Caller(0)
 	// dirpath := filepath.Dir(thisfilepath)
 	// configfilepath := path.Join(dirpath, "..", "..", "conf", config_type)
 
 	// ttcode:
-	configfilepath := "./" + config_type
+	configfilepath := path.Join(Config_dir, config_type)
 	return configfilepath
 }
 
 var global_config ServerConfig
 
 func init() {
+	flag.StringVar(&Config_dir, "conf", "/etc/PilotGo/plugin/topology/agent", "topo-agent configuration directory")
+	flag.Parse()
+
 	err := readConfig(config_file(), &global_config)
 	if err != nil {
 		err = errors.Wrap(err, "**2")
