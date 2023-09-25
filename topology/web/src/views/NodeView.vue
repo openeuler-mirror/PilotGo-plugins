@@ -14,6 +14,7 @@
         </el-dropdown-menu>
       </template>
     </el-dropdown>
+    <el-button class="button" @click="switch_cluster">集群拓扑</el-button>
   </div>
 
   <div id="topo-container" class="container"></div>
@@ -28,8 +29,11 @@
 <script setup lang="ts">
 import G6 from '@antv/g6';
 import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { topo } from '../request/api';
 import server_logo from "@/assets/icon/server.png";
+
+const router = useRouter()
 
 const node_list = reactive<any>([])
 let graph = ref()
@@ -40,6 +44,10 @@ let table_data = reactive<any>([])
 
 function handleClose() {
   drawer.value = false
+}
+
+function switch_cluster() {
+  router.push("/cluster")
 }
 
 onMounted(async () => {
@@ -167,10 +175,22 @@ function updateDrawer(node: any) {
   font-size: 120%;
   position: absolute;
   background-color: white;
+  right: 120px;
+  bottom: 5px;
+
+  margin-bottom: 3px;
+  margin-right: 10px;
+  padding-left: 10px;
+}
+
+.button {
+  font-size: 120%;
+  position: absolute;
+  background-color: white;
   right: 0;
   bottom: 0;
 
-  margin-bottom: 3px;
+  margin-bottom: 0px;
   margin-right: 10px;
   padding-left: 10px;
 }
