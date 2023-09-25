@@ -1,5 +1,8 @@
 <template>
-  <h1 class="h1">集群拓扑图演示页面</h1>
+  <div class="title">
+    <h1 class="h1">集群拓扑图演示页面</h1>
+    <el-button class="button" @click="switch_single_node">单机拓扑</el-button>
+  </div>
   <div id="topo-container" class="container"></div>
   <el-drawer class="drawer" v-model="drawer" :title="title" direction="rtl" :before-close="handleClose">
     <el-table :data="table_data" stripe style="width: 100%">
@@ -12,6 +15,7 @@
 <script setup lang="ts">
 import G6 from '@antv/g6';
 import { ref, reactive, onMounted } from "vue";
+import { useRouter } from "vue-router";
 import { topo } from '../request/api';
 import server_logo from "@/assets/icon/server.png";
 
@@ -19,8 +23,14 @@ let drawer = ref(false)
 let title = ref("")
 let table_data = reactive<any>([])
 
+const router = useRouter()
+
 function handleClose() {
   drawer.value = false
+}
+
+function switch_single_node() {
+  router.push("/node")
 }
 
 onMounted(async () => {
@@ -128,9 +138,25 @@ function updateDrawer(node: any) {
 </script>
 
 <style scoped>
+.title {
+  position: relative;
+}
+
 .h1 {
   width: 100%;
   text-align: center;
+}
+
+.button {
+  font-size: 120%;
+  position: absolute;
+  background-color: white;
+  right: 0;
+  bottom: 0;
+
+  margin-bottom: 3px;
+  margin-right: 10px;
+  padding-left: 10px;
 }
 
 .container {
