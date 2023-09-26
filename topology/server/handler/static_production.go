@@ -32,13 +32,15 @@ func StaticRouter(router *gin.Engine) {
 			c.FileFromFS("/", http.FS(StaticFiles))
 		})
 
-		// 解决页面刷新404的问题
-		static.NoRoute(func(c *gin.Context) {
-			if !strings.HasPrefix(c.Request.RequestURI, "/plugin/topology/api") {
-				c.FileFromFS("/", http.FS(StaticFiles))
-				return
-			}
-			c.AbortWithStatus(http.StatusNotFound)
-		})
 	}
+
+	// 解决页面刷新404的问题
+	router.NoRoute(func(c *gin.Context) {
+		if !strings.HasPrefix(c.Request.RequestURI, "/plugin/topology/api") {
+			c.FileFromFS("/", http.FS(StaticFiles))
+			return
+		}
+		c.AbortWithStatus(http.StatusNotFound)
+	})
+
 }
