@@ -7,7 +7,7 @@ After=network-online.target
 Type=simple
 Restart=always
 RestartSec=3s
-ExecStart=/usr/bin/PilotGo-plugin-topology-agent --config.file=/etc/PilotGo/plugin/topology/agent/config_agent.yaml
+ExecStart=/usr/bin/PilotGo-plugin-topology-agent 
 
 [Install]
 WantedBy=multi-user.target
