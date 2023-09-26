@@ -12,7 +12,7 @@ var (
 func Init(plugin *config.PluginAtune) *client.PluginInfo {
 	PluginInfo := client.PluginInfo{
 		Name:        "atune",
-		Version:     "0.0.1",
+		Version:     "1.0.1",
 		Description: "A-Tune智能运维调优工具",
 		Author:      "zhanghan",
 		Email:       "zhanghan@kylinos.cn",
