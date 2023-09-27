@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230926064010-69fe9dd4adc7
+	github.com/gin-contrib/timeout v0.0.3
 	github.com/gin-gonic/gin v1.7.7
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
