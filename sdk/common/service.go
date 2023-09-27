@@ -46,12 +46,12 @@ type ServiceInfo struct {
 }
 
 type ServiceStruct struct {
-	Batch       *Batch `json:batch`
-	ServiceName string `json:service`
+	Batch       *Batch `json:"batch"`
+	ServiceName string `json:"service"`
 }
 
 type Result struct {
 	Code    int              `json:"code"`
 	Mseeage string           `json:"msg"`
-	Data    []*ServiceResult `json:"data`
+	Data    []*ServiceResult `json:"data"`
 }

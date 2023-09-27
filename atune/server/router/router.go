@@ -41,4 +41,12 @@ func registerAPIs(router *gin.Engine) {
 		atune.GET("all", httphandler.GetAtuneAll)
 		atune.GET("info", httphandler.GetAtuneInfo)
 	}
+
+	dbtune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
+	{
+		dbtune.GET("tunes", httphandler.QueryTunes)
+		dbtune.POST("save", httphandler.SaveTune)
+		dbtune.POST("update", httphandler.UpdateTune)
+		dbtune.DELETE("delete", httphandler.DeleteTune)
+	}
 }

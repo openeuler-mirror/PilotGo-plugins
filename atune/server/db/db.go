@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"openeuler.org/PilotGo/atune-plugin/config"
+	"openeuler.org/PilotGo/atune-plugin/model"
 )
 
 var Url string
@@ -40,6 +41,7 @@ func MysqldbInit(conf *config.MysqlDBInfo) error {
 	if err != nil {
 		return err
 	}
+	MySQL().AutoMigrate(&model.Tunes{})
 
 	return nil
 }
