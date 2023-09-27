@@ -3,12 +3,10 @@ package collector
 import (
 	"encoding/json"
 	"fmt"
-	"runtime"
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-agent/utils"
 	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"github.com/pkg/errors"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/process"
@@ -33,16 +31,16 @@ func CreatePsutilCollector() *PsutilCollector {
 func (pc *PsutilCollector) Collect_host_data() error {
 	hostinit, err := host.Info()
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo(err)
-		logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
-		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+		// err = errors.New(err.Error())
+		logger.Error(err.Error())
+		return err
 	}
 
 	m_u_bytes, err := utils.FileReadBytes(utils.Agentuuid_filepath)
 	if err != nil {
-		filepath, line, funcname := utils.CallerInfo(err)
-		logger.Error("file: %s, line: %d, func: %s, err: %s\n", filepath, line, funcname, err.Error())
-		return fmt.Errorf("file: %s, line: %d, func: %s, err -> %s", filepath, line, funcname, err.Error())
+		// err = errors.New(err.Error())
+		logger.Error(err.Error())
+		return err
 	}
 	type machineuuid struct {
 		Agentuuid string `json:"agent_uuid"`
@@ -72,14 +70,17 @@ func (pc *PsutilCollector) Collect_host_data() error {
 func (pc *PsutilCollector) Collect_process_instant_data() error {
 	Echo_process_err := func(method string, err error, processid int32) {
 		if err != nil {
-			_, filepath, line, _ := runtime.Caller(1)
-			fmt.Printf("file: %s, line: %d, func: %s, processid: %d, err: %s\n", filepath, line-1, method, processid, err.Error())
+			// _, filepath, line, _ := runtime.Caller(1)
+			// fmt.Printf("file: %s, line: %d, func: %s, processid: %d, err: %s\n", filepath, line-1, method, processid, err.Error())
+			// err = errors.Errorf("%s: %s, %d", err.Error(), method, processid)
+			fmt.Printf("%v: %s, %d\n", err.Error(), method, processid)
 		}
 	}
 
 	processes_0, err := process.Processes()
 	if err != nil {
-		err = errors.Errorf("failed to get processes: %s", err)
+		// err = errors.Errorf("failed to get processes: %s", err)
+		logger.Error("failed to get processes: %s", err)
 		return err
 	}
 
@@ -209,7 +210,8 @@ func (pc *PsutilCollector) Collect_process_instant_data() error {
 func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 	connections, err := net.Connections("all")
 	if err != nil {
-		err = errors.Errorf("failed to run net.connections: %s", err)
+		// err = errors.Errorf("failed to run net.connections: %s", err)
+		logger.Error("failed to run net.connections: %s", err)
 		return err
 	}
 
@@ -240,7 +242,8 @@ func (pc *PsutilCollector) Collect_netconnection_all_data() error {
 func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 	interfaces, err := net.Interfaces()
 	if err != nil {
-		err = errors.Errorf("failed to run net.interfaces: %s", err)
+		// err = errors.Errorf("failed to run net.interfaces: %s", err)
+		logger.Error("failed to run net.interfaces: %s", err)
 		return err
 	}
 
@@ -259,7 +262,8 @@ func (pc *PsutilCollector) Collect_addrInterfaceMap_data() error {
 func (pc *PsutilCollector) Collect_interfaces_io_data() error {
 	iocounters, err := net.IOCounters(true)
 	if err != nil {
-		err = errors.Errorf("failed to collect interfaces io: %s", err.Error())
+		// err = errors.Errorf("failed to collect interfaces io: %s", err.Error())
+		logger.Error("failed to collect interfaces io: %s", err.Error())
 		return err
 	}
 
@@ -287,7 +291,8 @@ func (pc *PsutilCollector) Collect_interfaces_io_data() error {
 func (pc *PsutilCollector) Collect_disk_data() error {
 	partitions, err := disk.Partitions(false)
 	if err != nil {
-		err = errors.Errorf("failed to collect disk partitions: %s", err.Error())
+		// err = errors.Errorf("failed to collect disk partitions: %s", err.Error())
+		logger.Error("failed to collect disk partitions: %s", err.Error())
 		return err
 	}
 
@@ -297,7 +302,8 @@ func (pc *PsutilCollector) Collect_disk_data() error {
 
 		iocounter, err := disk.IOCounters([]string{disk_entity.Partition.Device}...)
 		if err != nil {
-			err = errors.Errorf("failed to collect disk io: %s", err.Error())
+			// err = errors.Errorf("failed to collect disk io: %s", err.Error())
+			logger.Error("failed to collect disk io: %s", err.Error())
 			return err
 		}
 
@@ -305,7 +311,8 @@ func (pc *PsutilCollector) Collect_disk_data() error {
 
 		usage, err := disk.Usage(partition.Mountpoint)
 		if err != nil {
-			err = errors.Errorf("failed to collect disk usage: %s", err.Error())
+			// err = errors.Errorf("failed to collect disk usage: %s", err.Error())
+			logger.Error("failed to collect disk usage: %s", err.Error())
 			return err
 		}
 
@@ -320,7 +327,8 @@ func (pc *PsutilCollector) Collect_disk_data() error {
 func (pc *PsutilCollector) Collect_cpu_data() error {
 	cputimes, err := cpu.Times(true)
 	if err != nil {
-		err = errors.Errorf("failed to collect cpu times: %s", err.Error())
+		// err = errors.Errorf("failed to collect cpu times: %s", err.Error())
+		logger.Error("failed to collect cpu times: %s", err.Error())
 		return err
 	}
 
@@ -330,7 +338,8 @@ func (pc *PsutilCollector) Collect_cpu_data() error {
 
 		cpuinfos, err := cpu.Info()
 		if err != nil {
-			err = errors.Errorf("failed to collect cpu info: %s", err.Error())
+			// err = errors.Errorf("failed to collect cpu info: %s", err.Error())
+			logger.Error("failed to collect cpu info: %s", err.Error())
 			return err
 		}
 		cpu_entity.Info = cpuinfos[i]
