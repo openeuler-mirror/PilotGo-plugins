@@ -6,8 +6,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"openeuler.org/PilotGo/atune-plugin/config"
 	"openeuler.org/PilotGo/atune-plugin/db"
 	"openeuler.org/PilotGo/atune-plugin/plugin"

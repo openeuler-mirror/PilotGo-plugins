@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strconv"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"openeuler.org/PilotGo/atune-plugin/dao"
 	"openeuler.org/PilotGo/atune-plugin/model"
 )

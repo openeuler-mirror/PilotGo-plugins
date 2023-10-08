@@ -1,7 +1,7 @@
 package httphandler
 
 import (
-	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/atune-plugin/model"
 	"openeuler.org/PilotGo/atune-plugin/service"

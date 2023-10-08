@@ -1,7 +1,7 @@
 package router
 
 import (
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/atune-plugin/config"
 	"openeuler.org/PilotGo/atune-plugin/httphandler"
@@ -25,7 +25,6 @@ func HttpServerInit(conf *config.HttpServer) error {
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
-	router.Use(logger.LoggerDebug())
 	router.Use(gin.Recovery())
 
 	registerAPIs(router)
