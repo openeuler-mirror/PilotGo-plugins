@@ -9,9 +9,9 @@ import (
 	"sync"
 
 	"gitee.com/openeuler/PilotGo-plugin-topology-server/conf"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
-	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
@@ -178,6 +178,9 @@ func (t *Topoclient) InitErrorControl(errch <-chan error, errgroup *sync.WaitGro
 					fmt.Printf("%+v\n", err)
 					// errors.EORE(err)
 					errgroup.Done()
+				default:
+					fmt.Printf("only support warn and fatal error type: %+v\n", err)
+					os.Exit(1)
 				}
 			}
 		}

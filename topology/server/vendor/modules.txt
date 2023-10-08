@@ -1,9 +1,9 @@
-# gitee.com/openeuler/PilotGo-plugins/sdk v0.0.0-20230926064010-69fe9dd4adc7
+# gitee.com/openeuler/PilotGo/sdk v0.0.0-20231008025439-b87209596d18
 ## explicit; go 1.17
-gitee.com/openeuler/PilotGo-plugins/sdk/common
-gitee.com/openeuler/PilotGo-plugins/sdk/logger
-gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client
-gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils
+gitee.com/openeuler/PilotGo/sdk/common
+gitee.com/openeuler/PilotGo/sdk/logger
+gitee.com/openeuler/PilotGo/sdk/plugin/client
+gitee.com/openeuler/PilotGo/sdk/utils/httputils
 # github.com/gabriel-vasile/mimetype v1.4.2
 ## explicit; go 1.20
 github.com/gabriel-vasile/mimetype
@@ -34,7 +34,7 @@ github.com/go-playground/locales/currency
 # github.com/go-playground/universal-translator v0.18.1
 ## explicit; go 1.18
 github.com/go-playground/universal-translator
-# github.com/go-playground/validator/v10 v10.14.0
+# github.com/go-playground/validator/v10 v10.14.1
 ## explicit; go 1.18
 github.com/go-playground/validator/v10
 # github.com/golang/protobuf v1.5.0
@@ -43,8 +43,8 @@ github.com/golang/protobuf/proto
 # github.com/json-iterator/go v1.1.12
 ## explicit; go 1.12
 github.com/json-iterator/go
-# github.com/kr/pretty v0.3.0
-## explicit; go 1.12
+# github.com/kr/text v0.2.0
+## explicit
 # github.com/leodido/go-urn v1.2.4
 ## explicit; go 1.16
 github.com/leodido/go-urn
@@ -71,8 +71,8 @@ github.com/modern-go/reflect2
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
-# github.com/rogpeppe/go-internal v1.8.0
-## explicit; go 1.11
+# github.com/rogpeppe/go-internal v1.9.0
+## explicit; go 1.17
 # github.com/shirou/gopsutil v3.21.11+incompatible
 ## explicit
 github.com/shirou/gopsutil/cpu
@@ -84,8 +84,6 @@ github.com/shirou/gopsutil/process
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/stretchr/testify v1.8.4
-## explicit; go 1.20
 # github.com/tklauser/go-sysconf v0.3.12
 ## explicit; go 1.13
 github.com/tklauser/go-sysconf
@@ -146,8 +144,6 @@ google.golang.org/protobuf/reflect/protoregistry
 google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
-# gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
-## explicit; go 1.11
 # gopkg.in/yaml.v2 v2.4.0
 ## explicit; go 1.15
 gopkg.in/yaml.v2

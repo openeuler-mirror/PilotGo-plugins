@@ -3,7 +3,7 @@ package conf
 import (
 	"path"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 )
 
 type TopoConf struct {
