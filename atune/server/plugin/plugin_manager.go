@@ -1,7 +1,7 @@
 package plugin
 
 import (
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"openeuler.org/PilotGo/atune-plugin/config"
 )
 

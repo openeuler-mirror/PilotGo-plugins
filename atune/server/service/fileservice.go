@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"openeuler.org/PilotGo/atune-plugin/config"
 )
 

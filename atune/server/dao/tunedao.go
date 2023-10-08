@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"gitee.com/openeuler/PilotGo-plugins/sdk/response"
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"openeuler.org/PilotGo/atune-plugin/db"
 	"openeuler.org/PilotGo/atune-plugin/model"
 )
