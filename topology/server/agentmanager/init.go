@@ -1,7 +1,7 @@
 package agentmanager
 
 import (
-	"gitee.com/openeuler/PilotGo-plugins/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 )
 
 const Version = "1.0.1"

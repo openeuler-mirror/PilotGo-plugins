@@ -5,7 +5,7 @@ type MachineNode struct {
 	Department string `json:"department"`
 	IP         string `json:"ip"`
 	CPUArch    string `json:"cpu_arch"`
-	OS         string `json:"os`
+	OS         string `json:"os"`
 	State      int    `json:"state"`
 }
 
