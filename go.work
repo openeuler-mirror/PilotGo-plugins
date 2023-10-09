@@ -4,6 +4,4 @@ use (
 	./atune/server
 	./container/server
 	./sdk
-	./topology/agent
-	./topology/server
 )
