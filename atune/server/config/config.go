@@ -40,7 +40,6 @@ type ServerConfig struct {
 const config_file = "./config.yml"
 
 var global_config ServerConfig
-var PilotGo_Server string
 
 func Init() {
 	err := readConfig(config_file, &global_config)
