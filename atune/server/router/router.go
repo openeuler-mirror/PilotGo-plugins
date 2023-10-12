@@ -4,7 +4,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/atune-plugin/config"
-	"openeuler.org/PilotGo/atune-plugin/httphandler"
+	"openeuler.org/PilotGo/atune-plugin/controller"
 	"openeuler.org/PilotGo/atune-plugin/plugin"
 )
 
@@ -37,15 +37,15 @@ func registerAPIs(router *gin.Engine) {
 
 	atune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
 	{
-		atune.GET("all", httphandler.GetAtuneAll)
-		atune.GET("info", httphandler.GetAtuneInfo)
+		atune.GET("all", controller.GetAtuneAll)
+		atune.GET("info", controller.GetAtuneInfo)
 	}
 
 	dbtune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
 	{
-		dbtune.GET("tunes", httphandler.QueryTunes)
-		dbtune.POST("save", httphandler.SaveTune)
-		dbtune.POST("update", httphandler.UpdateTune)
-		dbtune.DELETE("delete", httphandler.DeleteTune)
+		dbtune.GET("tunes", controller.QueryTunes)
+		dbtune.POST("save", controller.SaveTune)
+		dbtune.POST("update", controller.UpdateTune)
+		dbtune.DELETE("delete", controller.DeleteTune)
 	}
 }

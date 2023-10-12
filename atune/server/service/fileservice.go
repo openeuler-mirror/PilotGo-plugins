@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"openeuler.org/PilotGo/atune-plugin/config"
+	"openeuler.org/PilotGo/atune-plugin/plugin"
 )
 
 func Upload(cookie string, filePath string, filename string) error {
@@ -21,7 +21,7 @@ func Upload(cookie string, filePath string, filename string) error {
 		return err
 	}
 
-	upload_addr := "http://" + config.PilotGo_Server + "/api/v1/upload?filename=" + filename
+	upload_addr := "http://" + plugin.GlobalClient.Server + "/api/v1/upload?filename=" + filename
 	request, err := http.NewRequest("POST", upload_addr, bodyBuf)
 	if err != nil {
 		return err

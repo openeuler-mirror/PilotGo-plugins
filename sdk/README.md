@@ -1,2 +1,0 @@
-# PilotGo Plugin SDK
-

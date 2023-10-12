@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gopkg.in/yaml.v3"
 )
 
