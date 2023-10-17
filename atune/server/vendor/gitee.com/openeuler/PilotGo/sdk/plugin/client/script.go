@@ -8,10 +8,15 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-type RunCommandCallback func([]*common.CmdResult)
+type CallbackHandler struct {
+	RunCommandCallback RunCommandCallback
+	TaskLen            int
+}
+
+type RunCommandCallback func([]*common.RunResult)
 
 func (c *Client) RunCommand(batch *common.Batch, cmd string) ([]*common.CmdResult, error) {
-	url := c.Server + "/api/v1/pluginapi/run_command"
+	url := "http://" + c.Server + "/api/v1/pluginapi/run_command"
 
 	p := &common.CmdStruct{
 		Batch:   batch,
@@ -44,7 +49,7 @@ type ScriptStruct struct {
 }
 
 func (c *Client) RunScript(batch *common.Batch, script string, params []string) ([]*common.CmdResult, error) {
-	url := c.Server + "/api/v1/pluginapi/run_script"
+	url := "http://" + c.Server + "/api/v1/pluginapi/run_script"
 
 	p := &ScriptStruct{
 		Batch:  batch,
@@ -72,11 +77,11 @@ func (c *Client) RunScript(batch *common.Batch, script string, params []string) 
 }
 
 func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCommandCallback) error {
-	url := c.Server + "/api/v1/pluginapi/run_command_async"
+	url := "http://" + c.Server + "/api/v1/pluginapi/run_command_async?plugin_name=" + c.PluginInfo.Name
 
 	p := &common.CmdStruct{
 		Batch:   batch,
-		Command: base64.StdEncoding.EncodeToString([]byte(cmd)),
+		Command: cmd,
 	}
 
 	r, err := httputils.Post(url, &httputils.Params{
@@ -86,35 +91,51 @@ func (c *Client) RunCommandAsync(batch *common.Batch, cmd string, callback RunCo
 		return err
 	}
 
-	res := &struct {
-		TaskID string `json:"task_id"`
+	res := struct {
+		Code int `json:"code"`
+		Data struct {
+			TaskID  string `json:"task_id"`
+			TaskLen int    `json:"task_len"`
+		} `json:"data"`
 	}{}
-	if err := json.Unmarshal(r.Body, res); err != nil {
+	if err := json.Unmarshal(r.Body, &res); err != nil {
 		return err
 	}
 
-	taskID := res.TaskID
-	c.registerCommandResultCallback(taskID, callback)
+	taskID := res.Data.TaskID
+	TaskLen := res.Data.TaskLen
+	c.registerCommandResultCallback(taskID, TaskLen, callback)
 
 	return nil
 }
 
 func (c *Client) startCommandResultProcessor() {
-	// TODO：do exit
-	for {
-		d := <-c.asyncCmdResultChan
+	go func() {
+		for {
+			d := <-c.asyncCmdResultChan
 
-		cb, ok := c.cmdProcessorCallbackMap[d.TaskID]
-		if !ok {
-			continue
+			cb, ok := c.cmdProcessorCallbackMap[d.TaskID]
+			if !ok {
+				continue
+			}
+
+			// 注意：map并发安全
+			cb.RunCommandCallback(d.Result)
+			cb.TaskLen = cb.TaskLen - len(d.Result)
+			if cb.TaskLen == 0 {
+				delete(c.cmdProcessorCallbackMap, d.TaskID)
+			}
 		}
-
-		// 注意：map并发安全
-		cb(d.Result)
-		delete(c.cmdProcessorCallbackMap, d.TaskID)
-	}
+	}()
 }
 
-func (c *Client) registerCommandResultCallback(taskID string, callback RunCommandCallback) {
-	c.cmdProcessorCallbackMap[taskID] = callback
+func (c *Client) registerCommandResultCallback(taskID string, taskLen int, callback RunCommandCallback) {
+	rccb := c.cmdProcessorCallbackMap[taskID]
+	rccb.RunCommandCallback = callback
+	rccb.TaskLen = taskLen
+	c.cmdProcessorCallbackMap[taskID] = rccb
+}
+
+func (c *Client) ProcessCommandResult(command_result *common.AsyncCmdResult) {
+	c.asyncCmdResultChan <- command_result
 }

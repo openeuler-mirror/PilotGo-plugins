@@ -29,14 +29,14 @@ func main() {
 		os.Exit(-1)
 	}
 
+	plugin.GlobalClient = client.DefaultClient(plugin.Init(config.Config().PluginAtune))
+	plugin.GlobalClient.Server = config.Config().PilotGoServer.Addr
+
 	err := router.HttpServerInit(config.Config().HttpServer)
 	if err != nil {
 		logger.Error("http server init failed, error:%v", err)
 		os.Exit(-1)
 	}
-
-	plugin.GlobalClient = client.DefaultClient(plugin.Init(config.Config().PluginAtune))
-	plugin.GlobalClient.Server = config.Config().PilotGoServer.Addr
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
