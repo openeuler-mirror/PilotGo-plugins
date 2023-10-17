@@ -11,5 +11,12 @@ type Tunes struct {
 }
 
 type RunResult struct {
-	ID int `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	ID            int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	MachineUUID   string `json:"machine_uuid"`
+	MachineIP     string `json:"machine_ip"`
+	Command       string `json:"command"`
+	RetCode       int    `json:"retcode"`
+	Stdout        string `json:"stdout"`
+	Stderr        string `json:"stderr"`
+	ResponseError string `json:"resError"`
 }

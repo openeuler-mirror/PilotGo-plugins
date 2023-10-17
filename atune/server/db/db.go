@@ -42,6 +42,7 @@ func MysqldbInit(conf *config.MysqlDBInfo) error {
 		return err
 	}
 	MySQL().AutoMigrate(&model.Tunes{})
+	MySQL().AutoMigrate(&model.RunResult{})
 
 	return nil
 }

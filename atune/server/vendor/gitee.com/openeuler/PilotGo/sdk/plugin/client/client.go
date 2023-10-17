@@ -15,7 +15,7 @@ type Client struct {
 
 	// 用于异步command及script执行结果处理机
 	asyncCmdResultChan      chan *common.AsyncCmdResult
-	cmdProcessorCallbackMap map[string]RunCommandCallback
+	cmdProcessorCallbackMap map[string]CallbackHandler
 }
 
 var global_client *Client
@@ -27,8 +27,9 @@ func DefaultClient(desc *PluginInfo) *Client {
 	global_client = &Client{
 		PluginInfo: desc,
 
-		eventChan:          make(chan *common.EventMessage, 20),
-		asyncCmdResultChan: make(chan *common.AsyncCmdResult, 20),
+		eventChan:               make(chan *common.EventMessage, 20),
+		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
+		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
 	}
 
 	return global_client
@@ -40,7 +41,7 @@ func GetClient() *Client {
 
 // RegisterHandlers 注册一些插件标准的API接口，清单如下：
 // GET /plugin_manage/info
-func (c *Client) RegisterHandlers(router *gin.Engine) {
+func (client *Client) RegisterHandlers(router *gin.Engine) {
 	// 提供插件基本信息
 	mg := router.Group("/plugin_manage/")
 	{
@@ -50,11 +51,11 @@ func (c *Client) RegisterHandlers(router *gin.Engine) {
 	api := router.Group("/plugin_manage/api/v1/")
 	{
 		api.PUT("/event", func(c *gin.Context) {
-			c.Set("__internal__client_instance", c)
+			c.Set("__internal__client_instance", client)
 		}, EventHandler)
 
 		api.PUT("/command_result", func(c *gin.Context) {
-			c.Set("__internal__client_instance", c)
+			c.Set("__internal__client_instance", client)
 		}, CommandResultHandler)
 	}
 
@@ -67,6 +68,6 @@ func (c *Client) RegisterHandlers(router *gin.Engine) {
 	// }
 
 	// TODO: start command result process service
-	c.startEventProcessor()
-	c.startCommandResultProcessor()
+	client.startEventProcessor()
+	client.startCommandResultProcessor()
 }
