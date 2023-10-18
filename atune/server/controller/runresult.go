@@ -12,22 +12,23 @@ import (
 func RunCommand(c *gin.Context) {
 	d := &common.CmdStruct{}
 	if err := c.ShouldBind(d); err != nil {
-		logger.Debug("bind batch param error:%s", err)
+		logger.Debug("绑定批次参数失败：%s", err)
 		response.Fail(c, nil, "parameter error")
 		return
 	}
 
 	run_result := func(result []*common.RunResult) {
 		for _, res := range result {
+			logger.Info("结果：%v", *res)
 			if err := service.ProcessResult(res, d.Command); err != nil {
-				logger.Error("%v", err.Error())
+				logger.Error("处理结果失败：%v", err.Error())
 			}
 		}
 	}
 
 	err := plugin.GlobalClient.RunCommandAsync(d.Batch, d.Command, run_result)
 	if err != nil {
-		logger.Error("%v", err.Error())
+		logger.Error("远程调用失败：%v", err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}

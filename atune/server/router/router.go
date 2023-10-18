@@ -25,6 +25,7 @@ func HttpServerInit(conf *config.HttpServer) error {
 func setupRouter() *gin.Engine {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
+	router.Use(logger.RequestLogger())
 	router.Use(gin.Recovery())
 
 	registerAPIs(router)
