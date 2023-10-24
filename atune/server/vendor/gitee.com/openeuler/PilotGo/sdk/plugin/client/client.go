@@ -27,7 +27,9 @@ func DefaultClient(desc *PluginInfo) *Client {
 	global_client = &Client{
 		PluginInfo: desc,
 
-		eventChan:               make(chan *common.EventMessage, 20),
+		eventChan:        make(chan *common.EventMessage, 20),
+		eventCallbackMap: make(map[int]EventCallback),
+
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
 	}
@@ -50,7 +52,7 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
-		api.PUT("/event", func(c *gin.Context) {
+		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
 		}, EventHandler)
 
