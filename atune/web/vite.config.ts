@@ -14,11 +14,12 @@ export default defineConfig({
   server: {
     port: 8080,
     https: false,
+    cors: true,
     proxy: {
       '/plugin': {
         target: 'http://localhost:8099',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/plugin/, ''),
+        rewrite: (path) => path.replace(/^\//, ''),
       },
     },
   },
