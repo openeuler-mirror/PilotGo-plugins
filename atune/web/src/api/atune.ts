@@ -16,3 +16,12 @@ export function getAtuneInfo(data: object) {
     params: data,
   });
 }
+
+// 获取调优模板列表分页
+export function getTuneLists(data: object) {
+  return request({
+    url: '/plugin/atune/tunes',
+    method: 'get',
+    params: data,
+  });
+}
