@@ -7,11 +7,12 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
+	"openeuler.org/PilotGo/atune-plugin/config"
 )
 
 type MysqlManager struct {
 	ip       string
-	port     string
+	port     int
 	userName string
 	passWord string
 	dbName   string
@@ -25,7 +26,14 @@ func MySQL() *gorm.DB {
 	return global_db
 }
 
-func MysqldbInit(m *MysqlManager) error {
+func MysqldbInit(conf *config.MysqlDBInfo) error {
+	m := &MysqlManager{
+		ip:       conf.HostName,
+		port:     conf.Port,
+		userName: conf.UserName,
+		passWord: conf.Password,
+		dbName:   conf.DataBase,
+	}
 	err := ensureDatabase(m)
 	if err != nil {
 		return err
