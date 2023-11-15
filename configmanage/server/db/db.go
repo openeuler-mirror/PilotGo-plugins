@@ -7,7 +7,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-	"openeuler.org/PilotGo/atune-plugin/config"
+	"openeuler.org/PilotGo/configmanage-plugin/config"
 )
 
 type MysqlManager struct {
