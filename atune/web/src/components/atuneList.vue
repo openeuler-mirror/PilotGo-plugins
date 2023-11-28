@@ -1,44 +1,35 @@
 <template>
-  
-    <div class="table">
-      <el-table :data="tableData" style="width: 100%">
-        <el-table-column prop="tuneName" label="名称" width="180" />
-        <el-table-column prop="prepare" label="环境准备" />
-        <el-table-column prop="tune" label="调优" />
-        <el-table-column prop="restore" label="环境恢复" width="180" />
-      </el-table>
-    </div>
-    <div class="pagination">
-      <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[1, 2, 5]"
-        :total="totalItems"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      ></el-pagination>
-    </div>
-  
-
+  <div class="table">
+    <el-table :data="tableData" style="width: 100%">
+      <el-table-column prop="tuneName" label="名称" width="180" />
+      <el-table-column prop="prepare" label="环境准备" />
+      <el-table-column prop="tune" label="调优" />
+      <el-table-column prop="restore" label="环境恢复" width="180" />
+    </el-table>
+  </div>
+  <div class="pagination">
+    <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :page-sizes="[10, 20, 50]"
+      :total="totalItems" layout="total, sizes, prev, pager, next, jumper" @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"></el-pagination>
+  </div>
 </template>
 
 <script lang='ts' setup>
-import {  onMounted,ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { getTuneLists } from '@/api/atune'
 
 const tableData = ref([] as Atune[]);
 const currentPage = ref(1);
-const pageSize = ref(1);
+const pageSize = ref(10);
 const totalItems = ref(0);
 
 interface Atune {
   tuneName: string
   workDir: string
   prepare: string
-  tune:string
-  restore:string
-  note:string
+  tune: string
+  restore: string
+  note: string
 }
 
 const fetchData = async () => {
@@ -47,9 +38,9 @@ const fetchData = async () => {
       page: currentPage.value,
       size: pageSize.value,
     });
-    
-    tableData.value = response.data.data; 
-    totalItems.value = response.data.total; 
+
+    tableData.value = response.data.data;
+    totalItems.value = response.data.total;
   } catch (error) {
     console.error('Error fetching data:', error);
   }
@@ -60,7 +51,7 @@ const handleSizeChange = (newSize: number) => {
   fetchData();
 };
 
-const handleCurrentChange = (newPage:number) => {
+const handleCurrentChange = (newPage: number) => {
   currentPage.value = newPage;
   fetchData();
 };
@@ -70,8 +61,8 @@ onMounted(fetchData);
 </script>
 
 <style lang = 'less' scoped>
-
 .table {
+
   .el-table th,
   .el-table td {
     text-align: center; // 内容居中
@@ -81,10 +72,10 @@ onMounted(fetchData);
     font-weight: bold; // 设置标签为黑体
   }
 }
+
 .pagination {
   position: absolute;
   bottom: 0;
   padding-bottom: 3%;
 }
- 
 </style>
