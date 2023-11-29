@@ -1,10 +1,5 @@
 <template>
     <div>
-        <p>{{ selectedNodeData }}</p>
-
-        <div>获取调优信息</div>
-        <button @click="fetchAtuneInfo">获取调优信息</button>
-
         <el-form :model="form" label-width="120px">
             <el-form-item label="调优对象">
                 <el-input v-model="form.tuneName"></el-input>
@@ -13,7 +8,7 @@
                 <el-input v-model="form.workDir"></el-input>
             </el-form-item>
             <el-form-item label="环境准备">
-                <el-input v-model="form.perpare"></el-input>
+                <el-input v-model="form.prepare"></el-input>
             </el-form-item>
             <el-form-item label="智能调优">
                 <el-input v-model="form.tune"></el-input>
@@ -40,28 +35,43 @@ let props = defineProps({
 })
 
 const atuneName = ref(props.selectedNodeData)
-// 使用 onUpdated 钩子来监视 selectedNodeData 的变化
+
 onUpdated(() => {
     atuneName.value = props.selectedNodeData
+    fetchAtuneInfo();
 })
 
-const atuneInfo = ref(null)
 const form = reactive({
     tuneName: "",
     workDir: "",
-    perpare: "",
+    prepare: "",
     tune: "",
     restore: "",
     note: ""
 })
 const fetchAtuneInfo = () => {
     if (atuneName.value) {
-        // 获取单个模板信息
         getAtuneInfo({ name: atuneName.value })
             .then((res) => {
                 if (res.data && res.data.code === 200) {
-                    atuneInfo.value = res.data;
-                    console.log('获取到的调优信息：', atuneInfo.value);
+                    const data = res.data.data;
+                    // 判断数据结构类型
+                    if (data.BaseTune) {
+                        // 如果有 BaseTune
+                        form.tuneName = data.BaseTune.tuneName || "";
+                        form.workDir = data.BaseTune.workDir || "";
+                        form.prepare = data.BaseTune.prepare || "";
+                        form.tune = data.BaseTune.tune || "";
+                        form.restore = data.BaseTune.restore || "";
+                    } else {
+                        form.tuneName = data.tuneName || "";
+                        form.workDir = data.workDir || "";
+                        form.prepare = data.prepare || "";
+                        form.tune = data.tune || "";
+                        form.restore = data.restore || "";
+                    }
+                    form.note = data.note || "";
+                    console.log('获取到的调优信息：', data);
                 } else {
                     console.log('获取调优信息时出错:', res.data.msg)
                 }
