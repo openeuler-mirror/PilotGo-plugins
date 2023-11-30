@@ -8,7 +8,15 @@
       <el-tree :data="atuneTree" :props="defaultProps" :highlight-current="true" @node-click="handleNodeClick"></el-tree>
     </div>
     <div class="table-container">
-      <div class="title">调优模板</div>
+      <div class="title">
+        <div class="title-content">
+          <p>调优模板</p>
+        </div>
+        <el-input placeholder="请输入调优名称进行搜索..." :prefix-icon="Search" clearable
+          style="width: 280px;margin-right: 10px;"></el-input>
+        <el-button :icon="Search">搜索</el-button>
+        <el-button class="delete-button">删除</el-button>
+      </div>
       <div class="table">
         <atuneList></atuneList>
       </div>
@@ -23,6 +31,7 @@
 import { onMounted, ref } from 'vue';
 import { getAtuneAllName } from '@/api/atune';
 import { ElTree, ElDialog } from 'element-plus';
+import { Search } from '@element-plus/icons-vue'
 import atuneList from '@/components/atuneList.vue'
 import atuneTemplete from '@/components/atuneTemplete.vue'
 
@@ -97,6 +106,11 @@ function closeDialog() {
     border: 2px solid #ddd;
     display: flex;
     flex-direction: column;
+
+    .table-button {
+      display: flex;
+      justify-content: right;
+    }
   }
 
   .table {
@@ -112,6 +126,17 @@ function closeDialog() {
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
     text-indent: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title-content {
+      flex: 1;
+    }
+
+    .delete-button {
+      margin-right: 10px;
+    }
   }
 }
 </style>

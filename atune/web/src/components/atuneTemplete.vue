@@ -17,7 +17,7 @@
                 <el-input v-model="form.restore"></el-input>
             </el-form-item>
             <el-form-item label="注意事项">
-                <el-input v-model="form.note" class="custom-input" type="text" :rows="4"></el-input>
+                <el-input v-model="form.note" class="custom-input" type="textarea" :rows="6"></el-input>
             </el-form-item>
         </el-form>
         <el-form class="centered-buttons">
@@ -28,7 +28,7 @@
 </template>
 
 <script lang='ts' setup>
-import { ref, onUpdated, reactive } from 'vue'
+import { ref, onUpdated, reactive, onMounted } from 'vue'
 import { getAtuneInfo } from '@/api/atune'
 
 let props = defineProps({
@@ -39,6 +39,11 @@ let props = defineProps({
 })
 
 const atuneName = ref(props.selectedNodeData)
+
+onMounted(() => {
+    atuneName.value = props.selectedNodeData
+    fetchAtuneInfo();
+})
 
 onUpdated(() => {
     atuneName.value = props.selectedNodeData
@@ -97,10 +102,11 @@ const onSubmit = () => {
 
     .custom-input {
         white-space: pre-wrap;
-        text-align: left; // 靠左
-        vertical-align: top; // 靠上
-        height: 150px;
+        resize: none;
+        text-align: left;
+        vertical-align: top;
     }
+
 }
 
 
