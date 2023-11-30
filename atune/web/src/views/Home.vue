@@ -13,12 +13,10 @@
         <atuneList></atuneList>
       </div>
     </div>
-    <div>
-      <el-dialog title="调优模板信息" width="70%" @close="closeDialog" v-model="showDialog">
-        <atuneTemplete :selectedNodeData="selectedNodeData"></atuneTemplete>
-      </el-dialog>
-    </div>
   </div>
+  <el-dialog title="调优模板信息" width="70%" @close="closeDialog" v-model="showDialog">
+    <atuneTemplete :selectedNodeData="selectedNodeData"></atuneTemplete>
+  </el-dialog>
 </template>
 
 <script lang="ts" setup>
@@ -76,43 +74,44 @@ function closeDialog() {
   display: flex;
   min-width: 100%;
   height: 95%;
-}
 
-.tree-container,
-.table-container {
-  border-radius: 10px;
-  overflow: hidden;
-  margin: 10px;
-  background-color: #fff;
-}
 
-.tree-container {
-  height: 95%;
-  width: 20%;
-  border: 1px solid #ddd;
-  margin-left: 30px;
-}
+  .tree-container,
+  .table-container {
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 10px;
+    background-color: #fff;
+  }
 
-.table-container {
-  height: 95%;
-  width: 76%;
-  border: 2px solid #ddd;
-  display: flex;
-  flex-direction: column;
-}
+  .tree-container {
+    height: 95%;
+    width: 20%;
+    border: 1px solid #ddd;
+    margin-left: 30px;
+  }
 
-.table {
-  flex: 1;
-  padding: 10px;
-}
+  .table-container {
+    height: 95%;
+    width: 76%;
+    border: 2px solid #ddd;
+    display: flex;
+    flex-direction: column;
+  }
 
-.title {
-  height: 30px;
-  background-color: #395a9c;
-  color: #fff;
-  padding: 10px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-  text-indent: 15px;
+  .table {
+    flex: 1;
+    padding: 10px;
+  }
+
+  .title {
+    height: 30px;
+    background-color: #395a9c;
+    color: #fff;
+    padding: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    text-indent: 15px;
+  }
 }
 </style>

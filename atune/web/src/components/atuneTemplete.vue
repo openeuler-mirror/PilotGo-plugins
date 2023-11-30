@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-form :model="form" label-width="120px">
+        <el-form :model="form" class="custom-form">
             <el-form-item label="调优对象">
                 <el-input v-model="form.tuneName"></el-input>
             </el-form-item>
@@ -17,8 +17,12 @@
                 <el-input v-model="form.restore"></el-input>
             </el-form-item>
             <el-form-item label="注意事项">
-                <el-input v-model="form.note"></el-input>
+                <el-input v-model="form.note" class="custom-input" type="text" :rows="4"></el-input>
             </el-form-item>
+        </el-form>
+        <el-form class="centered-buttons">
+            <el-button type="primary" @click="onSubmit" class="custom-button">保存</el-button>
+            <el-button class="custom-button">取消</el-button>
         </el-form>
     </div>
 </template>
@@ -80,7 +84,33 @@ const fetchAtuneInfo = () => {
         console.warn('atuneName 为空，无法获取调优信息');
     }
 }
-
+const onSubmit = () => {
+    console.log('submit!')
+}
 </script>
 
-<style lang = 'less' scoped></style>
+<style lang = 'less' scoped>
+.custom-form {
+    margin-left: 25px;
+    margin-right: 20px;
+    outline-width: 120px;
+
+    .custom-input {
+        white-space: pre-wrap;
+        text-align: left; // 靠左
+        vertical-align: top; // 靠上
+        height: 150px;
+    }
+}
+
+
+.centered-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+
+    .custom-button {
+        margin-right: 7px;
+    }
+}
+</style>
