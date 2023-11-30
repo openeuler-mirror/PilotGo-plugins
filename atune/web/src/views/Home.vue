@@ -15,10 +15,10 @@
         <el-input placeholder="请输入调优名称进行搜索..." :prefix-icon="Search" clearable
           style="width: 280px;margin-right: 10px;"></el-input>
         <el-button :icon="Search">搜索</el-button>
-        <el-button class="delete-button">删除</el-button>
+        <el-button class="delete-button" @click="handleDelete">删除</el-button>
       </div>
       <div class="table">
-        <atuneList></atuneList>
+        <atuneList @selectionChange="handleSelectionChange"></atuneList>
       </div>
     </div>
   </div>
@@ -38,9 +38,32 @@ import atuneTemplete from '@/components/atuneTemplete.vue'
 const atuneTree = ref([]);
 const selectedNodeData = ref("");
 const showDialog = ref(false);
+const selectedRows = ref([])
 const defaultProps = ref({
   label: 'label',
 });
+
+// 选中调优对象
+const handleNodeClick = (node: any) => {
+  selectedNodeData.value = node.label;
+  showDialog.value = true;
+}
+
+// 关闭dialog弹框
+const closeDialog = () => {
+  showDialog.value = false;
+}
+
+// 选中多选框
+const handleSelectionChange = (selected_Rows: any) => {
+  selectedRows.value = selected_Rows;
+}
+
+// 删除
+const handleDelete = () => {
+  console.log('删除行：', selectedRows.value);
+  // 调用删除 API 或执行其他操作
+}
 
 onMounted(async () => {
   const res = await getAtuneAllName();
@@ -49,17 +72,6 @@ onMounted(async () => {
     key: index.toString(),
   }));
 });
-
-function handleNodeClick(node: any) {
-  selectedNodeData.value = node.label;
-  // 点击节点时显示dialog弹框
-  showDialog.value = true;
-}
-
-// 关闭dialog弹框
-function closeDialog() {
-  showDialog.value = false;
-}
 </script>
 
 <style lang="less" scoped>
