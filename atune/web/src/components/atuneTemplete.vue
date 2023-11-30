@@ -40,16 +40,6 @@ let props = defineProps({
 
 const atuneName = ref(props.selectedNodeData)
 
-onMounted(() => {
-    atuneName.value = props.selectedNodeData
-    fetchAtuneInfo();
-})
-
-onUpdated(() => {
-    atuneName.value = props.selectedNodeData
-    fetchAtuneInfo();
-})
-
 const form = reactive({
     tuneName: "",
     workDir: "",
@@ -59,27 +49,21 @@ const form = reactive({
     note: ""
 })
 const fetchAtuneInfo = () => {
+    atuneName.value = props.selectedNodeData
     if (atuneName.value) {
         getAtuneInfo({ name: atuneName.value })
             .then((res) => {
                 if (res.data && res.data.code === 200) {
                     const data = res.data.data;
                     // 判断数据结构类型
-                    if (data.BaseTune) {
-                        // 如果有 BaseTune
-                        form.tuneName = data.BaseTune.tuneName || "";
-                        form.workDir = data.BaseTune.workDir || "";
-                        form.prepare = data.BaseTune.prepare || "";
-                        form.tune = data.BaseTune.tune || "";
-                        form.restore = data.BaseTune.restore || "";
-                    } else {
-                        form.tuneName = data.tuneName || "";
-                        form.workDir = data.workDir || "";
-                        form.prepare = data.prepare || "";
-                        form.tune = data.tune || "";
-                        form.restore = data.restore || "";
-                    }
-                    form.note = data.note || "";
+                    const baseTuneData = data.BaseTune || {};
+
+                    form.tuneName = baseTuneData.tuneName || data.tuneName || '';
+                    form.workDir = baseTuneData.workDir || data.workDir || '';
+                    form.prepare = baseTuneData.prepare || data.prepare || '';
+                    form.tune = baseTuneData.tune || data.tune || '';
+                    form.restore = baseTuneData.restore || data.restore || '';
+                    form.note = data.note || '';
                     console.log('获取到的调优信息：', data);
                 } else {
                     console.log('获取调优信息时出错:', res.data.msg)
@@ -92,6 +76,14 @@ const fetchAtuneInfo = () => {
 const onSubmit = () => {
     console.log('submit!')
 }
+
+onMounted(() => {
+    fetchAtuneInfo();
+})
+
+onUpdated(() => {
+    fetchAtuneInfo();
+})
 </script>
 
 <style lang = 'less' scoped>
