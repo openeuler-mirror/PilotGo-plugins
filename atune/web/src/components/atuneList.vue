@@ -16,14 +16,14 @@
 </template>
 
 <script lang='ts' setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, defineEmits } from 'vue';
 import { getTuneLists } from '@/api/atune'
 
 const tableData = ref([] as Atune[]);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const totalItems = ref(0);
-const selectedRows = ref([] as Atune[])
+const emit = defineEmits(['selectionChange']);
 
 interface Atune {
   tuneName: string
@@ -34,6 +34,7 @@ interface Atune {
   note: string
 }
 
+// 获取tune模板列表
 const fetchData = async () => {
   try {
     const response = await getTuneLists({
@@ -48,18 +49,21 @@ const fetchData = async () => {
   }
 };
 
+// 页码大小
 const handleSizeChange = (newSize: number) => {
   pageSize.value = newSize;
   fetchData();
 };
 
+// 页数
 const handleCurrentChange = (newPage: number) => {
   currentPage.value = newPage;
   fetchData();
 };
 
+// 选中多选框
 const handleSelectionChange = (rows: Atune[]) => {
-  selectedRows.value = rows;
+  emit('selectionChange', rows);
 };
 
 onMounted(() => {
