@@ -29,16 +29,16 @@
 
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
-import { getAtuneAllName } from '@/api/atune';
+import { getAtuneAllName, deleteTune } from '@/api/atune';
 import { ElTree, ElDialog } from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
-import atuneList from '@/components/atuneList.vue'
+import atuneList, { Atune } from '@/components/atuneList.vue'
 import atuneTemplete from '@/components/atuneTemplete.vue'
 
 const atuneTree = ref([]);
 const selectedNodeData = ref("");
 const showDialog = ref(false);
-const selectedRows = ref([])
+const selectedRows = ref([] as Atune[])
 const defaultProps = ref({
   label: 'label',
 });
@@ -61,8 +61,22 @@ const handleSelectionChange = (selected_Rows: any) => {
 
 // 删除
 const handleDelete = () => {
-  console.log('删除行：', selectedRows.value);
-  // 调用删除 API 或执行其他操作
+  let ids = ref<number[]>([])
+  selectedRows.value.forEach(item => {
+    ids.value.push(item.id)
+  })
+  deleteTune({ ids: ids.value }).then(res => {
+    if (res.data && res.data.code === 200) {
+      // Handle success, you may want to update the UI or perform other actions
+      console.log('删除成功');
+    } else {
+      // Handle error, show a message, or take appropriate actions
+      console.error('删除失败:', res.data.msg);
+    }
+  }).catch(error => {
+    // Handle network or other errors
+    console.error('删除请求错误:', error);
+  });
 }
 
 onMounted(async () => {
