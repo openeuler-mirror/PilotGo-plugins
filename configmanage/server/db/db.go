@@ -61,22 +61,24 @@ func MysqldbInit(conf *config.MysqlDBInfo) error {
 
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
+
+	//创建数据库表信息
 	MySQL().AutoMigrate()
 	return nil
 }
 
-func ensureDatabase(conf *MysqlManager) error {
+func ensureDatabase(m *MysqlManager) error {
 	Url := fmt.Sprintf("%s:%s@(%s:%d)/?charset=utf8mb4&parseTime=true",
-		conf.userName,
-		conf.passWord,
-		conf.ip,
-		conf.port)
+		m.userName,
+		m.passWord,
+		m.ip,
+		m.port)
 	db, err := gorm.Open(mysql.Open(Url))
 	if err != nil {
 		return err
 	}
 
-	creatDataBase := "CREATE DATABASE IF NOT EXISTS " + conf.ip + " DEFAULT CHARSET utf8 COLLATE utf8_general_ci"
+	creatDataBase := "CREATE DATABASE IF NOT EXISTS " + m.dbName + " DEFAULT CHARSET utf8 COLLATE utf8_general_ci"
 	db.Exec(creatDataBase)
 
 	d, err := db.DB()

@@ -3,8 +3,6 @@ config_plugin:
   plugin_type: "iframe"   # iframe   micro-app
 http_server:
   addr: "localhost:8099"
-pilotgo_server:
-  addr: "0.0.0.0:8888"
 log:
   level: debug
   driver: file    #可选stdout和file。stdout：输出到终端控制台；file：输出到path下的指定文件。

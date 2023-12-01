@@ -17,10 +17,6 @@ type HttpServer struct {
 	Addr string `yaml:"addr"`
 }
 
-type PilotGoServer struct {
-	Addr string `yaml:"addr"`
-}
-
 type MysqlDBInfo struct {
 	HostName string `yaml:"host"`
 	Port     int    `yaml:"port"`
@@ -30,23 +26,17 @@ type MysqlDBInfo struct {
 }
 
 type ServerConfig struct {
-	ConfigPlugin  *ConfigPlugin   `yaml:"config_plugin"`
-	HttpServer    *HttpServer     `yaml:"http_server"`
-	PilotGoServer *PilotGoServer  `yaml:"pilotgo_server"`
-	Logopts       *logger.LogOpts `yaml:"log"`
-	Mysql         *MysqlDBInfo    `yaml:"mysql"`
+	ConfigPlugin *ConfigPlugin   `yaml:"config_plugin"`
+	HttpServer   *HttpServer     `yaml:"http_server"`
+	Logopts      *logger.LogOpts `yaml:"log"`
+	Mysql        *MysqlDBInfo    `yaml:"mysql"`
 }
-
-const config_file = "./config.yml"
 
 var global_config ServerConfig
 
-func Init() {
+func Init(config_file string) error {
 	err := readConfig(config_file, &global_config)
-	if err != nil {
-		fmt.Printf("%v", err.Error())
-		os.Exit(-1)
-	}
+	return err
 }
 
 func Config() *ServerConfig {
