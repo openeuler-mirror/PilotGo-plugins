@@ -25,7 +25,8 @@ const pageSize = ref(10);
 const totalItems = ref(0);
 const emit = defineEmits(['selectionChange']);
 
-interface Atune {
+export interface Atune {
+  id: number
   tuneName: string
   workDir: string
   prepare: string

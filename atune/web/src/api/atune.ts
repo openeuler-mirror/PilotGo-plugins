@@ -25,3 +25,12 @@ export function getTuneLists(data: object) {
     params: data,
   });
 }
+
+// 删除调优模板
+export function deleteTune(data: object) {
+  return request({
+    url: '/plugin/atune/delete',
+    method: 'delete',
+    data,
+  });
+}
