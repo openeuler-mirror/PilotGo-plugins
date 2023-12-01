@@ -30,7 +30,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { getAtuneAllName, deleteTune } from '@/api/atune';
-import { ElTree, ElDialog } from 'element-plus';
+import { ElTree, ElDialog, ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
 import atuneList, { Atune } from '@/components/atuneList.vue'
 import atuneTemplete from '@/components/atuneTemplete.vue'
@@ -61,22 +61,27 @@ const handleSelectionChange = (selected_Rows: any) => {
 
 // 删除
 const handleDelete = () => {
-  let ids = ref<number[]>([])
-  selectedRows.value.forEach(item => {
-    ids.value.push(item.id)
+  ElMessageBox.confirm('确定要删除吗？', '提示', {
+    type: 'warning',
+    confirmButtonText: '确定',
+    cancelButtonText: '取消'
   })
-  deleteTune({ ids: ids.value }).then(res => {
-    if (res.data && res.data.code === 200) {
-      // Handle success, you may want to update the UI or perform other actions
-      console.log('删除成功');
-    } else {
-      // Handle error, show a message, or take appropriate actions
-      console.error('删除失败:', res.data.msg);
-    }
-  }).catch(error => {
-    // Handle network or other errors
-    console.error('删除请求错误:', error);
-  });
+    .then(() => {
+      let ids = ref<number[]>([])
+      selectedRows.value.forEach(item => {
+        ids.value.push(item.id)
+      })
+      deleteTune({ ids: ids.value }).then(res => {
+        if (res.data.code === 200) {
+          ElMessage.success(res.data.msg)
+          location.reload();
+        } else {
+          ElMessage.error(res.data.msg)
+        }
+      }).catch(err => {
+        ElMessage.error("数据传输失败，请检查：", err)
+      });
+    })
 }
 
 onMounted(async () => {
