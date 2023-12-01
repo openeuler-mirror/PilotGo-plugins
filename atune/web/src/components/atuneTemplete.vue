@@ -22,7 +22,7 @@
         </el-form>
         <el-form class="centered-buttons">
             <el-button type="primary" @click="onSubmit" class="custom-button">保存</el-button>
-            <el-button class="custom-button">取消</el-button>
+            <el-button class="custom-button" @click="onCancel">取消</el-button>
         </el-form>
     </div>
 </template>
@@ -37,8 +37,8 @@ let props = defineProps({
         default: ""
     }
 })
-
 const atuneName = ref(props.selectedNodeData)
+const emit = defineEmits(['closeDialog']);
 
 const form = reactive({
     tuneName: "",
@@ -64,7 +64,6 @@ const fetchAtuneInfo = () => {
                     form.tune = baseTuneData.tune || data.tune || '';
                     form.restore = baseTuneData.restore || data.restore || '';
                     form.note = data.note || '';
-                    console.log('获取到的调优信息：', data);
                 } else {
                     console.log('获取调优信息时出错:', res.data.msg)
                 }
@@ -74,8 +73,13 @@ const fetchAtuneInfo = () => {
     }
 }
 const onSubmit = () => {
-    console.log('submit!')
+    console.log('submit!', form)
+    emit('closeDialog');
 }
+
+const onCancel = () => {
+    emit('closeDialog');
+};
 
 onMounted(() => {
     fetchAtuneInfo();
