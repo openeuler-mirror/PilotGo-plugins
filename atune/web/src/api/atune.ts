@@ -26,6 +26,15 @@ export function getTuneLists(data: object) {
   });
 }
 
+// 保存调优模板
+export function saveTune(data: object) {
+  return request({
+    url: '/plugin/atune/save',
+    method: 'post',
+    data,
+  });
+}
+
 // 删除调优模板
 export function deleteTune(data: object) {
   return request({

@@ -22,8 +22,8 @@
       </div>
     </div>
   </div>
-  <el-dialog title="调优模板信息" width="70%" @close="closeDialog" v-model="showDialog">
-    <atuneTemplete :selectedNodeData="selectedNodeData"></atuneTemplete>
+  <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
+    <atuneTemplete :selectedNodeData="selectedNodeData" @closeDialog="closeDialog"></atuneTemplete>
   </el-dialog>
 </template>
 
