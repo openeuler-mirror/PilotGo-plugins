@@ -103,3 +103,20 @@ func DeleteTune(c *gin.Context) {
 	}
 	response.Success(c, nil, "已删除调优对象模板")
 }
+
+func SearchTune(c *gin.Context) {
+	tune_name := c.Query("name")
+
+	query := &response.PaginationQ{}
+	if err := c.ShouldBindQuery(query); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	data, total, err := service.SearchTune(tune_name, query)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.DataPagination(c, data, total, query)
+}

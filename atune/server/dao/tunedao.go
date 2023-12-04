@@ -42,6 +42,18 @@ func DeleteTune(tuneId int) error {
 	return nil
 }
 
+func SearchTune(tune_name string, query *response.PaginationQ) ([]*model.Tunes, int64, error) {
+	var tune []*model.Tunes
+	if err := db.MySQL().Order("id desc").Limit(query.PageSize).Offset((query.Page-1)*query.PageSize).Where("tune_name LIKE ?", "%"+tune_name+"%").Find(&tune).Error; err != nil {
+		return nil, 0, nil
+	}
+
+	var total int64
+	if err := db.MySQL().Where("tune_name LIKE ?", "%"+tune_name+"%").Model(&tune).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	return tune, total, nil
+}
 func IsExistTuneName(tuneName string) (bool, error) {
 	var t model.Tunes
 	err := db.MySQL().Where("tune_name = ?", tuneName).Find(&t).Error
