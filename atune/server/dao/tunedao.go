@@ -8,7 +8,7 @@ import (
 
 func QueryTunes(query *response.PaginationQ) ([]*model.Tunes, int64, error) {
 	var tunes []*model.Tunes
-	if err := db.MySQL().Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize).Find(&tunes).Error; err != nil {
+	if err := db.MySQL().Order("id desc").Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize).Find(&tunes).Error; err != nil {
 		return nil, 0, err
 	}
 

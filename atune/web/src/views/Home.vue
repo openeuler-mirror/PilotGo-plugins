@@ -18,12 +18,13 @@
         <el-button class="delete-button" @click="handleDelete">删除</el-button>
       </div>
       <div class="table">
-        <atuneList @selectionChange="handleSelectionChange"></atuneList>
+        <atuneList @selectionChange="handleSelectionChange" :refreshData="refreshData"></atuneList>
       </div>
     </div>
   </div>
   <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
-    <atuneTemplete :selectedNodeData="selectedNodeData" @closeDialog="closeDialog"></atuneTemplete>
+    <atuneTemplete :selectedNodeData="selectedNodeData" @closeDialog="closeDialog" @dataUpdated="handleDataUpdated">
+    </atuneTemplete>
   </el-dialog>
 </template>
 
@@ -39,6 +40,7 @@ const atuneTree = ref([]);
 const selectedNodeData = ref("");
 const showDialog = ref(false);
 const selectedRows = ref([] as Atune[])
+const refreshData = ref(false);
 const defaultProps = ref({
   label: 'label',
 });
@@ -59,6 +61,9 @@ const handleSelectionChange = (selected_Rows: any) => {
   selectedRows.value = selected_Rows;
 }
 
+const handleDataUpdated = () => {
+  refreshData.value = !refreshData.value;
+};
 // 删除
 const handleDelete = () => {
   ElMessageBox.confirm('确定要删除吗？', '提示', {
@@ -74,7 +79,7 @@ const handleDelete = () => {
       deleteTune({ ids: ids.value }).then(res => {
         if (res.data.code === 200) {
           ElMessage.success(res.data.msg)
-          location.reload();
+          refreshData.value = !refreshData.value;
         } else {
           ElMessage.error(res.data.msg)
         }

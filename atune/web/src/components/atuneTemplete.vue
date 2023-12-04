@@ -28,8 +28,9 @@
 </template>
 
 <script lang='ts' setup>
+import { ElMessage } from 'element-plus';
 import { ref, onUpdated, reactive, onMounted } from 'vue'
-import { getAtuneInfo } from '@/api/atune'
+import { getAtuneInfo, saveTune } from '@/api/atune'
 
 let props = defineProps({
     selectedNodeData: {
@@ -38,7 +39,7 @@ let props = defineProps({
     }
 })
 const atuneName = ref(props.selectedNodeData)
-const emit = defineEmits(['closeDialog']);
+const emit = defineEmits(['closeDialog', 'dataUpdated']);
 
 const form = reactive({
     tuneName: "",
@@ -73,8 +74,17 @@ const fetchAtuneInfo = () => {
     }
 }
 const onSubmit = () => {
-    console.log('submit!', form)
     emit('closeDialog');
+    saveTune(form).then(res => {
+        if (res.data.code === 200) {
+            ElMessage.success(res.data.msg)
+            emit('dataUpdated');
+        } else {
+            ElMessage.error(res.data.msg)
+        }
+    }).catch(err => {
+        ElMessage.error("数据传输失败，请检查", err)
+    })
 }
 
 const onCancel = () => {

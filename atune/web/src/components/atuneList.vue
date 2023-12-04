@@ -16,7 +16,7 @@
 </template>
 
 <script lang='ts' setup>
-import { onMounted, ref, defineEmits } from 'vue';
+import { onMounted, ref, defineEmits, watch } from 'vue';
 import { getTuneLists } from '@/api/atune'
 
 const tableData = ref([] as Atune[]);
@@ -34,6 +34,12 @@ export interface Atune {
   restore: string
   note: string
 }
+let props = defineProps({
+  refreshData: {
+    type: Boolean,
+    default: false
+  }
+})
 
 // 获取tune模板列表
 const fetchData = async () => {
@@ -68,6 +74,10 @@ const handleSelectionChange = (rows: Atune[]) => {
 };
 
 onMounted(() => {
+  fetchData();
+});
+
+watch(() => props.refreshData, () => {
   fetchData();
 });
 
