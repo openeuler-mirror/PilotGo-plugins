@@ -48,6 +48,7 @@ func registerAPIs(router *gin.Engine) {
 		dbtune.POST("save", controller.SaveTune)
 		dbtune.POST("update", controller.UpdateTune)
 		dbtune.DELETE("delete", controller.DeleteTune)
+		dbtune.GET("search", controller.SearchTune)
 	}
 
 	restune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)

@@ -142,11 +142,6 @@ onMounted(async () => {
     border: 2px solid #ddd;
     display: flex;
     flex-direction: column;
-
-    .table-button {
-      display: flex;
-      justify-content: right;
-    }
   }
 
   .table {

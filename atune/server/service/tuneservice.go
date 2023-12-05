@@ -61,3 +61,11 @@ func UpdateTune(t model.Tunes) error {
 	}
 	return nil
 }
+
+func SearchTune(tune_name string, query *response.PaginationQ) ([]*model.Tunes, int, error) {
+	if data, total, err := dao.SearchTune(tune_name, query); err != nil {
+		return nil, 0, err
+	} else {
+		return data, int(total), nil
+	}
+}
