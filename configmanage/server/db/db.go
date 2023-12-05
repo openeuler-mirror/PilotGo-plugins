@@ -62,8 +62,6 @@ func MysqldbInit(conf *config.MysqlDBInfo) error {
 	db.SetMaxIdleConns(10)
 	db.SetMaxOpenConns(100)
 
-	//创建数据库表信息
-	MySQL().AutoMigrate()
 	return nil
 }
 

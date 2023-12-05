@@ -11,6 +11,7 @@ import (
 	"openeuler.org/PilotGo/configmanage-plugin/db"
 	"openeuler.org/PilotGo/configmanage-plugin/global"
 	"openeuler.org/PilotGo/configmanage-plugin/router"
+	"openeuler.org/PilotGo/configmanage-plugin/service"
 )
 
 var config_file string
@@ -38,6 +39,9 @@ func main() {
 		os.Exit(-1)
 	}
 
+	db.MySQL().AutoMigrate(&service.ConfigMessage{})
+	db.MySQL().AutoMigrate(&service.ConfigFile{})
+	db.MySQL().AutoMigrate(&service.ConfigNode{})
 	server := router.InitRouter()
 	global.GlobalClient = client.DefaultClient(global.Init(config.Config().ConfigPlugin))
 
