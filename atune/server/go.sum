@@ -1,5 +1,7 @@
 gitee.com/openeuler/PilotGo/sdk v0.0.0-20231024072151-019ddee0ae4b h1:OfObzXpfq6qAEcH9tlzqIYUjfZe4mKR37DgCMpmzYO0=
 gitee.com/openeuler/PilotGo/sdk v0.0.0-20231024072151-019ddee0ae4b/go.mod h1:zEVmY3l48/CvR2kIM3DJpD/jWTG1qkOxRoHJii/D0us=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231130033012-9175e9682d48 h1:I8Sko0e1yoimn3A2G8r1mfTVxMxaOYmkpbSVndnx2Rg=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20231130033012-9175e9682d48/go.mod h1:zEVmY3l48/CvR2kIM3DJpD/jWTG1qkOxRoHJii/D0us=
 github.com/bytedance/sonic v1.5.0/go.mod h1:ED5hyg4y6t3/9Ku1R6dU/4KyJ48DZ4jPhfY1O2AihPM=
 github.com/bytedance/sonic v1.9.1 h1:6iJ6NqdoxCDr6mbY8h18oSO+cShGSMRGCEo7F2h0x8s=
 github.com/bytedance/sonic v1.9.1/go.mod h1:i736AoUSYt75HyZLoJW9ERYxcy6eaN6h4BZXU064P/U=
