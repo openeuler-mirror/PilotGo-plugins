@@ -30,7 +30,6 @@ func main() {
 	}
 
 	plugin.GlobalClient = client.DefaultClient(plugin.Init(config.Config().PluginAtune))
-	plugin.GlobalClient.Server = config.Config().PilotGoServer.Addr
 
 	err := router.HttpServerInit(config.Config().HttpServer)
 	if err != nil {

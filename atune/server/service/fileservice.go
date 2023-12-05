@@ -21,7 +21,7 @@ func Upload(cookie string, filePath string, filename string) error {
 		return err
 	}
 
-	upload_addr := "http://" + plugin.GlobalClient.Server + "/api/v1/upload?filename=" + filename
+	upload_addr := "http://" + plugin.GlobalClient.Server() + "/api/v1/upload?filename=" + filename
 	request, err := http.NewRequest("POST", upload_addr, bodyBuf)
 	if err != nil {
 		return err

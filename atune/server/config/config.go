@@ -17,9 +17,6 @@ type PluginAtune struct {
 type HttpServer struct {
 	Addr string `yaml:"addr"`
 }
-type PilotGoServer struct {
-	Addr string `yaml:"addr"`
-}
 
 type MysqlDBInfo struct {
 	HostName string `yaml:"host"`
@@ -30,11 +27,10 @@ type MysqlDBInfo struct {
 }
 
 type ServerConfig struct {
-	PluginAtune   *PluginAtune    `yaml:"plugin_atune"`
-	HttpServer    *HttpServer     `yaml:"http_server"`
-	PilotGoServer *PilotGoServer  `yaml:"pilotgo_server"`
-	Logopts       *logger.LogOpts `yaml:"log"`
-	Mysql         *MysqlDBInfo    `yaml:"mysql"`
+	PluginAtune *PluginAtune    `yaml:"plugin_atune"`
+	HttpServer  *HttpServer     `yaml:"http_server"`
+	Logopts     *logger.LogOpts `yaml:"log"`
+	Mysql       *MysqlDBInfo    `yaml:"mysql"`
 }
 
 const config_file = "./config.yml"
