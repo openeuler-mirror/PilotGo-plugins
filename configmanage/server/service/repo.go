@@ -1,28 +1,19 @@
 package service
 
-import (
-	"openeuler.org/PilotGo/configmanage-plugin/global"
-)
-
 type RepoConfig struct {
-	ConfigInstance ConfigInstance
-	Name           string
-	File           string
+	UUID string
+	Name string
+	File string
 }
 
 func (c *RepoConfig) Record() error {
-	c.ConfigInstance.Type = global.Repo
-	uuid, err := c.ConfigInstance.Record()
-	if err != nil {
-		return err
-	}
 	cf := ConfigFile{
-		ConfigInfoUUID: uuid,
+		ConfigInfoUUID: c.UUID,
 		Name:           c.Name,
 		File:           c.File,
 	}
-	err = cf.Add()
-	return err
+	return cf.Add()
+
 }
 
 func (c *RepoConfig) Load() error {

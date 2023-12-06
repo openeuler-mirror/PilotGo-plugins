@@ -4,7 +4,6 @@ import (
 	"strconv"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"github.com/google/uuid"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -14,8 +13,9 @@ type ConfigInstance struct {
 	BatchIds    []uint   `json:"batchids"`
 	DepartIds   []int    `json:"departids"`
 	UUIDS       []string `json:"uuids"`
+	UUID        string
 
-	Config *Config
+	Config Config
 }
 
 type Config interface {
@@ -33,20 +33,27 @@ type ConfigInfo = internal.ConfigInfo
 type ConfigFile = internal.ConfigFile
 type ConfigNode = internal.ConfigNode
 
-func (ci *ConfigInstance) Record() (string, error) {
+type ConfigResult struct {
+	ConfigInfo
+	BatchIds  []uint
+	DepartIds []int
+	UUIDS     []string
+}
+
+func (ci *ConfigInstance) Record() error {
 	cm := ConfigInfo{
-		UUID:        uuid.New().String(),
+		UUID:        ci.UUID,
 		Type:        ci.Type,
 		Description: ci.Description,
 	}
 	err := cm.Add()
 	if err != nil {
-		return cm.UUID, err
+		return err
 	}
 
 	for _, v := range ci.BatchIds {
 		cn := ConfigNode{
-			ConfigInfoUUID: cm.UUID,
+			ConfigInfoUUID: ci.UUID,
 			NodeId:         "b" + strconv.Itoa(int(v)),
 		}
 		err := cn.Add()
@@ -58,7 +65,7 @@ func (ci *ConfigInstance) Record() (string, error) {
 
 	for _, v := range ci.DepartIds {
 		cn := ConfigNode{
-			ConfigInfoUUID: cm.UUID,
+			ConfigInfoUUID: ci.UUID,
 			NodeId:         "d" + strconv.Itoa(v),
 		}
 		err := cn.Add()
@@ -70,7 +77,7 @@ func (ci *ConfigInstance) Record() (string, error) {
 
 	for _, v := range ci.UUIDS {
 		cn := ConfigNode{
-			ConfigInfoUUID: cm.UUID,
+			ConfigInfoUUID: ci.UUID,
 			NodeId:         "n" + v,
 		}
 		err := cn.Add()
@@ -79,5 +86,5 @@ func (ci *ConfigInstance) Record() (string, error) {
 			continue
 		}
 	}
-	return cm.UUID, err
+	return err
 }
