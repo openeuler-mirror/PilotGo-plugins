@@ -7,15 +7,15 @@ import (
 )
 
 type ConfigFile struct {
-	ID                int           `gorm:"primary_key;AUTO_INCREMENT"`
-	ConfigMessage     ConfigMessage `gorm:"Foreignkey:ConfigMessageUUID"`
-	ConfigMessageUUID string
-	Name              string `json:"name"`
-	File              string `gorm:"type:text" json:"file"`
-	CreatedAt         time.Time
+	ID             int        `gorm:"primary_key;AUTO_INCREMENT"`
+	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
+	ConfigInfoUUID string
+	Name           string `json:"name"`
+	File           string `gorm:"type:text" json:"file"`
+	CreatedAt      time.Time
 }
 
-func (cf *ConfigFile) AddConfigFile() error {
+func (cf *ConfigFile) Add() error {
 	return db.MySQL().Save(&cf).Error
 }
 

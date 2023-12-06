@@ -31,7 +31,7 @@ func main() {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
-	logger.Info("Thanks to choose PilotGo!")
+	logger.Info("Thanks to choose plugin-config!")
 
 	// mysql db初始化
 	if err := db.MysqldbInit(config.Config().Mysql); err != nil {
@@ -39,7 +39,7 @@ func main() {
 		os.Exit(-1)
 	}
 
-	db.MySQL().AutoMigrate(&service.ConfigMessage{})
+	db.MySQL().AutoMigrate(&service.ConfigInfo{})
 	db.MySQL().AutoMigrate(&service.ConfigFile{})
 	db.MySQL().AutoMigrate(&service.ConfigNode{})
 	server := router.InitRouter()
