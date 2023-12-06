@@ -19,3 +19,11 @@ func Init(plugin *config.ConfigPlugin) *client.PluginInfo {
 	}
 	return &PluginInfo
 }
+
+const (
+	Repo   = "repo"
+	Host   = "host"
+	SSH    = "ssh"
+	SSHD   = "sshd"
+	Sysctl = "sysctl"
+)
