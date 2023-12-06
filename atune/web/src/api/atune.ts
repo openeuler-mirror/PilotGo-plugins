@@ -43,3 +43,12 @@ export function deleteTune(data: object) {
     data,
   });
 }
+
+// 高级搜索模板列表分页
+export function searchTune(data: object) {
+  return request({
+    url: '/plugin/atune/search',
+    method: 'get',
+    params: data,
+  });
+}

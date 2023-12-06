@@ -16,8 +16,8 @@
 </template>
 
 <script lang='ts' setup>
-import { onMounted, ref, defineEmits, watch } from 'vue';
-import { getTuneLists } from '@/api/atune'
+import { onMounted, ref, watch } from 'vue';
+import { getTuneLists, searchTune } from '@/api/atune'
 
 const tableData = ref([] as Atune[]);
 const currentPage = ref(1);
@@ -38,11 +38,19 @@ let props = defineProps({
   refreshData: {
     type: Boolean,
     default: false
-  }
+  },
+  searchTuneName: {
+    type: String,
+    default: ""
+  },
+  searchTune: {
+    type: Boolean,
+    default: false
+  },
 })
 
 // 获取tune模板列表
-const fetchData = async () => {
+const getTuneListsData = async () => {
   try {
     const response = await getTuneLists({
       page: currentPage.value,
@@ -56,16 +64,31 @@ const fetchData = async () => {
   }
 };
 
+// 高级搜索tune模板列表
+const searchTuneListsData = () => {
+  searchTune({
+    page: currentPage.value,
+    size: pageSize.value,
+    name: props.searchTuneName
+  }).then(res => {
+    tableData.value = res.data.data;
+    totalItems.value = res.data.total;
+  }).catch(error => {
+    console.error('Error search data:', error);
+  })
+
+};
+
 // 页码大小
 const handleSizeChange = (newSize: number) => {
   pageSize.value = newSize;
-  fetchData();
+  getTuneListsData();
 };
 
 // 页数
 const handleCurrentChange = (newPage: number) => {
   currentPage.value = newPage;
-  fetchData();
+  getTuneListsData();
 };
 
 // 选中多选框
@@ -74,11 +97,15 @@ const handleSelectionChange = (rows: Atune[]) => {
 };
 
 onMounted(() => {
-  fetchData();
+  getTuneListsData();
 });
 
-watch(() => props.refreshData, () => {
-  fetchData();
+watch(() => [props.refreshData, props.searchTune], ([refreshData, searchTune]): void => {
+  if (searchTune !== undefined) {
+    searchTuneListsData();
+  } else if (refreshData !== undefined) {
+    getTuneListsData();
+  }
 });
 
 </script>

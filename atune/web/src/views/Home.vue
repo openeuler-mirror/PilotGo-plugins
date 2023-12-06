@@ -12,13 +12,15 @@
         <div class="title-content">
           <p>调优模板</p>
         </div>
-        <el-input placeholder="请输入调优名称进行搜索..." :prefix-icon="Search" clearable
-          style="width: 280px;margin-right: 10px;"></el-input>
-        <el-button :icon="Search">搜索</el-button>
+        <el-input v-model="searchTuneName" placeholder="请输入调优名称进行搜索..." :prefix-icon="Search" clearable
+          style="width: 280px;margin-right: 10px;" @keydown.enter.native="handleSearch"></el-input>
+        <el-button :icon="Search" @click="handleSearch">搜索</el-button>
         <el-button class="delete-button" @click="handleDelete">删除</el-button>
       </div>
       <div class="table">
-        <atuneList @selectionChange="handleSelectionChange" :refreshData="refreshData"></atuneList>
+        <atuneList @selectionChange="handleSelectionChange" :refreshData="refreshData" :searchTuneName="searchTuneName"
+          :searchTune="searchTune">
+        </atuneList>
       </div>
     </div>
   </div>
@@ -38,6 +40,8 @@ import atuneTemplete from '@/components/atuneTemplete.vue'
 
 const atuneTree = ref([]);
 const selectedNodeData = ref("");
+const searchTuneName = ref("")
+const searchTune = ref(false)
 const showDialog = ref(false);
 const selectedRows = ref([] as Atune[])
 const refreshData = ref(false);
@@ -61,9 +65,16 @@ const handleSelectionChange = (selected_Rows: any) => {
   selectedRows.value = selected_Rows;
 }
 
+// 刷新
 const handleDataUpdated = () => {
   refreshData.value = !refreshData.value;
 };
+
+// 搜索
+const handleSearch = () => {
+  searchTune.value = !searchTune.value;
+};
+
 // 删除
 const handleDelete = () => {
   ElMessageBox.confirm('确定要删除吗？', '提示', {
