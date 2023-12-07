@@ -29,19 +29,22 @@
 
 <script lang='ts' setup>
 import { ElMessage } from 'element-plus';
-import { ref, onUpdated, reactive, onMounted } from 'vue'
-import { getAtuneInfo, saveTune } from '@/api/atune'
+import { reactive, watchEffect } from 'vue'
+import { getAtuneInfo, saveTune, updateTune } from '@/api/atune'
+import { Atune } from '@/types/atune'
 
 let props = defineProps({
     selectedNodeData: {
         type: String,
         default: ""
+    },
+    selectedEditRow: {
+        type: Object as () => Atune,
+        default: null
     }
 })
-const atuneName = ref(props.selectedNodeData)
-const emit = defineEmits(['closeDialog', 'dataUpdated']);
-
 const form = reactive({
+    id: 0,
     tuneName: "",
     workDir: "",
     prepare: "",
@@ -49,32 +52,40 @@ const form = reactive({
     restore: "",
     note: ""
 })
-const fetchAtuneInfo = () => {
-    atuneName.value = props.selectedNodeData
-    if (atuneName.value) {
-        getAtuneInfo({ name: atuneName.value })
-            .then((res) => {
-                if (res.data && res.data.code === 200) {
-                    const data = res.data.data;
-                    // 判断数据结构类型
-                    const baseTuneData = data.BaseTune || {};
+const emit = defineEmits(['closeDialog', 'dataUpdated']);
 
-                    form.tuneName = baseTuneData.tuneName || data.tuneName || '';
-                    form.workDir = baseTuneData.workDir || data.workDir || '';
-                    form.prepare = baseTuneData.prepare || data.prepare || '';
-                    form.tune = baseTuneData.tune || data.tune || '';
-                    form.restore = baseTuneData.restore || data.restore || '';
-                    form.note = data.note || '';
-                } else {
-                    console.log('获取调优信息时出错:', res.data.msg)
-                }
-            })
-    } else {
-        console.warn('atuneName 为空，无法获取调优信息');
-    }
+// 编辑
+const handleEdit = () => {
+    form.id = props.selectedEditRow.id
+    form.tuneName = props.selectedEditRow.tuneName
+    form.workDir = props.selectedEditRow.workDir
+    form.prepare = props.selectedEditRow.prepare
+    form.tune = props.selectedEditRow.tune
+    form.restore = props.selectedEditRow.restore
+    form.note = props.selectedEditRow.note
 }
-const onSubmit = () => {
-    emit('closeDialog');
+
+const fetchAtuneInfo = () => {
+    getAtuneInfo({ name: props.selectedNodeData })
+        .then((res) => {
+            if (res.data && res.data.code === 200) {
+                const data = res.data.data;
+                // 判断数据结构类型
+                const baseTuneData = data.BaseTune || {};
+
+                form.tuneName = baseTuneData.tuneName || data.tuneName || '';
+                form.workDir = baseTuneData.workDir || data.workDir || '';
+                form.prepare = baseTuneData.prepare || data.prepare || '';
+                form.tune = baseTuneData.tune || data.tune || '';
+                form.restore = baseTuneData.restore || data.restore || '';
+                form.note = data.note || '';
+            } else {
+                console.log('获取调优信息时出错:', res.data.msg)
+            }
+        })
+}
+
+const saveTuneData = () => {
     saveTune(form).then(res => {
         if (res.data.code === 200) {
             ElMessage.success(res.data.msg)
@@ -86,18 +97,43 @@ const onSubmit = () => {
         ElMessage.error("数据传输失败，请检查", err)
     })
 }
+const updateTuneData = () => {
+    updateTune(form).then(res => {
+        if (res.data.code === 200) {
+            ElMessage.success(res.data.msg)
+            emit('dataUpdated');
+        } else {
+            ElMessage.error(res.data.msg)
+        }
+    }).catch(err => {
+        ElMessage.error("数据传输失败，请检查", err)
+    })
+}
+
+const onSubmit = () => {
+    emit('closeDialog');
+    if (form.id === 0) {
+        saveTuneData();
+    } else {
+        updateTuneData();
+    }
+}
 
 const onCancel = () => {
     emit('closeDialog');
 };
 
-onMounted(() => {
-    fetchAtuneInfo();
-})
+watchEffect(() => {
+    if (props.selectedNodeData !== '') {
+        fetchAtuneInfo();
+    }
+});
 
-onUpdated(() => {
-    fetchAtuneInfo();
-})
+watchEffect(() => {
+    if (props.selectedEditRow) {
+        handleEdit();
+    }
+});
 </script>
 
 <style lang = 'less' scoped>
