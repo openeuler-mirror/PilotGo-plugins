@@ -1,5 +1,7 @@
 package service
 
+import "openeuler.org/PilotGo/configmanage-plugin/internal"
+
 type RepoConfig struct {
 	UUID string
 	Name string
@@ -8,15 +10,21 @@ type RepoConfig struct {
 
 func (c *RepoConfig) Record() error {
 	cf := ConfigFile{
-		ConfigInfoUUID: c.UUID,
-		Name:           c.Name,
-		File:           c.File,
+		UUID: c.UUID,
+		Name: c.Name,
+		File: c.File,
 	}
 	return cf.Add()
 
 }
 
 func (c *RepoConfig) Load() error {
+	cf, err := internal.GetConfigFilesByUUID(c.UUID)
+	if err != nil {
+		return err
+	}
+	c.Name = cf.Name
+	c.File = cf.File
 	return nil
 }
 

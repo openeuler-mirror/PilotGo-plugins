@@ -17,9 +17,11 @@ func AddRepoHandler(c *gin.Context) {
 		return
 	}
 
-	uuid := uuid.New().String()
+	fileuuid := uuid.New().String()
 	config := &service.RepoConfig{
-		UUID: uuid,
+		UUID: fileuuid,
+		Name: "",
+		File: "",
 	}
 	err = config.Record()
 	if err != nil {
@@ -28,12 +30,13 @@ func AddRepoHandler(c *gin.Context) {
 	}
 
 	ci := service.ConfigInstance{
-		UUID:        uuid,
+		UUID:        uuid.New().String(),
 		Type:        global.Repo,
 		Description: "",
+		FileUUID:    fileuuid,
 		BatchIds:    []uint{},
 		DepartIds:   []int{},
-		UUIDS:       []string{},
+		NodeS:       []string{},
 		Config:      config,
 	}
 	err = ci.Record()
@@ -41,4 +44,23 @@ func AddRepoHandler(c *gin.Context) {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}
+}
+
+func GetRepoConfig(c *gin.Context) {
+	//TODO:query 类型需要转变需要包含uuid
+	var query int
+	err := c.ShouldBind(query)
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+	config := &service.RepoConfig{
+		UUID: "fileuuid",
+	}
+	err = config.Load()
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+
 }

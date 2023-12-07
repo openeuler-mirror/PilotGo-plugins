@@ -3,10 +3,12 @@ package internal
 import "openeuler.org/PilotGo/configmanage-plugin/db"
 
 type ConfigInfo struct {
-	ID          int    `gorm:"AUTO_INCREMENT"`
-	UUID        string `gorm:"primary_key;type:varchar(50)" json:"uuid"`
-	Type        string `json:"type"`
-	Description string `json:"description"`
+	ID             int        `gorm:"primary_key;AUTO_INCREMENT"`
+	UUID           string     `gorm:"type:varchar(50)" json:"uuid"`
+	ConfigFile     ConfigFile `gorm:"Foreignkey:ConfigFileUUID"`
+	ConfigFileUUID string
+	Type           string `json:"type"`
+	Description    string `json:"description"`
 }
 
 func (cm *ConfigInfo) Add() error {
