@@ -18,14 +18,15 @@
         <el-button class="delete-button" @click="handleDelete">删除</el-button>
       </div>
       <div class="table">
-        <atuneList @selectionChange="handleSelectionChange" :refreshData="refreshData" :searchTuneName="searchTuneName"
-          :searchTune="searchTune">
+        <atuneList @selectionChange="handleSelectionChange" @selectionEdit="handleSelectEdit" :refreshData="refreshData"
+          :searchTuneName="searchTuneName" :searchTune="searchTune">
         </atuneList>
       </div>
     </div>
   </div>
   <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
-    <atuneTemplete :selectedNodeData="selectedNodeData" @closeDialog="closeDialog" @dataUpdated="handleDataUpdated">
+    <atuneTemplete :selectedNodeData="selectedNodeData" :selectedEditRow="selectedEditRow" @closeDialog="closeDialog"
+      @dataUpdated="handleDataUpdated">
     </atuneTemplete>
   </el-dialog>
 </template>
@@ -35,16 +36,18 @@ import { onMounted, ref } from 'vue';
 import { getAtuneAllName, deleteTune } from '@/api/atune';
 import { ElTree, ElDialog, ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
-import atuneList, { Atune } from '@/components/atuneList.vue'
+import atuneList from '@/components/atuneList.vue'
 import atuneTemplete from '@/components/atuneTemplete.vue'
+import { Atune } from '@/types/atune'
 
 const atuneTree = ref([]);
-const selectedNodeData = ref("");
+const selectedNodeData = ref("")
 const searchTuneName = ref("")
 const searchTune = ref(false)
-const showDialog = ref(false);
+const showDialog = ref(false)
 const selectedRows = ref([] as Atune[])
-const refreshData = ref(false);
+const selectedEditRow = ref()
+const refreshData = ref(false)
 const defaultProps = ref({
   label: 'label',
 });
@@ -63,6 +66,12 @@ const closeDialog = () => {
 // 选中多选框
 const handleSelectionChange = (selected_Rows: any) => {
   selectedRows.value = selected_Rows;
+}
+
+// 编辑
+const handleSelectEdit = (editRow: any) => {
+  selectedEditRow.value = editRow
+  showDialog.value = true;
 }
 
 // 刷新
