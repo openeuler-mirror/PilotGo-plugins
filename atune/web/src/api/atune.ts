@@ -52,3 +52,12 @@ export function searchTune(data: object) {
     params: data,
   });
 }
+
+// 编辑模板更新
+export function updateTune(data: object) {
+  return request({
+    url: '/plugin/atune/update',
+    method: 'post',
+    data,
+  });
+}
