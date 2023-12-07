@@ -158,7 +158,7 @@ onMounted(async () => {
 
   .table-container {
     height: 95%;
-    width: 76%;
+    width: 99%;
     border: 2px solid #ddd;
     display: flex;
     flex-direction: column;
