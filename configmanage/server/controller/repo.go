@@ -90,3 +90,14 @@ func UpdateRepoConfig(c *gin.Context) {
 	}
 	response.Success(c, query, "Update repo file success")
 }
+
+func HistoryRepoConfig(c *gin.Context) {
+	//TODO:query 类型需要转变需要包含configuuid
+	query := c.Query("configuuid")
+	rcs, err := service.HistoryRepoConfig(query)
+	if err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+	response.Success(c, rcs, "Get repo last file success")
+}

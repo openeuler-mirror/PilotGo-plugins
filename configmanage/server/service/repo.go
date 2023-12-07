@@ -1,6 +1,7 @@
 package service
 
 import (
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -42,4 +43,26 @@ func (c *RepoConfig) UpdateRepoConfig(configuuid string) error {
 	}
 	ci.ConfigFileUUID = c.UUID
 	return ci.Add()
+}
+
+func HistoryRepoConfig(configuuid string) ([]RepoConfig, error) {
+	var rcs []RepoConfig
+	ci, err := internal.GetInfoByConfigUUID(configuuid)
+	if err != nil {
+		return nil, err
+	}
+	cis, err := internal.GetInfoByUUID(ci.UUID)
+	for _, v := range cis {
+		cf, err := internal.GetConfigFileByUUID(v.ConfigFileUUID)
+		if err != nil {
+			logger.Error(err.Error())
+		}
+		rc := RepoConfig{
+			UUID: cf.UUID,
+			Name: cf.Name,
+			File: cf.File,
+		}
+		rcs = append(rcs, rc)
+	}
+	return rcs, err
 }
