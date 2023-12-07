@@ -15,8 +15,8 @@ func (cm *ConfigInfo) Add() error {
 	return db.MySQL().Save(&cm).Error
 }
 
-func GetConfigMessage() ([]ConfigInfo, error) {
-	var cm []ConfigInfo
-	err := db.MySQL().Find(&cm).Error
-	return cm, err
+func GetInfoByConfigUUID(configuuid string) (ConfigInfo, error) {
+	var ci ConfigInfo
+	err := db.MySQL().Where("config_file_uuid=?", configuuid).Find(&ci).Error
+	return ci, err
 }

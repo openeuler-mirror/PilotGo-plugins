@@ -1,6 +1,8 @@
 package service
 
-import "openeuler.org/PilotGo/configmanage-plugin/internal"
+import (
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
+)
 
 type RepoConfig struct {
 	UUID string
@@ -31,4 +33,13 @@ func (c *RepoConfig) Load() error {
 func (c *RepoConfig) Apply(uuid string) error {
 
 	return nil
+}
+
+func (c *RepoConfig) UpdateRepoConfig(configuuid string) error {
+	ci, err := internal.GetInfoByConfigUUID(configuuid)
+	if err != nil {
+		return err
+	}
+	ci.ConfigFileUUID = c.UUID
+	return ci.Add()
 }
