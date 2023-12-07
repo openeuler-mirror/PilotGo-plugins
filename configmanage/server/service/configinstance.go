@@ -8,17 +8,19 @@ import (
 )
 
 type ConfigInstance struct {
+	UUID        string   `json:"uuid"`
 	Type        string   `json:"type"`
 	Description string   `json:"description"`
+	FileUUID    string   `json:"fileuuid"`
 	BatchIds    []uint   `json:"batchids"`
 	DepartIds   []int    `json:"departids"`
-	UUIDS       []string `json:"uuids"`
-	UUID        string
+	NodeS       []string `json:"uuids"`
 
 	Config Config
 }
 
 type Config interface {
+	//Version() string
 
 	// 配置存储
 	Record() error
@@ -42,9 +44,10 @@ type ConfigResult struct {
 
 func (ci *ConfigInstance) Record() error {
 	cm := ConfigInfo{
-		UUID:        ci.UUID,
-		Type:        ci.Type,
-		Description: ci.Description,
+		UUID:           ci.UUID,
+		ConfigFileUUID: ci.FileUUID,
+		Type:           ci.Type,
+		Description:    ci.Description,
 	}
 	err := cm.Add()
 	if err != nil {
@@ -75,7 +78,7 @@ func (ci *ConfigInstance) Record() error {
 		}
 	}
 
-	for _, v := range ci.UUIDS {
+	for _, v := range ci.NodeS {
 		cn := ConfigNode{
 			ConfigInfoUUID: ci.UUID,
 			NodeId:         "n" + v,
