@@ -2,10 +2,15 @@
   <div class="table">
     <el-table :data="tableData" style="width: 100%" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="tuneName" label="名称" width="180" />
-      <el-table-column prop="prepare" label="环境准备" />
-      <el-table-column prop="tune" label="调优" />
-      <el-table-column prop="restore" label="环境恢复" width="180" />
+      <el-table-column prop="tuneName" label="名称" width="150" />
+      <el-table-column prop="prepare" label="环境准备" width="370" />
+      <el-table-column prop="tune" label="调优" width="400" />
+      <el-table-column prop="restore" label="环境恢复" width="370" />
+      <el-table-column label="操作" width="80">
+        <template #default="{ row }">
+          <el-button type="primary" size="small" @click="handleEdit(row)">编辑</el-button>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
   <div class="pagination">
@@ -18,22 +23,14 @@
 <script lang='ts' setup>
 import { onMounted, ref, watch } from 'vue';
 import { getTuneLists, searchTune } from '@/api/atune'
+import { Atune } from '@/types/atune'
 
 const tableData = ref([] as Atune[]);
 const currentPage = ref(1);
 const pageSize = ref(10);
 const totalItems = ref(0);
-const emit = defineEmits(['selectionChange']);
+const emit = defineEmits(['selectionChange', 'selectionEdit']);
 
-export interface Atune {
-  id: number
-  tuneName: string
-  workDir: string
-  prepare: string
-  tune: string
-  restore: string
-  note: string
-}
 let props = defineProps({
   refreshData: {
     type: Boolean,
@@ -90,6 +87,11 @@ const handleCurrentChange = (newPage: number) => {
   currentPage.value = newPage;
   getTuneListsData();
 };
+
+// 编辑
+const handleEdit = (row: Atune) => {
+  emit('selectionEdit', row);
+}
 
 // 选中多选框
 const handleSelectionChange = (rows: Atune[]) => {
