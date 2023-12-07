@@ -18,7 +18,7 @@ func (cf *ConfigFile) Add() error {
 	return db.MySQL().Save(&cf).Error
 }
 
-func GetConfigFilesByUUID(uuid string) (ConfigFile, error) {
+func GetConfigFileByUUID(uuid string) (ConfigFile, error) {
 	var file ConfigFile
 	err := db.MySQL().Where("uuid=?", uuid).Find(&file).Error
 	return file, err
