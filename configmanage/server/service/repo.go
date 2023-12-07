@@ -19,7 +19,7 @@ func (c *RepoConfig) Record() error {
 }
 
 func (c *RepoConfig) Load() error {
-	cf, err := internal.GetConfigFilesByUUID(c.UUID)
+	cf, err := internal.GetConfigFileByUUID(c.UUID)
 	if err != nil {
 		return err
 	}

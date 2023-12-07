@@ -11,10 +11,9 @@ type ConfigInstance struct {
 	UUID        string   `json:"uuid"`
 	Type        string   `json:"type"`
 	Description string   `json:"description"`
-	FileUUID    string   `json:"fileuuid"`
 	BatchIds    []uint   `json:"batchids"`
 	DepartIds   []int    `json:"departids"`
-	NodeS       []string `json:"uuids"`
+	Nodes       []string `json:"uuids"`
 
 	Config Config
 }
@@ -35,17 +34,10 @@ type ConfigInfo = internal.ConfigInfo
 type ConfigFile = internal.ConfigFile
 type ConfigNode = internal.ConfigNode
 
-type ConfigResult struct {
-	ConfigInfo
-	BatchIds  []uint
-	DepartIds []int
-	UUIDS     []string
-}
-
-func (ci *ConfigInstance) Record() error {
+func (ci *ConfigInstance) Add(configuuid string) error {
 	cm := ConfigInfo{
 		UUID:           ci.UUID,
-		ConfigFileUUID: ci.FileUUID,
+		ConfigFileUUID: configuuid,
 		Type:           ci.Type,
 		Description:    ci.Description,
 	}
@@ -78,7 +70,7 @@ func (ci *ConfigInstance) Record() error {
 		}
 	}
 
-	for _, v := range ci.NodeS {
+	for _, v := range ci.Nodes {
 		cn := ConfigNode{
 			ConfigInfoUUID: ci.UUID,
 			NodeId:         "n" + v,
