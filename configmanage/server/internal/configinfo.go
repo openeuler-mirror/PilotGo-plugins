@@ -20,3 +20,9 @@ func GetInfoByConfigUUID(configuuid string) (ConfigInfo, error) {
 	err := db.MySQL().Where("config_file_uuid=?", configuuid).Find(&ci).Error
 	return ci, err
 }
+
+func GetInfoByUUID(uuid string) ([]ConfigInfo, error) {
+	var cis []ConfigInfo
+	err := db.MySQL().Where("uuid=?", uuid).Find(&cis).Error
+	return cis, err
+}
