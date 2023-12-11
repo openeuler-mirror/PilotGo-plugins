@@ -37,8 +37,6 @@ func main() {
 	server := gin.Default()
 
 	GlobalClient := client.DefaultClient(PluginInfo)
-	// 临时给server赋值
-	GlobalClient.Server = "http://192.168.75.100:8888"
 	GlobalClient.RegisterHandlers(server)
 	InitRouter(server)
 

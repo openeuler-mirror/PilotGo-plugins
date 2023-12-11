@@ -42,6 +42,19 @@ func DeleteResult(resultId int) error {
 	return nil
 }
 
+func SearchResult(searchKey string, query *response.PaginationQ) ([]*model.RunResult, int64, error) {
+	var result []*model.RunResult
+	if err := db.MySQL().Order("id desc").Limit(query.PageSize).Offset((query.Page-1)*query.PageSize).Where("machine_ip LIKE ?", "%"+searchKey+"%").Find(&result).Error; err != nil {
+		return nil, 0, nil
+	}
+
+	var total int64
+	if err := db.MySQL().Where("machine_ip LIKE ?", "%"+searchKey+"%").Model(&result).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	return result, total, nil
+}
+
 func IsExistCommandResult(machine_uuid string, command string) (bool, error) {
 	var r model.RunResult
 	err := db.MySQL().Where("machine_uuid = ? AND command = ?", machine_uuid, command).Find(&r).Error

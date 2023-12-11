@@ -67,3 +67,20 @@ func DeleteResult(c *gin.Context) {
 	}
 	response.Success(c, nil, "已删除")
 }
+
+func SearchResult(c *gin.Context) {
+	searchKey := c.Query("searchKey")
+
+	query := &response.PaginationQ{}
+	if err := c.ShouldBindQuery(query); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	data, total, err := service.SearchResult(searchKey, query)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.DataPagination(c, data, total, query)
+}

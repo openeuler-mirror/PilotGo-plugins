@@ -56,5 +56,6 @@ func registerAPIs(router *gin.Engine) {
 		restune.POST("run", controller.RunCommand)
 		restune.GET("results", controller.QueryResults)
 		restune.DELETE("result_delete", controller.DeleteResult)
+		restune.GET("result_search", controller.SearchResult)
 	}
 }
