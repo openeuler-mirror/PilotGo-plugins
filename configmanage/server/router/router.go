@@ -18,6 +18,6 @@ func RegisterAPIs(router *gin.Engine) {
 	global.GlobalClient.RegisterHandlers(router)
 	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
-		//pg.POST("/install")
+		pg.POST("/install")
 	}
 }

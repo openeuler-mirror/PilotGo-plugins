@@ -55,3 +55,11 @@ func ProcessResult(res *common.RunResult, command string) error {
 	}
 	return nil
 }
+
+func SearchResult(searchKey string, query *response.PaginationQ) ([]*model.RunResult, int, error) {
+	if data, total, err := dao.SearchResult(searchKey, query); err != nil {
+		return nil, 0, err
+	} else {
+		return data, int(total), nil
+	}
+}
