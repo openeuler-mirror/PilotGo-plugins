@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
 import Home from '@/views/Home.vue';
+import Result from '@/views/ResultInfo.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -11,6 +12,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/plugin/atune',
     component: Home,
     meta: { title: '首页' },
+  },
+  {
+    path: '/plugin/atune/result',
+    component: Result,
+    meta: { title: '结果展示' },
   },
 ];
 
