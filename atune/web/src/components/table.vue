@@ -10,13 +10,15 @@
                 </div>
             </div>
         </div>
-        <div class="content" v-loading="loading" element-loading-text="数据加载中" element-loading-spinner="el-icon-loading">
+        <div class="content">
+          <div  v-loading="loading" element-loading-text="数据加载中" element-loading-spinner="el-icon-loading">
             <el-table :data="props.tableData" height="100%" :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
-                :cell-style="{ color: 'black' }"  tooltip-effect="dark">
-                <el-table-column type="selection"  width="55" align="center" ></el-table-column>
-                <slot name="table"></slot>
-            </el-table>
+            :cell-style="{ color: 'black' }"  tooltip-effect="dark">
+            <el-table-column type="selection"  width="55" align="center" ></el-table-column>
+            <slot name="table"></slot>
+          </el-table>
         </div>
+      </div >
         <div class="pagination">
             <el-pagination 
                 v-model:current-page="currentPage"  v-model:page-size="pageSize" :total="props.total" :page-sizes="props.pageSizes" 
@@ -40,10 +42,6 @@ let props = defineProps({
   tableData: {
     type:Array,
     default:[]
-  },
-  refreshData: {
-    type: Boolean,
-    default: false
   },
   searchKey: {
     type: String,
@@ -99,8 +97,10 @@ onMounted(() => {
 
 <style lang="less" scoped>
 .my-table {
-  height: 96%;
+  height: 100%;
+  width: 100%;
   display: flex; // 使用 flex 布局
+  // overflow: visible;
   flex-direction: column;
 
   .header {
@@ -124,14 +124,15 @@ onMounted(() => {
   }
 
   .content {
-    flex: 1;
-    height: 92%;
-    overflow-y: auto;
+    // flex: 1;
+    // height: 92%;
+    height: calc(94% - 40px);
+    overflow: scroll;
   }
   .pagination {
     width: 100%;
     height: 40px;
-    margin-top: auto;
+    margin: 0;
     :deep(.el-pagination) {
         justify-content: flex-end;
         .el-pagination__sizes {
