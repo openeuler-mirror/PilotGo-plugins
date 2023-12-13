@@ -124,14 +124,11 @@ onMounted(() => {
   }
 
   .content {
-    // flex: 1;
-    // height: 92%;
-    height: calc(94% - 40px);
+    height: 100%;
     overflow: scroll;
   }
   .pagination {
     width: 100%;
-    height: 40px;
     margin: 0;
     :deep(.el-pagination) {
         justify-content: flex-end;
