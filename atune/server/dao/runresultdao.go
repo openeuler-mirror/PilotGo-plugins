@@ -8,7 +8,7 @@ import (
 
 func QueryResults(query *response.PaginationQ) ([]*model.RunResult, int64, error) {
 	var results []*model.RunResult
-	if err := db.MySQL().Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize).Find(&results).Error; err != nil {
+	if err := db.MySQL().Order("id desc").Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize).Find(&results).Error; err != nil {
 		return nil, 0, err
 	}
 

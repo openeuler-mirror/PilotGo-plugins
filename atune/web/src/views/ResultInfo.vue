@@ -12,11 +12,12 @@
         :pageSize.sync="pageSize" 
         :currentPage.sync="currentPage"
         @update:pageSize="onPageSizeChange" 
-        @update:currentPage="onCurrentPageChange">
+        @update:currentPage="onCurrentPageChange"
+        @update:selectedData="onSelectionChange">
       <template v-slot:table_search>
         <el-input placeholder="请输入IP地址进行搜索..." :prefix-icon="Search" clearable
-          style="width: 280px;margin-right: 10px;" v-model="searchIP" :searchKey="searchIP" @keydown.enter.native="searchResult"></el-input>
-        <el-button :icon="Search" @click="searchResult">搜索</el-button>
+          style="width: 280px;margin-right: 10px;" v-model="searchIP" @keydown.enter.native="searchData"></el-input>
+        <el-button :icon="Search" @click="searchData">搜索</el-button>
         <el-button class="delete-button" @click="handleDelete">删除</el-button>
       </template>
       <template v-slot:table :loading="loading">
@@ -45,7 +46,6 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const loading=ref(false)
 const selectedRows = ref<any[]>([])
-
 
 // 获取执行结果
 function getData() {
@@ -102,6 +102,7 @@ const handleDelete = () => {
       })
       deleteResult({ ids: ids.value }).then(res => {
         if (res.data.code === 200) {
+          getData()
           ElMessage.success(res.data.msg)
         } else {
           ElMessage.error(res.data.msg)
@@ -111,6 +112,11 @@ const handleDelete = () => {
       });
     })
 }
+
+// 选中多选框
+const onSelectionChange = (selection: any[]) => {
+  selectedRows.value = selection;
+};
 
 const onPageSizeChange = (newSize:number) => {
   pageSize.value = newSize;
