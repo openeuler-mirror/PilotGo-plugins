@@ -12,7 +12,7 @@
         </div>
         <div class="content">
           <div  v-loading="loading" element-loading-text="数据加载中" element-loading-spinner="el-icon-loading">
-            <el-table :data="props.tableData" height="100%" :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
+            <el-table :data="props.tableData" @selection-change="onSelectionChange" height="100%" :header-cell-style="{ color: 'black', 'background-color': '#f6f8fd' }"
             :cell-style="{ color: 'black' }"  tooltip-effect="dark">
             <el-table-column type="selection"  width="55" align="center" ></el-table-column>
             <slot name="table"></slot>
@@ -31,9 +31,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref,watch,onMounted } from 'vue';
+import { ref, watch, onMounted, toRaw } from 'vue';
 
-const emit = defineEmits(['update:pageSize', 'update:currentPage']);
+const emit = defineEmits(['update:pageSize', 'update:currentPage','update:selectedData']);
 let props = defineProps({
   loading:{
     type:Boolean,
@@ -42,10 +42,6 @@ let props = defineProps({
   tableData: {
     type:Array,
     default:[]
-  },
-  searchKey: {
-    type: String,
-    default: ""
   },
   searchTune: {
     type: Boolean,
@@ -69,9 +65,17 @@ let props = defineProps({
   },
 })
 
-
 const currentPage = ref(props.currentPage);
 const pageSize = ref(props.pageSize);
+
+const onSelectionChange = (val: any[]) => {
+    let d: any[] = []
+    val.forEach((item: any) => {
+        d.push(toRaw(item))
+    })
+
+    emit('update:selectedData', d)
+}
 
 const onPageSizeChange = (newSize:number) => {
     pageSize.value = newSize;
