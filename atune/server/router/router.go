@@ -1,6 +1,9 @@
 package router
 
 import (
+	"net/http"
+	"strings"
+
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/atune-plugin/config"
@@ -29,6 +32,7 @@ func setupRouter() *gin.Engine {
 	router.Use(gin.Recovery())
 
 	registerAPIs(router)
+	StaticRouter(router)
 
 	return router
 }
@@ -58,4 +62,19 @@ func registerAPIs(router *gin.Engine) {
 		restune.DELETE("result_delete", controller.DeleteResult)
 		restune.GET("result_search", controller.SearchResult)
 	}
+}
+
+func StaticRouter(router *gin.Engine) {
+	router.Static("/plugin/atune/static", "../web/dist/static")
+	router.StaticFile("/plugin/atune", "../web/dist/index.html")
+
+	// 解决页面刷新404的问题
+	router.NoRoute(func(c *gin.Context) {
+		logger.Error("process noroute: %s", c.Request.URL)
+		if !strings.HasPrefix(c.Request.RequestURI, "/plugin/atune/*path") {
+			c.File("../web/dist/index.html")
+			return
+		}
+		c.Status(http.StatusNotFound)
+	})
 }
