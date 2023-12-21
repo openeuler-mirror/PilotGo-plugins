@@ -5,19 +5,29 @@ import Result from '@/views/ResultInfo.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/plugin/atune',
-    component: Home,
-    meta: { title: '首页' },
+    path: '/',
+    redirect: '/atune'
   },
   {
-    path: '/plugin/atune/result',
+    path: '/atune',
+    component: Home,
+    meta: { title: '任务列表' },
+    children: [
+      {
+        path: 'detail',
+        component: () => import("../components/atuneTemplete.vue")
+      }
+    ]
+  },
+  {
+    path: '/result',
     component: Result,
     meta: { title: '结果展示' },
   },
 ];
 
 const router = createRouter({
-  history: createWebHistory('/'),
+  history: createWebHistory(),
   routes,
 });
 

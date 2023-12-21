@@ -4,7 +4,6 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/plugin/atune/',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -16,12 +15,14 @@ export default defineConfig({
     https: false,
     cors: true,
     proxy: {
-      '/': {
-        target: 'http://localhost:8099',
+      '/plugin/atune': {
+        target: 'http://10.41.107.32:8099',
         changeOrigin: true,
+        rewrite: (p) => p.replace('/^\/plugin\/atune/', '')
       },
     },
   },
+  // base: '/plugin/atune/',
   build: {
     outDir: 'dist',
     assetsDir: 'static/', //指定静态资源存放路径

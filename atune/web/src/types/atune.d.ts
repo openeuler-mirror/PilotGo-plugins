@@ -1,3 +1,12 @@
+export interface Task {
+  id: number;
+  name: string;
+  atune: string;
+  state: number;
+  createTime: string;
+  updateTime: string;
+}
+
 export interface Atune {
   id: number;
   tuneName: string;
