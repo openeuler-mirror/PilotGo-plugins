@@ -1,27 +1,32 @@
 <template>
   <div class="top">
     <span class="top-title">A-Tune调优管理</span>
+    <span class="top-description">此处应有一段介绍</span>
   </div>
   <div class="container">
-    <div class="tree-container">
-      <div class="title">可调优对象</div>
-      <el-tree :data="atuneTree" :props="defaultProps" :highlight-current="true" @node-click="handleNodeClick"></el-tree>
-    </div>
-    <div class="table-container">
+    <div class="table-container" v-show="!showDetail">
       <div class="title">
-        <div class="title-content">
-          <p>调优模板</p>
-        </div>
-        <el-input v-model="searchTuneName" placeholder="请输入调优名称进行搜索..." :prefix-icon="Search" clearable
+        <div class="title-content">执行任务列表</div>
+        <el-input v-model="searchTuneName" placeholder="请输入任务名称进行搜索..." :prefix-icon="Search" clearable
           style="width: 280px;margin-right: 10px;" @keydown.enter.native="handleSearch"></el-input>
         <el-button :icon="Search" @click="handleSearch">搜索</el-button>
+        <el-button class="delete-button" @click="handleCreat">新增</el-button>
         <el-button class="delete-button" @click="handleDelete">删除</el-button>
       </div>
-      <div class="table">
+      <div>
         <atuneList @selectionChange="handleSelectionChange" @selectionEdit="handleSelectEdit" :refreshData="refreshData"
           :searchTuneName="searchTuneName" :searchTune="searchTune">
         </atuneList>
       </div>
+    </div>
+    <div class="table-container" v-show="showDetail">
+      <div class="title">
+        <div class="title-content">
+          <span class="title-content-link" @click="returnHome">执行任务列表&nbsp;</span>
+          <span>> 任务详情</span>
+        </div>
+      </div>
+      <router-view />
     </div>
   </div>
   <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
@@ -32,31 +37,23 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref } from 'vue';
-import { getAtuneAllName, deleteTune } from '@/api/atune';
-import { ElTree, ElDialog, ElMessage, ElMessageBox } from 'element-plus';
+import { ref } from 'vue';
+import { deleteTune } from '@/api/atune';
+import { ElDialog, ElMessage, ElMessageBox } from 'element-plus';
 import { Search } from '@element-plus/icons-vue'
 import atuneList from '@/components/atuneList.vue'
 import atuneTemplete from '@/components/atuneTemplete.vue'
-import { Atune } from '@/types/atune'
+import { Task } from '@/types/atune'
+import router from '../router/index.ts';
 
-const atuneTree = ref([]);
 const selectedNodeData = ref("")
 const searchTuneName = ref("")
 const searchTune = ref(false)
 const showDialog = ref(false)
-const selectedRows = ref([] as Atune[])
+const selectedRows = ref([] as Task[])
 const selectedEditRow = ref()
 const refreshData = ref(false)
-const defaultProps = ref({
-  label: 'label',
-});
-
-// 选中调优对象
-const handleNodeClick = (node: any) => {
-  selectedNodeData.value = node.label;
-  showDialog.value = true;
-}
+const showDetail = ref(false)
 
 // 关闭dialog弹框
 const closeDialog = () => {
@@ -68,10 +65,30 @@ const handleSelectionChange = (selected_Rows: any) => {
   selectedRows.value = selected_Rows;
 }
 
+// 返回任务列表
+const returnHome = () => {
+  router.push({
+    path: '/atune'
+  })
+  showDetail.value = false;
+}
+
+// 新增
+const handleCreat = () => {
+
+}
+
 // 编辑
 const handleSelectEdit = (editRow: any) => {
-  selectedEditRow.value = editRow
-  showDialog.value = true;
+  /* selectedEditRow.value = editRow
+  showDialog.value = true; */
+  router.push({
+    path: '/atune/detail',
+    params: {
+      row: editRow
+    }
+  })
+  showDetail.value = true;
 }
 
 // 刷新
@@ -109,13 +126,14 @@ const handleDelete = () => {
     })
 }
 
+/* // 获取所有的可调优对象
 onMounted(async () => {
   const res = await getAtuneAllName();
   atuneTree.value = res.data.data.map((item: string, index: number) => ({
     label: item,
     key: index.toString(),
   }));
-});
+}); */
 </script>
 
 <style lang="less" scoped>
@@ -123,45 +141,38 @@ onMounted(async () => {
   width: 100%;
   height: 64px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
 
   &-title {
     padding-left: 40px;
-    font-size: 20px;
-    color: #222;
-    font-weight: 500;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
     display: inline-block;
+  }
+
+  &-description {
+    padding-left: 40px;
+    font-size: 16px;
+    color: #444;
+    font-weight: 500;
   }
 }
 
 .container {
   display: flex;
+  justify-content: center;
   min-width: 100%;
-  height: calc(100% - 64px);
-
-
-  .tree-container,
-  .table-container {
-    border-radius: 10px;
-    overflow: hidden;
-    margin: 10px;
-    background-color: #fff;
-  }
-
-  .tree-container {
-    height: 95%;
-    width: 20%;
-    border: 1px solid #ddd;
-    margin-left: 30px;
-  }
+  height: calc(100% - 64px - 10px);
 
   .table-container {
     height: 95%;
-    width: 99%;
+    width: 98%;
     border: 2px solid #ddd;
     display: flex;
     flex-direction: column;
+    border-radius: 12px;
   }
 
   .table {
@@ -183,6 +194,14 @@ onMounted(async () => {
 
     .title-content {
       flex: 1;
+
+      &-link {
+        cursor: pointer;
+
+        &:hover {
+          color: #409eff;
+        }
+      }
     }
 
     .delete-button {

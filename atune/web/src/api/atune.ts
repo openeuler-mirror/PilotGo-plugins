@@ -1,5 +1,13 @@
 import request from './request';
 
+// 获取所有的任务列表
+export function getTaskLists() {
+  return request({
+    url: '/plugin/atune/tasks',
+    method: 'get',
+  });
+}
+
 // 获取所有的调优列表
 export function getAtuneAllName() {
   return request({

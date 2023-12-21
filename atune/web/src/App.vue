@@ -9,7 +9,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import locale from 'element-plus/es/locale/lang/zh-cn';
-const zhCn = ref(locale); 
+const zhCn = ref(locale);
 </script>
 
 <style lang="less" scoped>
