@@ -26,12 +26,26 @@ func SaveRusult(result *model.RunResult) error {
 	return nil
 }
 
-func UpdateResult(machine_uuid string, result *model.RunResult) error {
+func UpdateResult(dbtaskid int, machine_uuid string, result *model.RunResult) error {
 	var r model.RunResult
-	if err := db.MySQL().Model(&r).Where("machine_uuid = ?", machine_uuid).Updates(&result).Error; err != nil {
+	if err := db.MySQL().Model(&r).Where("task_id = ? AND machine_uuid = ?", dbtaskid, machine_uuid).Updates(&result).Error; err != nil {
 		return err
 	}
 	return nil
+}
+
+// 列中包含false，是false，表明远程命令未更新完成
+func IsUpdateAll() (bool, error) {
+	var count int64
+	if err := db.MySQL().Model(&model.RunResult{}).Where("is_update = ?", false).Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return false, nil
+	} else {
+		return true, nil
+	}
 }
 
 func DeleteResult(resultId int) error {

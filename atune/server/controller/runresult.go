@@ -16,40 +16,28 @@ func RunCommand(c *gin.Context) {
 		response.Fail(c, nil, "parameter error")
 		return
 	}
+	dbtaskid, err := service.SaveTask(d.Command, d.CmdType, d.Batch.MachineUUIDs)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
 
-	run_result := func(result []*common.RunResult) {
+	run_result := func(result []*common.CmdResult) {
 		for _, res := range result {
 			logger.Info("结果：%v", *res)
-			if err := service.ProcessResult(res, d.Command); err != nil {
+			if err := service.ProcessResult(res, d.Command, dbtaskid); err != nil {
 				logger.Error("处理结果失败：%v", err.Error())
 			}
 		}
 	}
 
-	err := plugin.GlobalClient.RunCommandAsync(d.Batch, d.Command, run_result)
+	err = plugin.GlobalClient.RunCommandAsync(d.Batch, d.Command, run_result)
 	if err != nil {
 		logger.Error("远程调用失败：%v", err.Error())
 		response.Fail(c, nil, err.Error())
 		return
 	}
 	response.Success(c, nil, "指令下发完成")
-}
-
-func QueryResults(c *gin.Context) {
-	query := &response.PaginationQ{}
-	err := c.ShouldBindQuery(query)
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
-
-	data, total, err := service.QueryResults(query)
-	if err != nil {
-		response.Fail(c, nil, err.Error())
-		return
-	}
-
-	response.DataPagination(c, data, total, query)
 }
 
 func DeleteResult(c *gin.Context) {
