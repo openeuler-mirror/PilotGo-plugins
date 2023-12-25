@@ -1,28 +1,34 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import type { RouteRecordRaw } from 'vue-router';
-import Home from '@/views/Home.vue';
-import Result from '@/views/ResultInfo.vue';
+import { createRouter, createWebHistory } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
+import Home from "@/views/Home.vue";
+import Atune from "@/components/atuneList.vue";
+import Result from "@/views/ResultInfo.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/atune'
+    path: "/",
+    redirect: "/task",
   },
   {
-    path: '/atune',
+    path: "/task",
     component: Home,
-    meta: { title: '任务列表' },
+    meta: { title: "任务列表" },
     children: [
       {
-        path: 'detail',
-        component: () => import("../components/atuneTemplete.vue")
-      }
-    ]
+        path: "detail",
+        component: () => import("../views/taskDetail.vue"),
+      },
+    ],
   },
   {
-    path: '/result',
+    path: "/atune",
+    component: Atune,
+    meta: { title: "模板列表" },
+  },
+  {
+    path: "/result",
     component: Result,
-    meta: { title: '结果展示' },
+    meta: { title: "结果展示" },
   },
 ];
 
