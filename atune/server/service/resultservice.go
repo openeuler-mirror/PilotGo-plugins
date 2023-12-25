@@ -11,14 +11,6 @@ import (
 	"openeuler.org/PilotGo/atune-plugin/model"
 )
 
-func QueryResults(query *response.PaginationQ) ([]*model.RunResult, int, error) {
-	if data, total, err := dao.QueryResults(query); err != nil {
-		return nil, 0, err
-	} else {
-		return data, int(total), nil
-	}
-}
-
 func DeleteResult(resultId []int) error {
 	if len(resultId) == 0 {
 		return errors.New("请输入删除的ID")
@@ -31,28 +23,25 @@ func DeleteResult(resultId []int) error {
 	}
 	return nil
 }
-func ProcessResult(res *common.RunResult, command string) error {
+func ProcessResult(res *common.CmdResult, command string, dbtaskid int) error {
 	result := &model.RunResult{
-		MachineUUID:   res.CmdResult.MachineUUID,
-		MachineIP:     res.CmdResult.MachineIP,
-		Command:       command,
-		RetCode:       res.CmdResult.RetCode,
-		Stdout:        res.CmdResult.Stdout,
-		Stderr:        res.CmdResult.Stderr,
-		ResponseError: res.Error.(string),
+		MachineIP: res.MachineIP,
+		RetCode:   res.RetCode,
+		Stdout:    res.Stdout,
+		Stderr:    res.Stderr,
+		IsUpdate:  true,
 	}
 
-	ok, err := dao.IsExistCommandResult(res.CmdResult.MachineUUID, command)
-	if ok && err == nil {
-		if Err := dao.UpdateResult(res.CmdResult.MachineUUID, result); Err != nil {
-			return errors.New("更新命令执行结果失败：" + Err.Error())
+	if err := dao.UpdateResult(dbtaskid, res.MachineUUID, result); err != nil {
+		return errors.New("更新命令执行结果失败：" + err.Error())
+	}
+
+	if ok, err := dao.IsUpdateAll(); ok && err == nil {
+		if err := dao.UpdateTask(dbtaskid); err != nil {
+			return errors.New("更新任务列表失败：" + err.Error())
 		}
 	}
-	if !ok && err == nil {
-		if Err := dao.SaveRusult(result); Err != nil {
-			return errors.New("保存命令执行结果失败：" + Err.Error())
-		}
-	}
+
 	return nil
 }
 
