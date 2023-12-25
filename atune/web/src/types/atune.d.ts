@@ -1,10 +1,11 @@
 export interface Task {
   id: number;
-  name: string;
-  atune: string;
-  state: number;
-  createTime: string;
-  updateTime: string;
+  task_name: string;
+  command: string;
+  task_status: string;
+  create_time: string;
+  update_time: string;
+  results: [{}];
 }
 
 export interface Atune {
