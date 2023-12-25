@@ -55,10 +55,14 @@ func registerAPIs(router *gin.Engine) {
 		dbtune.GET("search", controller.SearchTune)
 	}
 
+	task := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
+	{
+		task.GET("tasks", controller.TaskLists)
+	}
+
 	restune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
 	{
 		restune.POST("run", controller.RunCommand)
-		restune.GET("results", controller.QueryResults)
 		restune.DELETE("result_delete", controller.DeleteResult)
 		restune.GET("result_search", controller.SearchResult)
 	}
