@@ -2,17 +2,26 @@
   <div class="app">
     <div class="top">
       <span class="top-title">A-Tune调优管理</span>
-      <span class="top-description">此处应有一段介绍</span>
+      <div class="nav">
+        <!-- 两页 任务列表、调优模板列表 -->
+        <router-link
+          class="nav-link shadow"
+          to="/task"
+          :active-class="'active'"
+        >
+          任务</router-link
+        >
+        <el-divider direction="vertical" />
+        <router-link
+          class="nav-link shadow"
+          to="/atune"
+          :active-class="'active'"
+        >
+          模板</router-link
+        >
+      </div>
     </div>
-    <div class="nav">
-      <!-- 两页 任务列表、调优模板列表 -->
-      <router-link class="nav-link" to="/task" :active-class="'active'">
-        任务</router-link
-      >
-      <router-link class="nav-link" to="/atune" :active-class="'active'">
-        模板</router-link
-      >
-    </div>
+
     <el-config-provider :locale="zhCn">
       <router-view></router-view>
     </el-config-provider>
@@ -36,41 +45,36 @@ const zhCn = ref(locale);
 
   .top {
     width: 100%;
-    height: 64px;
+    height: 44px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
 
     &-title {
-      padding-left: 40px;
-      font-size: 18px;
+      width: 160px;
+      text-align: center;
+      font-size: 16px;
       font-weight: 600;
       color: #333;
       display: inline-block;
     }
-
-    &-description {
-      padding-left: 40px;
-      font-size: 16px;
-      color: #444;
-      font-weight: 500;
-    }
   }
   .nav {
+    position: absolute;
+    z-index: 100;
+    left: calc(50% - 160px);
     width: 200px;
-    height: 38px;
-    margin: 0 auto;
     display: flex;
     justify-content: space-around;
     align-items: center;
     &-link {
       display: inline-block;
-      width: 46%;
+      width: 44%;
       text-align: center;
       text-decoration: none;
       color: rgb(96, 122, 207);
       border-radius: 6px;
       font-weight: bold;
+      background-color: #fff;
       &:hover {
         background-color: rgba(96, 122, 207, 0.4);
         color: #fff;
