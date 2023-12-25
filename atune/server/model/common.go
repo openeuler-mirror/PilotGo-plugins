@@ -11,12 +11,25 @@ type Tunes struct {
 }
 
 type RunResult struct {
-	ID            int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
-	MachineUUID   string `json:"machine_uuid"`
-	MachineIP     string `json:"machine_ip"`
-	Command       string `json:"command"`
-	RetCode       int    `json:"retcode"`
-	Stdout        string `json:"stdout"`
-	Stderr        string `json:"stderr"`
-	ResponseError string `json:"resError"`
+	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	TaskID      int    `json:"task_id"`
+	MachineUUID string `json:"machine_uuid"`
+	MachineIP   string `json:"machine_ip"`
+	Command     string `json:"command"`
+	RetCode     int    `json:"retcode"`
+	Stdout      string `json:"stdout"`
+	Stderr      string `json:"stderr"`
+	IsUpdate    bool   `json:"is_update"`
+}
+
+type Tasks struct {
+	ID         int         `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	TuneID     int         `json:"tune_id"`
+	TaskName   string      `json:"task_name"`
+	Script     string      `json:"command"`
+	TaskStatus string      `json:"task_status"`
+	CreateTime string      `json:"create_time"`
+	UpdateTime string      `json:"update_time"`
+	RunResults []RunResult `gorm:"foreignKey:TaskID" json:"results"`
+	Tune       Tunes       `gorm:"foreignKey:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"tune"`
 }
