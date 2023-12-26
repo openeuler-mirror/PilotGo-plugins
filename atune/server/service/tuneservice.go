@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"strconv"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
@@ -22,12 +23,17 @@ func SaveTune(tune model.Tunes) error {
 	if tune.TuneName == "" {
 		return errors.New("内容为空，请检查输入内容")
 	}
-
-	if ok, err := dao.IsExistTuneName(tune.TuneName); err == nil && ok {
-		return errors.New("已存在该模板，勿重复添加")
+	t := model.Tunes{
+		TuneName:      tune.TuneName,
+		Description:   tune.Description,
+		CreateTime:    time.Now().Format("2006-01-02 15:04:05"),
+		WorkDirectory: tune.WorkDirectory,
+		Prepare:       tune.Prepare,
+		Tune:          tune.Tune,
+		Restore:       tune.Restore,
+		Notes:         tune.Notes,
 	}
-
-	if err := dao.SaveTune(&tune); err != nil {
+	if err := dao.SaveTune(&t); err != nil {
 		return err
 	}
 
@@ -49,6 +55,8 @@ func DeleteTune(tuneId []int) error {
 
 func UpdateTune(t model.Tunes) error {
 	updatetune := &model.Tunes{
+		Description:   t.Description,
+		UpdateTime:    time.Now().Format("2006-01-02 15:04:05"),
 		WorkDirectory: t.WorkDirectory,
 		Prepare:       t.Prepare,
 		Tune:          t.Tune,
