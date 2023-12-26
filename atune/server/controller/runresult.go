@@ -10,13 +10,18 @@ import (
 )
 
 func RunCommand(c *gin.Context) {
-	d := &common.CmdStruct{}
+	d := &struct {
+		MachineUUIDs []string `json:"machine_uuids"`
+		Command      string   `json:"command"`
+		TuneID       int      `json:"tune_id"`
+		TaskName     string   `json:"task_name"`
+	}{}
 	if err := c.ShouldBind(d); err != nil {
 		logger.Debug("绑定批次参数失败：%s", err)
 		response.Fail(c, nil, "parameter error")
 		return
 	}
-	dbtaskid, err := service.SaveTask(d.Command, d.CmdType, d.Batch.MachineUUIDs)
+	dbtaskid, err := service.SaveTask(d.Command, d.TaskName, d.MachineUUIDs, d.TuneID)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -31,7 +36,10 @@ func RunCommand(c *gin.Context) {
 		}
 	}
 
-	err = plugin.GlobalClient.RunCommandAsync(d.Batch, d.Command, run_result)
+	dd := &common.Batch{
+		MachineUUIDs: d.MachineUUIDs,
+	}
+	err = plugin.GlobalClient.RunCommandAsync(dd, d.Command, run_result)
 	if err != nil {
 		logger.Error("远程调用失败：%v", err.Error())
 		response.Fail(c, nil, err.Error())

@@ -11,7 +11,7 @@ import (
 
 func QueryTaskLists(query *response.PaginationQ) ([]*model.Tasks, int64, error) {
 	var tasks []*model.Tasks
-	if err := db.MySQL().Preload("RunResults").Order("id desc").Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize).Find(&tasks).Error; err != nil {
+	if err := db.MySQL().Preload("Tune").Preload("RunResults").Order("id desc").Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize).Find(&tasks).Error; err != nil {
 		return nil, 0, err
 	}
 
