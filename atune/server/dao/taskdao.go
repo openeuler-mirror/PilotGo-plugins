@@ -30,10 +30,9 @@ func SaveTask(task *model.Tasks) (int, error) {
 }
 func UpdateTask(dbtaskid int) error {
 	var t model.Tasks
-	update_time := time.Now().Format("2006-01-02 15:04:05")
 	task := model.Tasks{
 		TaskStatus: global.Completed,
-		UpdateTime: update_time,
+		UpdateTime: time.Now().Format("2006-01-02 15:04:05"),
 	}
 	if err := db.MySQL().Model(&t).Where("id = ?", dbtaskid).Updates(&task).Error; err != nil {
 		return err
