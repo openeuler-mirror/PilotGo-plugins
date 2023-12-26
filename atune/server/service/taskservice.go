@@ -19,10 +19,11 @@ func QueryTaskLists(query *response.PaginationQ) ([]*model.Tasks, int, error) {
 	}
 }
 
-func SaveTask(cmd string, task_name string, uuids []string) (int, error) {
+func SaveTask(cmd string, task_name string, uuids []string, tuneId int) (int, error) {
 	creat_time := time.Now().Format("2006-01-02 15:04:05")
 	task := &model.Tasks{
 		TaskName:   task_name,
+		TuneID:     tuneId,
 		Script:     cmd,
 		TaskStatus: global.Executing,
 		CreateTime: creat_time,
