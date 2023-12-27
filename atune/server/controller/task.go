@@ -22,3 +22,36 @@ func TaskLists(c *gin.Context) {
 
 	response.DataPagination(c, data, total, query)
 }
+
+func DeleteTask(c *gin.Context) {
+	taskdel := struct {
+		TaskID []int `json:"ids"`
+	}{}
+	if err := c.Bind(&taskdel); err != nil {
+		response.Fail(c, nil, "parameter error")
+		return
+	}
+
+	if err := service.DeleteTask(taskdel.TaskID); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "已删除调优对象模板")
+}
+
+func SearchTask(c *gin.Context) {
+	search := c.Query("search")
+
+	query := &response.PaginationQ{}
+	if err := c.ShouldBindQuery(query); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	data, total, err := service.SearchTask(search, query)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.DataPagination(c, data, total, query)
+}

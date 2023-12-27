@@ -58,6 +58,9 @@ func registerAPIs(router *gin.Engine) {
 	task := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)
 	{
 		task.GET("tasks", controller.TaskLists)
+
+		task.DELETE("task_delete", controller.DeleteTask)
+		task.GET("task_search", controller.SearchTask)
 	}
 
 	restune := router.Group("/plugin/" + plugin.GlobalClient.PluginInfo.Name)

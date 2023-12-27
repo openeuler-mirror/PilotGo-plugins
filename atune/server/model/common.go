@@ -33,6 +33,6 @@ type Tasks struct {
 	TaskStatus string      `json:"task_status"`
 	CreateTime string      `json:"create_time"`
 	UpdateTime string      `json:"update_time"`
-	RunResults []RunResult `gorm:"foreignKey:TaskID" json:"results"`
+	RunResults []RunResult `gorm:"foreignKey:TaskID;constraint:OnDelete:CASCADE;" json:"results"`
 	Tune       Tunes       `gorm:"foreignKey:TuneID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"tune"`
 }

@@ -3,7 +3,7 @@ module openeuler.org/PilotGo/atune-plugin
 go 1.18
 
 require (
-	gitee.com/openeuler/PilotGo/sdk v0.0.0-20231225071221-260195e4ee3e
+	gitee.com/openeuler/PilotGo/sdk v0.0.0-20231227075111-fc150174f73a
 	github.com/gin-gonic/gin v1.9.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.1
