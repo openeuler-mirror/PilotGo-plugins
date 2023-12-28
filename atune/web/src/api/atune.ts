@@ -9,6 +9,15 @@ export function getTaskLists(data: Object) {
   });
 }
 
+// 高级搜索任务列表分页
+export function searchTask(data: object) {
+  return request({
+    url: "/plugin/atune/task_search",
+    method: "get",
+    params: data,
+  });
+}
+
 // 新增任务
 export function addTask(data: object) {
   return request({
@@ -21,7 +30,7 @@ export function addTask(data: object) {
 // 删除任务
 export function deleteTask(data: object) {
   return request({
-    url: "/plugin/atune/delete",
+    url: "/plugin/atune/task_delete",
     method: "delete",
     data,
   });

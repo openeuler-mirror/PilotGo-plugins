@@ -36,7 +36,7 @@ func DeleteTask(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, nil, "已删除调优对象模板")
+	response.Success(c, nil, "已删除任务")
 }
 
 func SearchTask(c *gin.Context) {
