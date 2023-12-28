@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strconv"
 	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -45,4 +46,24 @@ func SaveTask(cmd string, task_name string, uuids []string, tuneId int) (int, er
 		}
 	}
 	return taskid, nil
+}
+func DeleteTask(taskId []int) error {
+	if len(taskId) == 0 {
+		return errors.New("请输入调优模板ID")
+	}
+
+	for _, tid := range taskId {
+		if err := dao.DeleteTask(tid); err != nil {
+			logger.Error("%v", strconv.Itoa(tid)+"未删除成功")
+		}
+	}
+	return nil
+}
+
+func SearchTask(search string, query *response.PaginationQ) ([]*model.Tasks, int, error) {
+	if data, total, err := dao.SearchTask(search, query); err != nil {
+		return nil, 0, err
+	} else {
+		return data, int(total), nil
+	}
 }
