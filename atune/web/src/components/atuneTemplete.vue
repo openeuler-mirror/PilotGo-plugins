@@ -4,6 +4,9 @@
       <el-form-item label="调优对象">
         <el-input v-model="form.tuneName"></el-input>
       </el-form-item>
+      <el-form-item label="概述介绍">
+        <el-input v-model="form.description"></el-input>
+      </el-form-item>
       <el-form-item label="工作目录">
         <el-input v-model="form.workDir"></el-input>
       </el-form-item>
@@ -17,12 +20,7 @@
         <el-input v-model="form.restore"></el-input>
       </el-form-item>
       <el-form-item label="注意事项">
-        <el-input
-          v-model="form.note"
-          class="custom-input"
-          type="textarea"
-          :rows="6"
-        ></el-input>
+        <el-input v-model="form.note" class="custom-input" type="textarea" :rows="6"></el-input>
       </el-form-item>
     </el-form>
     <el-form class="centered-buttons">
@@ -36,7 +34,7 @@
 import { ElMessage } from "element-plus";
 import { reactive, watchEffect, ref } from "vue";
 import { getAtuneInfo, saveTune, updateTune } from "@/api/atune";
-import { Atune } from "@/types/atune";
+import { Atune, Task } from "@/types/atune";
 import MyButton from "@/components/myButton.vue";
 
 let props = defineProps({
@@ -54,6 +52,7 @@ const isEdit = ref(false);
 const form = reactive({
   id: 0,
   tuneName: "",
+  description: "",
   workDir: "",
   prepare: "",
   tune: "",

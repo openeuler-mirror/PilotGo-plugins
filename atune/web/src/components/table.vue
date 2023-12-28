@@ -8,13 +8,8 @@
       <div class="my_table_header_operation">
         <!-- 模糊搜索 -->
         <div class="operation-select-input">
-          <el-input
-            v-model="keyWord"
-            placeholder="请输入关键词进行搜索..."
-            :prefix-icon="Search"
-            clearable
-            @keydown.enter.native="handleSearch"
-          ></el-input>
+          <el-input v-model="keyWord" placeholder="请输入关键词进行搜索..." :prefix-icon="Search" clearable
+            @keydown.enter.native="handleSearch"></el-input>
         </div>
       </div>
       <div class="my_table_header_button">
@@ -23,14 +18,8 @@
     </el-row>
     <!-- 列表 -->
     <div class="my_table_content" ref="tableBox">
-      <el-table
-        ref="myTableRef"
-        :data="tableData"
-        class="table"
-        @select="handleRowSelectionChange"
-        @selection-change="handleSelectinChange"
-        v-loading="loading"
-      >
+      <el-table ref="myTableRef" :data="tableData" class="table" @select="handleRowSelectionChange"
+        @selection-change="handleSelectinChange" v-loading="loading">
         <slot></slot>
         <template #append>
           <slot name="append"></slot>
@@ -42,18 +31,10 @@
     </div>
     <!-- 分页 -->
     <div class="my_table_page">
-      <el-pagination
-        v-model:current-page="page.currentPage"
-        v-model:page-size="page.pageSize"
-        popper-class="pagePopper"
-        :page-sizes="[10, 20, 25, 50, 75, 100]"
-        :small="page.small"
-        :background="page.background"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="page.total"
-        @size-change="getTableData"
-        @current-change="getTableData"
-      />
+      <el-pagination v-model:current-page="page.currentPage" v-model:page-size="page.pageSize" popper-class="pagePopper"
+        :page-sizes="[10, 20, 25, 50, 75, 100]" :small="page.small" :background="page.background"
+        layout="total, sizes, prev, pager, next, jumper" :total="page.total" @size-change="getTableData"
+        @current-change="getTableData" />
     </div>
   </div>
 </template>
@@ -103,53 +84,7 @@ onMounted(async () => {
 
 // 获取表格数据
 const getTableData = () => {
-  // loading.value = true;
-  tableData.value = [
-    {
-      id: 2,
-      task_name: "准备调优环境",
-      command: "ls",
-      task_status: "已完成",
-      create_time: "2023-12-25 11:23:18",
-      update_time: "2023-12-25 11:23:18",
-      results: [
-        {
-          id: 2,
-          task_id: 2,
-          machine_uuid: "13ff60a7-0f7d-49d6-b7fc-b766cc347ba8",
-          machine_ip: "192.168.160.20",
-          command: "ls",
-          retcode: 0,
-          stdout:
-            "app\nconfig_agent.yaml\nconfig_agent.yaml.templete\nconfig_server.yaml\nconfig_server.yaml.templete\ndbmanager\nglobal\ngo.mod\ngo.sum\nuser.xlsx.templete\nutils\nvendor",
-          stderr: "",
-          is_update: true,
-        },
-      ],
-    },
-    {
-      id: 1,
-      task_name: "执行中",
-      command: "ls",
-      task_status: "执行中",
-      create_time: "2023-12-25 10:08:15",
-      update_time: "",
-      results: [
-        {
-          id: 1,
-          task_id: 1,
-          machine_uuid: "13ff60a7-0f7d-49d6-b7fc-b766cc347ba8",
-          machine_ip: "192.168.160.20",
-          command: "ls",
-          retcode: 0,
-          stdout:
-            "app\nconfig_agent.yaml\nconfig_agent.yaml.templete\nconfig_server.yaml\nconfig_server.yaml.templete\ndbmanager\nglobal\ngo.mod\ngo.sum\nuser.xlsx.templete\nutils\nvendor",
-          stderr: "",
-          is_update: false,
-        },
-      ],
-    },
-  ];
+  loading.value = true;
   props.getData!({ page: page.currentPage, size: page.pageSize }).then(
     (res: { data: ReaultData }) => {
       let result: ReaultData = res.data;
@@ -174,7 +109,7 @@ const handleSearch = () => {
     .searchFunc({
       page: page.currentPage,
       size: page.pageSize,
-      name: keyWord,
+      search: keyWord.value,
     })
     .then((res: any) => {
       loading.value = false;
@@ -256,6 +191,7 @@ defineExpose({
   justify-content: space-evenly;
   width: 100%;
   height: 100%;
+
   &_header {
     width: 100%;
     height: 44px;
@@ -265,6 +201,7 @@ defineExpose({
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     &_title {
       font-size: 16px;
     }
