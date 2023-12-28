@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import type { RouteRecordRaw } from "vue-router";
 import Home from "@/views/Home.vue";
-import Atune from "@/components/atuneList.vue";
+import Atune from "@/views/atuneList.vue";
 import Result from "@/views/ResultInfo.vue";
 
 const routes: Array<RouteRecordRaw> = [
@@ -16,6 +16,7 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "detail",
+        name: "taskDetail",
         component: () => import("../views/taskDetail.vue"),
       },
     ],
@@ -24,6 +25,13 @@ const routes: Array<RouteRecordRaw> = [
     path: "/atune",
     component: Atune,
     meta: { title: "模板列表" },
+    children: [
+      {
+        path: "detail",
+        name: "atuneDetail",
+        component: () => import("../views/atuneDetail.vue"),
+      },
+    ],
   },
   {
     path: "/result",

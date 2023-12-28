@@ -9,6 +9,24 @@ export function getTaskLists(data: Object) {
   });
 }
 
+// 新增任务
+export function addTask(data: object) {
+  return request({
+    url: "/plugin/atune/run",
+    method: "post",
+    data,
+  });
+}
+
+// 删除任务
+export function deleteTask(data: object) {
+  return request({
+    url: "/plugin/atune/delete",
+    method: "delete",
+    data,
+  });
+}
+
 // 获取所有的调优列表
 export function getAtuneAllName() {
   return request({
@@ -38,7 +56,7 @@ export function getTuneLists(data: object) {
 // 保存调优模板
 export function saveTune(data: object) {
   return request({
-    url: "/plugin/atune/save",
+    url: "/plugin/atune/save_tune",
     method: "post",
     data,
   });
@@ -47,7 +65,7 @@ export function saveTune(data: object) {
 // 删除调优模板
 export function deleteTune(data: object) {
   return request({
-    url: "/plugin/atune/delete",
+    url: "/plugin/atune/delete_tune",
     method: "delete",
     data,
   });
@@ -56,7 +74,7 @@ export function deleteTune(data: object) {
 // 高级搜索模板列表分页
 export function searchTune(data: object) {
   return request({
-    url: "/plugin/atune/search",
+    url: "/plugin/atune/search_tune",
     method: "get",
     params: data,
   });
@@ -65,7 +83,7 @@ export function searchTune(data: object) {
 // 编辑模板更新
 export function updateTune(data: object) {
   return request({
-    url: "/plugin/atune/update",
+    url: "/plugin/atune/update_tune",
     method: "post",
     data,
   });
