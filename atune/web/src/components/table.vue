@@ -24,7 +24,7 @@
     <!-- 列表 -->
     <div class="my_table_content" ref="tableBox">
       <el-table
-        ref="multipleTableRef"
+        ref="myTableRef"
         :data="tableData"
         class="table"
         @select="handleRowSelectionChange"
@@ -62,6 +62,7 @@
 import { ref, reactive, onMounted } from "vue";
 import { Search } from "@element-plus/icons-vue";
 import { ElTable, ElMessage, ElMessageBox } from "element-plus";
+import { ReaultData } from "@/types/atune";
 const props = defineProps({
   getData: {
     type: Function,
@@ -84,7 +85,7 @@ const emit = defineEmits(["handleSelect", "handleRowclick"]);
 const loading = ref(false);
 const tableData = ref([] as any[]);
 const all_datas = ref([]);
-const multipleTableRef = ref<InstanceType<typeof ElTable>>();
+const myTableRef = ref<InstanceType<typeof ElTable>>();
 const currentNum = ref(0); //复选框当前页数量
 const keyWord = ref("");
 const selectedRows = ref([] as any[]);
@@ -97,19 +98,66 @@ const page = reactive({
 });
 onMounted(async () => {
   await getTableData();
-  getAllData();
+  // getAllData();
 });
 
 // 获取表格数据
 const getTableData = () => {
-  loading.value = true;
+  // loading.value = true;
+  tableData.value = [
+    {
+      id: 2,
+      task_name: "准备调优环境",
+      command: "ls",
+      task_status: "已完成",
+      create_time: "2023-12-25 11:23:18",
+      update_time: "2023-12-25 11:23:18",
+      results: [
+        {
+          id: 2,
+          task_id: 2,
+          machine_uuid: "13ff60a7-0f7d-49d6-b7fc-b766cc347ba8",
+          machine_ip: "192.168.160.20",
+          command: "ls",
+          retcode: 0,
+          stdout:
+            "app\nconfig_agent.yaml\nconfig_agent.yaml.templete\nconfig_server.yaml\nconfig_server.yaml.templete\ndbmanager\nglobal\ngo.mod\ngo.sum\nuser.xlsx.templete\nutils\nvendor",
+          stderr: "",
+          is_update: true,
+        },
+      ],
+    },
+    {
+      id: 1,
+      task_name: "执行中",
+      command: "ls",
+      task_status: "执行中",
+      create_time: "2023-12-25 10:08:15",
+      update_time: "",
+      results: [
+        {
+          id: 1,
+          task_id: 1,
+          machine_uuid: "13ff60a7-0f7d-49d6-b7fc-b766cc347ba8",
+          machine_ip: "192.168.160.20",
+          command: "ls",
+          retcode: 0,
+          stdout:
+            "app\nconfig_agent.yaml\nconfig_agent.yaml.templete\nconfig_server.yaml\nconfig_server.yaml.templete\ndbmanager\nglobal\ngo.mod\ngo.sum\nuser.xlsx.templete\nutils\nvendor",
+          stderr: "",
+          is_update: false,
+        },
+      ],
+    },
+  ];
   props.getData!({ page: page.currentPage, size: page.pageSize }).then(
-    (res: any) => {
-      if (res.data && res.data.code === 200) {
+    (res: { data: ReaultData }) => {
+      let result: ReaultData = res.data;
+      if (result && result.code === 200) {
         loading.value = false;
-        tableData.value = res.data.data;
-        currentNum.value = res.data.data.length;
-        page.total = res.data.total;
+        tableData.value = result.data;
+        currentNum.value = result.data.length;
+        page.total = result.total;
       } else {
         loading.value = false;
         tableData.value = [];
@@ -155,8 +203,17 @@ const handleSelectinChange = (rows: any) => {
 };
 
 // 用户点击某一行的复选框
-const handleRowSelectionChange = (val: any, _row: any) => {
+const handleRowSelectionChange = (val: [], _row: any) => {
+  // 输出当前选中的所有行数组
   console.log(val);
+};
+
+// 刷新表格
+const handleRefresh = () => {
+  // 清空选项
+  myTableRef.value?.clearSelection();
+  // 重新获取数据
+  getTableData();
 };
 
 // 删除
@@ -174,6 +231,7 @@ const handleDelete = () => {
       .then((res: any) => {
         if (res.data.code === 200) {
           ElMessage.success(res.data.msg);
+          handleRefresh();
         } else {
           ElMessage.error(res.data.msg);
         }
@@ -186,6 +244,8 @@ const handleDelete = () => {
 
 defineExpose({
   getTableData,
+  handleDelete,
+  handleRefresh,
 });
 </script>
 

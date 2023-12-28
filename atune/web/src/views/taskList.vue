@@ -4,7 +4,7 @@
       ref="taskRef"
       :get-data="getTaskLists"
       :get-all-data="getTaskLists"
-      :del-func="deleteTune"
+      :del-func="deleteTask"
       :search-func="searchTune"
     >
       <template #listName>任务列表</template>
@@ -16,10 +16,10 @@
       <el-table-column prop="id" label="编号" width="80" />
       <el-table-column prop="task_name" label="名称" />
       <el-table-column prop="command" label="命令" />
-      <el-table-column prop="command" label="模板">
+      <el-table-column label="模板编号">
         <template #default="props">
           <el-link type="primary" @click="atuneDetail"
-            >{{ props.row.command }}
+            >{{ props.row.tune ? props.row.tune.tuneName : "暂无" }}
             <el-icon class="el-icon--right"><icon-view /></el-icon
           ></el-link>
         </template>
@@ -64,10 +64,9 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { View as IconView } from "@element-plus/icons-vue";
-import { getTaskLists, searchTune, deleteTune } from "@/api/atune";
-import MyTable from "@/components/table.vue";
-import MyButton from "@/components/myButton.vue";
-import { Task, Atune } from "@/types/atune";
+import { getTaskLists, searchTune, deleteTask } from "@/api/atune";
+import { Task } from "@/types/atune";
+import { useAtuneStore } from "@/store/atune";
 
 const taskRef = ref();
 const emit = defineEmits(["selectionChange", "taskDetail", "atuneDetail"]);
@@ -76,11 +75,13 @@ const emit = defineEmits(["selectionChange", "taskDetail", "atuneDetail"]);
 const format = (percentage: number) => (percentage === 0 ? "error" : "running");
 
 // 查看模板详情
-const atuneDetail = (row: Atune) => {
+const atuneDetail = (row: Task) => {
+  console.log(row);
   emit("atuneDetail", row);
 };
 // 查看任务详情
 const handleDetail = (row: Task) => {
+  useAtuneStore().setTaskRow(row);
   emit("taskDetail", row);
 };
 

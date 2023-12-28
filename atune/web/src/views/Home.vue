@@ -40,7 +40,8 @@ import { ref } from "vue";
 import { ElDialog } from "element-plus";
 import taskList from "./taskList.vue";
 import atuneTemplete from "@/components/atuneTemplete.vue";
-import router from "../router/index.ts";
+import { useRouter } from "vue-router";
+import { Task, Atune } from "@/types/atune";
 
 const selectedNodeData = ref("");
 const searchTuneName = ref("");
@@ -49,6 +50,9 @@ const showDialog = ref(false);
 const selectedEditRow = ref();
 const refreshData = ref(false);
 const showDetail = ref(false);
+
+// 路由管理器
+const router = useRouter();
 
 // 关闭dialog弹框
 const closeDialog = () => {
@@ -64,19 +68,14 @@ const returnHome = () => {
 const handleCreat = () => {};
 
 // 查看模板详情
-const handleAtuneDetail = (editRow: any) => {
-  selectedEditRow.value = editRow;
+const handleAtuneDetail = (taskRow: Task | Atune) => {
+  selectedEditRow.value = taskRow;
   showDialog.value = true;
 };
 
 // 查看任务详情
-const handleTaskDetail = (editRow: any) => {
-  router.push({
-    path: "/task/detail",
-    params: {
-      row: editRow,
-    },
-  });
+const handleTaskDetail = () => {
+  router.push("/task/detail");
   showDetail.value = true;
 };
 
