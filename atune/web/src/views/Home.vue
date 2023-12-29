@@ -2,14 +2,21 @@
   <div class="container">
     <!-- 任务列表 -->
     <div class="container-table shadow" v-show="!showDetail">
-      <taskList @taskDetail="handleTaskDetail" @atuneDetail="handleAtuneDetail" :refreshData="refreshData"
-        :searchTuneName="searchTuneName" :searchTune="searchTune">
+      <taskList
+        @taskDetail="handleTaskDetail"
+        @atuneDetail="handleAtuneDetail"
+        :refreshData="refreshData"
+        :searchTuneName="searchTuneName"
+        :searchTune="searchTune"
+      >
       </taskList>
     </div>
     <!-- 单项任务详情 -->
     <div v-show="showDetail" class="container-nav">
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item :to="{ path: '/task' }" @click="returnHome">执行任务列表</el-breadcrumb-item>
+        <el-breadcrumb-item :to="{ path: '/task' }" @click="returnHome"
+          >执行任务列表</el-breadcrumb-item
+        >
         <el-breadcrumb-item>任务详情</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -18,8 +25,13 @@
 
   <!-- 调优模板详情 -->
   <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
-    <atuneTemplete :selectedNodeData="selectedNodeData" :selectedEditRow="selectedEditRow" @closeDialog="closeDialog"
-      @dataUpdated="handleDataUpdated">
+    <atuneTemplete
+      :is-tune="false"
+      :selectedNodeData="selectedNodeData"
+      :selectedEditRow="selectedEditRow"
+      @closeDialog="closeDialog"
+      @dataUpdated="handleDataUpdated"
+    >
     </atuneTemplete>
   </el-dialog>
 </template>
@@ -54,7 +66,7 @@ const returnHome = () => {
 };
 
 // 新增
-const handleCreat = () => { };
+const handleCreat = () => {};
 
 // 查看模板详情
 const handleAtuneDetail = (taskRow: Task | Atune) => {

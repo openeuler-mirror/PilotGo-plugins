@@ -14,11 +14,12 @@
       </template>
       <el-table-column type="selection" width="55" />
       <el-table-column prop="id" label="编号" width="100" />
-      <el-table-column prop="tuneName" label="名称" width="100" />
+      <el-table-column prop="tuneName" label="调优对象" width="100" />
+      <el-table-column prop="custom_name" label="自定义名称" width="100" />
       <el-table-column prop="description" label="概述" />
-      <el-table-column prop="createTime" label="创建时间" />
-      <el-table-column prop="updateTime" label="更新时间" />
-      <el-table-column label="操作" width="80">
+      <el-table-column prop="create_time" label="创建时间" />
+      <el-table-column prop="update_time" label="更新时间" />
+      <el-table-column label="操作" width="180">
         <template #default="{ row }">
           <my-button size="small" @click="handleDetail(row)">详情</my-button>
           <my-button size="small" @click="handleEdit(row)">编辑</my-button>
@@ -26,6 +27,16 @@
       </el-table-column>
     </my-table>
   </div>
+  <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
+    <atuneTemplete
+      :is-tune="true"
+      :selectedNodeData="selectedNodeData"
+      :selectedEditRow="selectedEditRow"
+      @closeDialog="closeDialog"
+      @dataUpdated="handleDataUpdated"
+    >
+    </atuneTemplete>
+  </el-dialog>
   <div class="tuneList shadow" v-if="showDetail">
     <router-view />
   </div>
@@ -33,28 +44,44 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
+import { ElDialog } from "element-plus";
 import { getTuneLists, searchTune, deleteTune } from "@/api/atune";
+import atuneTemplete from "@/components/atuneTemplete.vue";
 import { Atune } from "@/types/atune";
 import { useRouter } from "vue-router";
-const emit = defineEmits(["atuneDetail"]);
+import { useAtuneStore } from "@/store/atune";
 const tuneRef = ref();
 const router = useRouter();
 const showDetail = ref(false);
+const selectedNodeData = ref("");
+const showDialog = ref(false);
+const selectedEditRow = ref();
+// 关闭dialog弹框
+const closeDialog = () => {
+  showDialog.value = false;
+};
 // 新增
-const handleCreat = () => {};
+const handleCreat = () => {
+  showDialog.value = true;
+};
 // 删除
 const handleDelete = () => {
   tuneRef.value.handleDelete();
 };
 // 详情
-const handleDetail = (atuneRow: any) => {
-  atuneRow;
+const handleDetail = (row: Atune) => {
+  useAtuneStore().setTuneRow(row);
   showDetail.value = true;
   router.push("/atune/detail");
 };
 // 编辑
 const handleEdit = (row: Atune) => {
-  emit("atuneDetail", row);
+  selectedEditRow.value = row;
+  showDialog.value = true;
+};
+// 刷新
+const handleDataUpdated = () => {
+  tuneRef.value.handleRefresh();
 };
 </script>
 

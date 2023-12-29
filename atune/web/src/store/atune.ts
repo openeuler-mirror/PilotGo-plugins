@@ -5,6 +5,7 @@ export const useAtuneStore = defineStore("atune", {
   state: () => ({
     count: 0,
     taskRow: {} as Task,
+    tuneRow: {} as Atune,
   }),
   getters: {
     double: (state) => state.count * 2,
@@ -16,6 +17,11 @@ export const useAtuneStore = defineStore("atune", {
     // 设置taskRow数据
     setTaskRow(row: Task) {
       this.taskRow = row;
+    },
+    // 设置taskRow数据
+    setTuneRow(row: Atune) {
+      this.tuneRow = row;
+      console.log(this.tuneRow);
     },
   },
   //   persist: {
