@@ -3,6 +3,7 @@ package model
 type Tunes struct {
 	ID            int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
 	TuneName      string `json:"tuneName"`
+	CustomName    string `json:"custom_name"`
 	Description   string `json:"description"`
 	CreateTime    string `json:"create_time"`
 	UpdateTime    string `json:"update_time"`
