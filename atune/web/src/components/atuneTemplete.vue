@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-form :model="form" class="custom-form">
+    <el-form :model="form" class="custom-form" :disabled="!isTune">
       <el-form-item label="调优对象" v-show="isTune">
         <el-select
           v-model="form.tuneName"
@@ -67,10 +67,6 @@ let props = defineProps({
     default: false,
     required: true,
   },
-  selectedNodeData: {
-    type: String,
-    default: "",
-  },
   selectedEditRow: {
     type: Object as () => Atune,
     default: null,
@@ -88,7 +84,7 @@ const form = reactive({
   restore: "",
   note: "",
 });
-const emit = defineEmits(["closeDialog", "dataUpdated"]);
+const emit = defineEmits(["closeDialog"]);
 // 获取所有的调优模板
 const getAllTune = () => {
   getAtuneAllName().then((res) => {
@@ -111,9 +107,8 @@ const handleEdit = () => {
   form.description = props.selectedEditRow.description;
 };
 
-const fetchAtuneInfo = (tuneName?: string) => {
-  let paramName = tuneName ? tuneName : props.selectedNodeData;
-  getAtuneInfo({ name: paramName }).then((res) => {
+const fetchAtuneInfo = (tuneName: string) => {
+  getAtuneInfo({ name: tuneName }).then((res) => {
     if (res.data && res.data.code === 200) {
       const data = res.data.data;
       // 判断数据结构类型
@@ -136,7 +131,6 @@ const saveTuneData = () => {
     .then((res) => {
       if (res.data.code === 200) {
         ElMessage.success(res.data.msg);
-        emit("dataUpdated");
       } else {
         ElMessage.error(res.data.msg);
       }
@@ -150,7 +144,6 @@ const updateTuneData = () => {
     .then((res) => {
       if (res.data.code === 200) {
         ElMessage.success(res.data.msg);
-        emit("dataUpdated");
       } else {
         ElMessage.error(res.data.msg);
       }
@@ -175,11 +168,6 @@ const onCancel = () => {
 watchEffect(() => {
   if (props.isTune) {
     getAllTune();
-  }
-});
-watchEffect(() => {
-  if (props.selectedNodeData !== "") {
-    fetchAtuneInfo();
   }
 });
 

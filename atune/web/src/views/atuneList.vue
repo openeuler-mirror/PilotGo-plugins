@@ -30,32 +30,42 @@
   <el-dialog title="调优模板信息" width="70%" v-model="showDialog">
     <atuneTemplete
       :is-tune="true"
-      :selectedNodeData="selectedNodeData"
       :selectedEditRow="selectedEditRow"
       @closeDialog="closeDialog"
-      @dataUpdated="handleDataUpdated"
     >
     </atuneTemplete>
   </el-dialog>
-  <div class="tuneList shadow" v-if="showDetail">
+  <div class="tuneList shadow">
     <router-view />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { ElDialog } from "element-plus";
 import { getTuneLists, searchTune, deleteTune } from "@/api/atune";
 import atuneTemplete from "@/components/atuneTemplete.vue";
 import { Atune } from "@/types/atune";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
+import { onBeforeRouteUpdate } from "vue-router";
+import { useRouterStore } from "@/store/router";
 import { useAtuneStore } from "@/store/atune";
 const tuneRef = ref();
 const router = useRouter();
 const showDetail = ref(false);
-const selectedNodeData = ref("");
 const showDialog = ref(false);
 const selectedEditRow = ref();
+
+// 每次刷新界面都需重新判断路由
+onMounted(() => {
+  showDetail.value = useRouterStore().showRoute(useRoute().fullPath, "detail");
+});
+// 组件内守卫
+onBeforeRouteUpdate((to: any, _from: any, next: any) => {
+  showDetail.value = useRouterStore().showRoute(to.fullPath, "detail");
+  next();
+});
+
 // 关闭dialog弹框
 const closeDialog = () => {
   showDialog.value = false;
@@ -78,10 +88,6 @@ const handleDetail = (row: Atune) => {
 const handleEdit = (row: Atune) => {
   selectedEditRow.value = row;
   showDialog.value = true;
-};
-// 刷新
-const handleDataUpdated = () => {
-  tuneRef.value.handleRefresh();
 };
 </script>
 

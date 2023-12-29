@@ -9,7 +9,6 @@
           <el-descriptions-item label="工作目录:">{{
             workDir
           }}</el-descriptions-item>
-          <br />
           <el-descriptions-item label="注意事项:">{{
             note
           }}</el-descriptions-item>
