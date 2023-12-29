@@ -105,7 +105,7 @@ func DeleteTune(c *gin.Context) {
 }
 
 func SearchTune(c *gin.Context) {
-	tune_name := c.Query("name")
+	search := c.Query("search")
 
 	query := &response.PaginationQ{}
 	if err := c.ShouldBindQuery(query); err != nil {
@@ -113,7 +113,7 @@ func SearchTune(c *gin.Context) {
 		return
 	}
 
-	data, total, err := service.SearchTune(tune_name, query)
+	data, total, err := service.SearchTune(search, query)
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
