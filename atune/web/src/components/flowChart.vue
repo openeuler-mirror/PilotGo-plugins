@@ -3,43 +3,25 @@
     <v-stage ref="stage" :config="stageSize" v-if="showFlow">
       <v-layer>
         <v-rect
-          @click="handleClick('reStart')"
-          :config="reStart"
-          @mousemove="handleMouseMove('reStart')"
-          @mouseout="handleMouseOut('reStart')"
-        /><v-rect
-          :config="rectPrepare"
-          @click="handleClick('rectPrepare')"
-          @mousemove="handleMouseMove('rectPrepare')"
-          @mouseout="handleMouseOut('rectPrepare')"
-        /><v-rect
-          :config="rectTune"
-          @click="handleClick('rectTune')"
-          @mousemove="handleMouseMove('rectTune')"
-          @mouseout="handleMouseOut('rectTune')"
-        /><v-rect
-          :config="rectRestore"
-          @click="handleClick('rectRestore')"
-          @mousemove="handleMouseMove('rectRestore')"
-          @mouseout="handleMouseOut('rectRestore')"
-        />
-        <v-text :config="{ x: 0, y: 20, text: 'start', fontSize: 16 }" />
-        <v-text :config="{ x: 20, y: 40, text: 'prepare', fontSize: 16 }" />
-        <v-text :config="{ x: 20, y: 80, text: 'restore', fontSize: 16 }" />
-        <v-text :config="{ x: 20, y: 60, text: 'tune', fontSize: 16 }" />
-        <v-shape
+          v-for="(item, index) in rectArr"
+          @click="handleClick(index, item)"
           :config="{
-            sceneFunc: arrowConfig1,
-            fill: '#00D2FF',
-            stroke: '#00D2FF',
-            strokeWidth: 2,
+            ...useCanvasStore().drawRect(index),
+            fill: rectBgColor[index],
           }"
         />
+        <v-text
+          v-for="(item, index) in rectArr"
+          @click="handleClick(index, item)"
+          :config="useCanvasStore().writeText(index, item)"
+        />
+
         <v-shape
+          v-for="item in 3"
           :config="{
-            sceneFunc: arrowConfig2,
-            fill: '#00D2FF',
-            stroke: '#00D2FF',
+            sceneFunc: (...event:any) =>{arrowConfig(event[0],event[1], item)},
+            fill: '#222',
+            stroke: '#222',
             strokeWidth: 2,
           }"
         />
@@ -51,28 +33,24 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { useCanvasStore } from "@/store/canvas";
-import { RectConfig } from "@/types/atune";
-import { pa } from "element-plus/es/locale/index.mjs";
 const showFlow = ref(false);
 const stage = ref();
 const stageW = ref(0);
 const stageH = ref(0);
 const stageSize = ref({});
-const reStart = ref({} as RectConfig);
-const rectPrepare = ref({} as RectConfig);
-const rectTune = ref({} as RectConfig);
-const rectRestore = ref({} as RectConfig);
-
+const rectBgColor = ref(["yellow", "#fff", "#fff", "#fff"]);
+const emit = defineEmits(["clickRect"]);
+let rectArr = ["start", "prepare", "restore", "tune"];
 let arrowStartX = 0;
 let arrowStartY = 0;
-let rectHeight = 0;
+let arrowLength = 0;
 onMounted(() => {
   const stageDiv = document.getElementById("flowChart");
   stageW.value = stageDiv!.clientWidth;
   stageH.value = stageDiv!.clientHeight;
   useCanvasStore().setWidth(stageW.value);
 });
-// 舞台的大小
+// 舞台的大小，基本参数的动态获取
 setTimeout(() => {
   const width = stageW.value;
   const height = stageH.value;
@@ -80,60 +58,44 @@ setTimeout(() => {
     width: width,
     height: height,
   };
-  reStart.value = useCanvasStore().rectStart;
-  rectPrepare.value = useCanvasStore().rectPrepare;
-  rectTune.value = useCanvasStore().rectTune;
-  rectRestore.value = useCanvasStore().rectRestore;
-
   arrowStartX = useCanvasStore().arrowStartX;
   arrowStartY = useCanvasStore().arrowStartY;
-  rectHeight = useCanvasStore().rectHeight;
+  arrowLength = useCanvasStore().arrowLength;
   showFlow.value = true;
 }, 100);
 
 // 鼠标移入事件
-const handleMouseMove = (shapeName: string) => {
-  console.log("移入", shapeName);
-  eval(shapeName).value.fill = "yellow";
-};
+const handleMouseMove = (_shapeName: string) => {};
 // 鼠标移出事件
-const handleMouseOut = (shapeName: string) => {
-  console.log("移出", shapeName);
-  eval(shapeName).value.fill = "#fff";
-};
+const handleMouseOut = (_shapeName: string) => {};
 // 鼠标点击事件
-const handleClick = (shapeName: string) => {
-  console.log("点击了：", shapeName);
+const handleClick = (index: number, rectText: string) => {
+  rectBgColor.value[index] = "yellow";
+  rectBgColor.value.forEach((_item, itemIndex) => {
+    if (itemIndex != index) {
+      rectBgColor.value[itemIndex] = "#fff";
+    }
+  });
+  emit("clickRect", rectText);
 };
 
 // 配置箭头参数
 let arrowPosition = (idNum: number) => {
   let arrowFX = arrowStartX;
   let arrowTX = arrowStartX;
-  let arrowFY = arrowStartY + rectHeight * idNum + 1;
-  let arrowTY = arrowStartY + rectHeight * (idNum + 1) - 2;
-  return { arrowFX, arrowTX, arrowFY, arrowTY };
+  let arrowFY = arrowStartY * idNum + 1;
+  let arrowTY = arrowStartY * idNum + arrowLength - 2;
+  return [arrowFX, arrowTX, arrowFY, arrowTY];
 };
-const arrowConfig1 = (context: any, shape: any) => {
-  let { arrowFX, arrowTX, arrowFY, arrowTY } = arrowPosition(0);
-
+const arrowConfig = (context: any, shape: any, idNum: number) => {
+  let params: number[] = arrowPosition(idNum);
   useCanvasStore().drawArrow(
     context,
     shape,
-    arrowFX,
-    arrowTX,
-    arrowFY,
-    arrowTY
-  );
-};
-const arrowConfig2 = (context: any, shape: any) => {
-  useCanvasStore().drawArrow(
-    context,
-    shape,
-    arrowStartX,
-    arrowStartX,
-    arrowStartY + rectHeight * 2 + 1,
-    arrowStartY + rectHeight * 3 - 2
+    params[0],
+    params[1],
+    params[2],
+    params[3]
   );
 };
 </script>

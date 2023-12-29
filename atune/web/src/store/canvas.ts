@@ -6,6 +6,7 @@ export const useCanvasStore = defineStore("canvas", {
     width: 0,
     fromX: 0,
     fromY: 50,
+    arrowLength: 50,
     rectWidth: 100,
     rectHeight: 50,
     rectConfig: {
@@ -13,11 +14,11 @@ export const useCanvasStore = defineStore("canvas", {
       y: 0,
       width: 100,
       height: 50,
-      fill: "#fff",
       stroke: "#fff",
       shadowBlur: 2,
       cornerRadius: 10,
     },
+    textConfig: { x: 0, y: 20, text: "start", fontSize: 16 },
   }),
   getters: {
     /**
@@ -27,33 +28,9 @@ export const useCanvasStore = defineStore("canvas", {
      * @param state
      * @returns
      */
-    // 计算各个图形的起始位置
-    rectStart: (state) => {
-      let rectConfig: RectConfig = JSON.parse(JSON.stringify(state.rectConfig));
-      rectConfig.x = state.width / 2 - state.rectWidth;
-      rectConfig.y = state.fromY;
-      return rectConfig;
-    },
-    rectPrepare: (state) => {
-      let rectConfig: RectConfig = JSON.parse(JSON.stringify(state.rectConfig));
-      rectConfig.x = state.width / 2 - state.rectWidth;
-      rectConfig.y = state.fromY + state.fromY * 2;
-      return rectConfig;
-    },
-    rectTune: (state) => {
-      let rectConfig: RectConfig = JSON.parse(JSON.stringify(state.rectConfig));
-      rectConfig.x = state.width / 2 - state.rectWidth;
-      rectConfig.y = state.fromY + state.fromY * 4;
-      return rectConfig;
-    },
-    rectRestore: (state) => {
-      let rectConfig: RectConfig = JSON.parse(JSON.stringify(state.rectConfig));
-      rectConfig.x = state.width / 2 - state.rectWidth;
-      rectConfig.y = state.fromY + state.fromY * 6;
-      return rectConfig;
-    },
+    // 箭头的起始位置X Y
     arrowStartX: (state) => {
-      return state.fromX - state.rectWidth / 2;
+      return state.fromX;
     },
     arrowStartY: (state) => {
       return state.fromY + state.rectHeight;
@@ -67,7 +44,39 @@ export const useCanvasStore = defineStore("canvas", {
       this.width = width;
       this.fromX = width / 2;
     },
+    drawRect(idNum: number) {
+      // 画矩形
+      let rectConfig: RectConfig = JSON.parse(JSON.stringify(this.rectConfig));
+      rectConfig.x = this.width / 2 - this.rectWidth / 2;
+      rectConfig.y = this.fromY + this.fromY * idNum * 2;
+      return rectConfig;
+    },
+    // 计算文字像素
+    getTextWidth(text: string, fontSize: number, fontWeight: string) {
+      // 创建临时元素
+      const ele: HTMLElement = document.createElement("div");
+      ele.style.position = "absolute";
+      ele.style.whiteSpace = "nowrap";
+      ele.style.fontSize = fontSize + "px";
+      ele.style.fontWeight = fontWeight;
+      ele.innerText = text;
+      document.body.append(ele);
+      const width: number = ele.getBoundingClientRect().width;
+      document.body.removeChild(ele);
+      return width;
+    },
+    // 写text
+    writeText(idNum: number, text: string) {
+      let getTextWidth = this.getTextWidth(text, 16, "none");
+      let textConfig = JSON.parse(JSON.stringify(this.textConfig));
+      textConfig.x = this.fromX - getTextWidth / 2;
+      textConfig.y =
+        this.fromY + this.fromY * idNum * 2 + this.rectHeight / 2 - 6;
+      textConfig.text = text;
+      return textConfig;
+    },
     drawArrow(
+      // 画箭头
       context: any,
       shape: any,
       fX: number,

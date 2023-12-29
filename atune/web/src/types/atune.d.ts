@@ -7,15 +7,16 @@ export interface Task {
   update_time: string;
   results: Array;
   tune_id: int;
-  tune: Atune
+  tune: Atune;
 }
 
 export interface Atune {
   id: number;
   description: string;
   create_time: string;
-  update_time: string
+  update_time: string;
   tuneName: string;
+  custom_name: string;
   workDir: string;
   prepare: string;
   tune: string;

@@ -8,8 +8,14 @@
       <div class="my_table_header_operation">
         <!-- 模糊搜索 -->
         <div class="operation-select-input">
-          <el-input v-model="keyWord" placeholder="请输入关键词进行搜索..." :prefix-icon="Search" clearable
-            @keydown.enter.native="handleSearch"></el-input>
+          <el-input
+            v-model="keyWord"
+            placeholder="请输入关键词进行搜索..."
+            :prefix-icon="Search"
+            clearable
+            @keydown.enter.native="handleSearch"
+            @clear="handleRefresh"
+          ></el-input>
         </div>
       </div>
       <div class="my_table_header_button">
@@ -18,8 +24,14 @@
     </el-row>
     <!-- 列表 -->
     <div class="my_table_content" ref="tableBox">
-      <el-table ref="myTableRef" :data="tableData" class="table" @select="handleRowSelectionChange"
-        @selection-change="handleSelectinChange" v-loading="loading">
+      <el-table
+        ref="myTableRef"
+        :data="tableData"
+        class="table"
+        @select="handleRowSelectionChange"
+        @selection-change="handleSelectinChange"
+        v-loading="loading"
+      >
         <slot></slot>
         <template #append>
           <slot name="append"></slot>
@@ -31,10 +43,18 @@
     </div>
     <!-- 分页 -->
     <div class="my_table_page">
-      <el-pagination v-model:current-page="page.currentPage" v-model:page-size="page.pageSize" popper-class="pagePopper"
-        :page-sizes="[10, 20, 25, 50, 75, 100]" :small="page.small" :background="page.background"
-        layout="total, sizes, prev, pager, next, jumper" :total="page.total" @size-change="getTableData"
-        @current-change="getTableData" />
+      <el-pagination
+        v-model:current-page="page.currentPage"
+        v-model:page-size="page.pageSize"
+        popper-class="pagePopper"
+        :page-sizes="[10, 20, 25, 50, 75, 100]"
+        :small="page.small"
+        :background="page.background"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="page.total"
+        @size-change="getTableData"
+        @current-change="getTableData"
+      />
     </div>
   </div>
 </template>

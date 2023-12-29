@@ -1,8 +1,22 @@
 <template>
   <div>
     <el-form :model="form" class="custom-form">
-      <el-form-item label="调优对象">
-        <el-input v-model="form.tuneName"></el-input>
+      <el-form-item label="调优对象" v-show="isTune">
+        <el-select
+          v-model="form.tuneName"
+          placeholder="请选择调优模板"
+          @change="fetchAtuneInfo(form.tuneName)"
+        >
+          <el-option
+            v-for="item in allTune"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="自定义名">
+        <el-input v-model="form.custom_name"></el-input>
       </el-form-item>
       <el-form-item label="概述介绍">
         <el-input v-model="form.description"></el-input>
@@ -20,11 +34,16 @@
         <el-input v-model="form.restore"></el-input>
       </el-form-item>
       <el-form-item label="注意事项">
-        <el-input v-model="form.note" class="custom-input" type="textarea" :rows="6"></el-input>
+        <el-input
+          v-model="form.note"
+          class="custom-input"
+          type="textarea"
+          :rows="6"
+        ></el-input>
       </el-form-item>
     </el-form>
     <el-form class="centered-buttons">
-      <my-button v-show="isEdit" @click="onSubmit">保存</my-button>
+      <my-button v-show="isTune" @click="onSubmit">保存</my-button>
       <my-button @click="onCancel">取消</my-button>
     </el-form>
   </div>
@@ -33,11 +52,21 @@
 <script lang="ts" setup>
 import { ElMessage } from "element-plus";
 import { reactive, watchEffect, ref } from "vue";
-import { getAtuneInfo, saveTune, updateTune } from "@/api/atune";
+import {
+  getAtuneInfo,
+  saveTune,
+  updateTune,
+  getAtuneAllName,
+} from "@/api/atune";
 import { Atune, Task } from "@/types/atune";
 import MyButton from "@/components/myButton.vue";
 
 let props = defineProps({
+  isTune: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
   selectedNodeData: {
     type: String,
     default: "",
@@ -47,11 +76,11 @@ let props = defineProps({
     default: null,
   },
 });
-
-const isEdit = ref(false);
+const allTune = ref([""]);
 const form = reactive({
   id: 0,
   tuneName: "",
+  custom_name: "",
   description: "",
   workDir: "",
   prepare: "",
@@ -60,20 +89,31 @@ const form = reactive({
   note: "",
 });
 const emit = defineEmits(["closeDialog", "dataUpdated"]);
+// 获取所有的调优模板
+const getAllTune = () => {
+  getAtuneAllName().then((res) => {
+    if (res.data.code === 200) {
+      allTune.value = res.data.data;
+    }
+  });
+};
 
 // 编辑
 const handleEdit = () => {
   form.id = props.selectedEditRow.id;
   form.tuneName = props.selectedEditRow.tuneName;
+  form.custom_name = props.selectedEditRow.custom_name;
   form.workDir = props.selectedEditRow.workDir;
   form.prepare = props.selectedEditRow.prepare;
   form.tune = props.selectedEditRow.tune;
   form.restore = props.selectedEditRow.restore;
   form.note = props.selectedEditRow.note;
+  form.description = props.selectedEditRow.description;
 };
 
-const fetchAtuneInfo = () => {
-  getAtuneInfo({ name: props.selectedNodeData }).then((res) => {
+const fetchAtuneInfo = (tuneName?: string) => {
+  let paramName = tuneName ? tuneName : props.selectedNodeData;
+  getAtuneInfo({ name: paramName }).then((res) => {
     if (res.data && res.data.code === 200) {
       const data = res.data.data;
       // 判断数据结构类型
@@ -132,7 +172,11 @@ const onSubmit = () => {
 const onCancel = () => {
   emit("closeDialog");
 };
-
+watchEffect(() => {
+  if (props.isTune) {
+    getAllTune();
+  }
+});
 watchEffect(() => {
   if (props.selectedNodeData !== "") {
     fetchAtuneInfo();
@@ -158,5 +202,8 @@ watchEffect(() => {
     text-align: left;
     vertical-align: top;
   }
+}
+.centered-buttons {
+  text-align: center;
 }
 </style>
