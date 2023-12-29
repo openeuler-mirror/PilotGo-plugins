@@ -6,7 +6,7 @@ import Result from "@/views/ResultInfo.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/",
+    path: "",
     redirect: "/task",
   },
   {
