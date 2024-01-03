@@ -11,6 +11,7 @@ type ConfigFile struct {
 	UUID      string `gorm:"primary_key;type:varchar(50)" json:"uuid"`
 	Name      string `json:"name"`
 	File      string `gorm:"type:text" json:"file"`
+	Path      string `json:"path"`
 	CreatedAt time.Time
 }
 

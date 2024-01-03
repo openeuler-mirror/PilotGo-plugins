@@ -5,7 +5,7 @@ import "openeuler.org/PilotGo/configmanage-plugin/db"
 type ConfigNode struct {
 	ID             int    `gorm:"primary_key;AUTO_INCREMENT"`
 	ConfigInfoUUID string `json:"config_info_uuid"`
-	NodeId         string `json:"node_id"`
+	NodeId         string `json:"node_id"` //机器信息
 }
 
 func (cn *ConfigNode) Add() error {
