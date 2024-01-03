@@ -27,7 +27,16 @@ type Config interface {
 	Load() error
 
 	// 依据agent uuid进行配置下发
-	Apply(string) error
+	Apply(Deploy) ([]string, error)
+}
+
+type Deploy struct {
+	Deploy_BatchIds  []int    `json:"deploy_batches"`
+	Deploy_DepartIds []int    `json:"deploy_departs"`
+	Deploy_NodeUUIds []string `json:"deploy_nodes"`
+	Deploy_Path      string   `json:"deploy_path"`
+	Deploy_FileName  string   `json:"deploy_name"`
+	Deploy_Text      string   `json:"deploy_file"`
 }
 
 type ConfigInfo = internal.ConfigInfo
@@ -49,7 +58,7 @@ func (ci *ConfigInstance) Add(configuuid string) error {
 	for _, v := range ci.BatchIds {
 		cn := ConfigNode{
 			ConfigInfoUUID: ci.UUID,
-			NodeId:         "b" + strconv.Itoa(int(v)),
+			NodeId:         "b:" + strconv.Itoa(int(v)),
 		}
 		err := cn.Add()
 		if err != nil {
@@ -61,7 +70,7 @@ func (ci *ConfigInstance) Add(configuuid string) error {
 	for _, v := range ci.DepartIds {
 		cn := ConfigNode{
 			ConfigInfoUUID: ci.UUID,
-			NodeId:         "d" + strconv.Itoa(v),
+			NodeId:         "d:" + strconv.Itoa(v),
 		}
 		err := cn.Add()
 		if err != nil {
@@ -73,7 +82,7 @@ func (ci *ConfigInstance) Add(configuuid string) error {
 	for _, v := range ci.Nodes {
 		cn := ConfigNode{
 			ConfigInfoUUID: ci.UUID,
-			NodeId:         "n" + v,
+			NodeId:         "n:" + v,
 		}
 		err := cn.Add()
 		if err != nil {
@@ -82,4 +91,8 @@ func (ci *ConfigInstance) Add(configuuid string) error {
 		}
 	}
 	return err
+}
+
+func GetInfoByConfigUUID(configuuid string) (ConfigInfo, error) {
+	return internal.GetInfoByConfigUUID(configuuid)
 }

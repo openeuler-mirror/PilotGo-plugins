@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/configmanage-plugin/controller"
 	"openeuler.org/PilotGo/configmanage-plugin/global"
 )
 
@@ -18,6 +19,8 @@ func RegisterAPIs(router *gin.Engine) {
 	global.GlobalClient.RegisterHandlers(router)
 	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
-		pg.POST("/install")
+		pg.POST("/repoadd", controller.AddRepoHandler)
+		pg.POST("/repoapply", controller.RepoApply)
+
 	}
 }
