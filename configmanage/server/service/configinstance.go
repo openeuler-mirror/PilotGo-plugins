@@ -1,9 +1,6 @@
 package service
 
 import (
-	"strconv"
-
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -11,7 +8,7 @@ type ConfigInstance struct {
 	UUID        string   `json:"uuid"`
 	Type        string   `json:"type"`
 	Description string   `json:"description"`
-	BatchIds    []uint   `json:"batchids"`
+	BatchIds    []int    `json:"batchids"`
 	DepartIds   []int    `json:"departids"`
 	Nodes       []string `json:"uuids"`
 
@@ -42,6 +39,8 @@ type Deploy struct {
 type ConfigInfo = internal.ConfigInfo
 type ConfigFile = internal.ConfigFile
 type ConfigNode = internal.ConfigNode
+type ConfigBatch = internal.ConfigBatch
+type ConfigDepart = internal.ConfigDepart
 
 func (ci *ConfigInstance) Add(configuuid string) error {
 	cm := ConfigInfo{
@@ -55,42 +54,33 @@ func (ci *ConfigInstance) Add(configuuid string) error {
 		return err
 	}
 
-	for _, v := range ci.BatchIds {
-		cn := ConfigNode{
-			ConfigInfoUUID: ci.UUID,
-			NodeId:         "b:" + strconv.Itoa(int(v)),
-		}
-		err := cn.Add()
-		if err != nil {
-			logger.Error("save config-batch failed: %s", err.Error())
-			continue
-		}
+	cb := ConfigBatch{
+		ConfigInfoUUID: ci.UUID,
+		BatchIDs:       ci.BatchIds,
+	}
+	err = cb.Add()
+	if err != nil {
+		return err
 	}
 
-	for _, v := range ci.DepartIds {
-		cn := ConfigNode{
-			ConfigInfoUUID: ci.UUID,
-			NodeId:         "d:" + strconv.Itoa(v),
-		}
-		err := cn.Add()
-		if err != nil {
-			logger.Error("save config-depart failed: %s", err.Error())
-			continue
-		}
+	cd := ConfigDepart{
+		ConfigInfoUUID: ci.UUID,
+		DepartIDs:      ci.DepartIds,
+	}
+	err = cd.Add()
+	if err != nil {
+		return err
 	}
 
-	for _, v := range ci.Nodes {
-		cn := ConfigNode{
-			ConfigInfoUUID: ci.UUID,
-			NodeId:         "n:" + v,
-		}
-		err := cn.Add()
-		if err != nil {
-			logger.Error("save config-node failed: %s", err.Error())
-			continue
-		}
+	cn := ConfigNode{
+		ConfigInfoUUID: ci.UUID,
+		NodeId:         ci.Nodes,
 	}
-	return err
+	err = cn.Add()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func GetInfoByConfigUUID(configuuid string) (ConfigInfo, error) {
