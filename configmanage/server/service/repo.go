@@ -9,27 +9,37 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"github.com/google/uuid"
 
-	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 type RepoConfig struct {
-	UUID string
-	Name string
-	File string
-	Path string
+	UUID    string `json:"uuid"` //ConfigInstance的uuid
+	Name    string `json:"name"`
+	File    string `json:"file"`
+	Path    string `json:"path"`
+	Version string `json:"version"`
 }
 
-func (c *RepoConfig) Record() error {
+func (rc *RepoConfig) Record() error {
 	cf := ConfigFile{
-		UUID: c.UUID,
-		Name: c.Name,
-		File: c.File,
-		Path: c.Path,
+		UUID: uuid.New().String(),
+		Name: rc.Name,
+		File: rc.File,
+		Path: rc.Path,
 	}
-	return cf.Add()
+	err := cf.Add()
+	if err != nil {
+		return err
+	}
+	i2f := internal.Info2File{
+		ConfigInfoUUID: rc.UUID,
+		ConfigFileUUID: cf.UUID,
+		Version:        rc.Version,
+	}
+	return i2f.Add()
 }
 
 func (c *RepoConfig) Load() error {
@@ -41,37 +51,6 @@ func (c *RepoConfig) Load() error {
 	c.File = cf.File
 	c.Path = cf.Path
 	return nil
-}
-
-func (c *RepoConfig) UpdateRepoConfig(configuuid string) error {
-	ci, err := internal.GetInfoByConfigUUID(configuuid)
-	if err != nil {
-		return err
-	}
-	ci.ConfigFileUUID = c.UUID
-	return ci.Add()
-}
-
-func HistoryRepoConfig(configuuid string) ([]RepoConfig, error) {
-	var rcs []RepoConfig
-	ci, err := internal.GetInfoByConfigUUID(configuuid)
-	if err != nil {
-		return nil, err
-	}
-	cis, err := internal.GetInfoByUUID(ci.UUID)
-	for _, v := range cis {
-		cf, err := internal.GetConfigFileByUUID(v.ConfigFileUUID)
-		if err != nil {
-			logger.Error(err.Error())
-		}
-		rc := RepoConfig{
-			UUID: cf.UUID,
-			Name: cf.Name,
-			File: cf.File,
-		}
-		rcs = append(rcs, rc)
-	}
-	return rcs, err
 }
 
 func (c *RepoConfig) Apply(de Deploy) ([]string, error) {
@@ -99,3 +78,36 @@ func (c *RepoConfig) Apply(de Deploy) ([]string, error) {
 	fmt.Println(resp.Data)
 	return nil, nil
 }
+
+/*
+	func (c *RepoConfig) UpdateRepoConfig(configuuid string) error {
+		ci, err := internal.GetInfoByConfigUUID(configuuid)
+		if err != nil {
+			return err
+		}
+		ci.ConfigFileUUID = c.UUID
+		return ci.Add()
+	}
+
+	func HistoryRepoConfig(configuuid string) ([]RepoConfig, error) {
+		var rcs []RepoConfig
+		ci, err := internal.GetInfoByConfigUUID(configuuid)
+		if err != nil {
+			return nil, err
+		}
+		cis, err := internal.GetInfoByUUID(ci.UUID)
+		for _, v := range cis {
+			cf, err := internal.GetConfigFileByUUID(v.ConfigFileUUID)
+			if err != nil {
+				logger.Error(err.Error())
+			}
+			rc := RepoConfig{
+				UUID: cf.UUID,
+				Name: cf.Name,
+				File: cf.File,
+			}
+			rcs = append(rcs, rc)
+		}
+		return rcs, err
+	}
+*/

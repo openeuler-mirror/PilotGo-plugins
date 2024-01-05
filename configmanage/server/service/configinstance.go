@@ -41,44 +41,50 @@ type ConfigFile = internal.ConfigFile
 type ConfigNode = internal.ConfigNode
 type ConfigBatch = internal.ConfigBatch
 type ConfigDepart = internal.ConfigDepart
+type Info2File = internal.Info2File
 
-func (ci *ConfigInstance) Add(configuuid string) error {
+func (ci *ConfigInstance) Add() error {
 	cm := ConfigInfo{
-		UUID:           ci.UUID,
-		ConfigFileUUID: configuuid,
-		Type:           ci.Type,
-		Description:    ci.Description,
+		UUID:        ci.UUID,
+		Type:        ci.Type,
+		Description: ci.Description,
 	}
 	err := cm.Add()
 	if err != nil {
 		return err
 	}
 
-	cb := ConfigBatch{
-		ConfigInfoUUID: ci.UUID,
-		BatchIDs:       ci.BatchIds,
-	}
-	err = cb.Add()
-	if err != nil {
-		return err
-	}
-
-	cd := ConfigDepart{
-		ConfigInfoUUID: ci.UUID,
-		DepartIDs:      ci.DepartIds,
-	}
-	err = cd.Add()
-	if err != nil {
-		return err
+	for _, v := range ci.BatchIds {
+		cb := ConfigBatch{
+			ConfigInfoUUID: ci.UUID,
+			BatchID:        v,
+		}
+		err = cb.Add()
+		if err != nil {
+			return err
+		}
 	}
 
-	cn := ConfigNode{
-		ConfigInfoUUID: ci.UUID,
-		NodeId:         ci.Nodes,
+	for _, v := range ci.DepartIds {
+		cd := ConfigDepart{
+			ConfigInfoUUID: ci.UUID,
+			DepartID:       v,
+		}
+		err = cd.Add()
+		if err != nil {
+			return err
+		}
 	}
-	err = cn.Add()
-	if err != nil {
-		return err
+
+	for _, v := range ci.Nodes {
+		cn := ConfigNode{
+			ConfigInfoUUID: ci.UUID,
+			NodeId:         v,
+		}
+		err = cn.Add()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
