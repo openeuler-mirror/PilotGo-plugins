@@ -19,8 +19,8 @@ func RegisterAPIs(router *gin.Engine) {
 	global.GlobalClient.RegisterHandlers(router)
 	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
-		pg.POST("/repoadd", controller.AddRepoHandler)
-		pg.POST("/repoapply", controller.RepoApply)
+		pg.POST("/add", controller.AddConfigHandler)
+		//pg.POST("/repoapply", controller.RepoApply)
 
 	}
 }
