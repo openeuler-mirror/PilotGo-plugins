@@ -12,7 +12,7 @@ func AddRepoHandler(c *gin.Context) {
 	//TODO:query 类型需要转变
 	query := &struct {
 		Description string   `json:"description"`
-		BatchIds    []uint   `json:"batchids"`
+		BatchIds    []int    `json:"batchids"`
 		DepartIds   []int    `json:"departids"`
 		Nodes       []string `json:"uuids"`
 		Name        string   `json:"name"`
