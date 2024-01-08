@@ -1,6 +1,8 @@
 package service
 
 import (
+	"encoding/json"
+
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -24,7 +26,7 @@ type Config interface {
 	Load() error
 
 	// 依据agent uuid进行配置下发
-	Apply(Deploy) ([]string, error)
+	Apply(Deploy) (json.RawMessage, error)
 }
 
 type Deploy struct {
