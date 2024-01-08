@@ -53,8 +53,8 @@ func (c *RepoConfig) Load() error {
 	return nil
 }
 
-func (c *RepoConfig) Apply(de Deploy) ([]string, error) {
-	//检查de里面的参数是否存在于数据库
+func (c *RepoConfig) Apply(de Deploy) (json.RawMessage, error) {
+	//TODO:检查de里面的参数是否存在于数据库
 
 	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
 	fmt.Println(url)
@@ -75,7 +75,9 @@ func (c *RepoConfig) Apply(de Deploy) ([]string, error) {
 	if resp.Code != http.StatusOK {
 		return nil, errors.New(resp.Message)
 	}
-	fmt.Println(resp.Data)
+	if resp.Data != nil {
+		return resp.Data, errors.New(resp.Message)
+	}
 	return nil, nil
 }
 

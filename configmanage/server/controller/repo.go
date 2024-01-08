@@ -78,39 +78,3 @@ func GetRepoConfig(c *gin.Context) {
 		response.Success(c, rcs, "Get repo last file success")
 	}
 */
-func RepoApply(c *gin.Context) {
-
-	//TODO: query 类型需要转变
-	query := &struct {
-		Deploy_BatchIds  []int    `json:"deploy_batches"`
-		Deploy_DepartIds []int    `json:"deploy_departs"`
-		Deploy_NodeUUIds []string `json:"deploy_nodes"`
-		DeployFile_UUID  string   `json:"file_uuid"` //文件uuid
-	}{}
-	err := c.Bind(query)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-
-	/*configinfo, err := service.GetInfoByConfigUUID(query.FileBroadcast_UUID)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}*/
-	repoconfigfile := &service.RepoConfig{
-		UUID: query.DeployFile_UUID,
-	}
-	repoconfigfile.Load()
-	de := service.Deploy{
-		Deploy_BatchIds:  query.Deploy_BatchIds,
-		Deploy_DepartIds: query.Deploy_DepartIds,
-		Deploy_NodeUUIds: query.Deploy_NodeUUIds,
-	}
-	rcs, err := repoconfigfile.Apply(de)
-	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
-		return
-	}
-	response.Success(c, rcs, "Get repo last file success")
-}
