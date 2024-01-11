@@ -6,21 +6,23 @@ import (
 	"openeuler.org/PilotGo/configmanage-plugin/db"
 )
 
-type ConfigFile struct {
-	ID        int    `gorm:"AUTO_INCREMENT"`
-	UUID      string `gorm:"primary_key;type:varchar(50)" json:"uuid"`
-	Name      string `json:"name"`
-	File      string `gorm:"type:text" json:"file"`
-	Path      string `json:"path"`
-	CreatedAt time.Time
+type RepoFile struct {
+	ID             int        `gorm:"AUTO_INCREMENT"`
+	UUID           string     `gorm:"primary_key;type:varchar(50)" json:"uuid"`
+	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
+	ConfigInfoUUID string
+	Content        interface{} `gorm:"type:json" json:"content"`
+	Version        string      `gorm:"type:varchar(50)" json:"version"`
+	IsIndex        bool        `json:"isindex"`
+	CreatedAt      time.Time
 }
 
-func (cf *ConfigFile) Add() error {
-	return db.MySQL().Save(&cf).Error
+func (rf *RepoFile) Add() error {
+	return db.MySQL().Save(&rf).Error
 }
 
-func GetConfigFileByUUID(uuid string) (ConfigFile, error) {
-	var file ConfigFile
-	err := db.MySQL().Where("uuid=?", uuid).Find(&file).Error
+func GetRepoFileByUUID(uuid string) (RepoFile, error) {
+	var file RepoFile
+	err := db.MySQL().Where("config_info_uuid=? && is_index = 1", uuid).Find(&file).Error
 	return file, err
 }
