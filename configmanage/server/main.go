@@ -40,11 +40,11 @@ func main() {
 	}
 
 	db.MySQL().AutoMigrate(&service.ConfigInfo{})
-	db.MySQL().AutoMigrate(&service.ConfigFile{})
-	db.MySQL().AutoMigrate(&service.Info2File{})
 	db.MySQL().AutoMigrate(&service.ConfigNode{})
 	db.MySQL().AutoMigrate(&service.ConfigDepart{})
 	db.MySQL().AutoMigrate(&service.ConfigBatch{})
+	db.MySQL().AutoMigrate(&service.RepoFile{})
+
 	server := router.InitRouter()
 	global.GlobalClient = client.DefaultClient(global.Init(config.Config().ConfigPlugin))
 

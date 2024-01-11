@@ -45,14 +45,15 @@ func AddConfigHandler(c *gin.Context) {
 	switch query.Type {
 	case global.Repo:
 		//解析参数
-		var repoconfigs []service.RepoConfig
-		if err := json.Unmarshal(query.Data, &repoconfigs); err != nil {
-			response.Fail(c, gin.H{"status": false}, err.Error())
-			return
+		repoconfig := &service.RepoConfig{
+			UUID:           uuid.New().String(),
+			ConfigInfoUUID: ci.UUID,
+			Content:        query.Data,
+			IsIndex:        false,
 		}
 
 		//将参数添加到数据库
-		err = AddRepoConfig(repoconfigs, ci.UUID)
+		err = repoconfig.Record()
 		if err != nil {
 			response.Fail(c, gin.H{"status": false}, err.Error())
 			return
@@ -72,6 +73,7 @@ func AddConfigHandler(c *gin.Context) {
 	}
 }
 
+/*
 func ApplyConfigHandler(c *gin.Context) {
 	query := &struct {
 		Deploy_Type      string          `json:"deploy_type"`
@@ -124,3 +126,4 @@ func ApplyConfigHandler(c *gin.Context) {
 		fmt.Println("Unknown type:", query.Deploy_Type)
 	}
 }
+*/

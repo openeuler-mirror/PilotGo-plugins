@@ -39,11 +39,10 @@ type Deploy struct {
 }
 
 type ConfigInfo = internal.ConfigInfo
-type ConfigFile = internal.ConfigFile
 type ConfigNode = internal.ConfigNode
 type ConfigBatch = internal.ConfigBatch
 type ConfigDepart = internal.ConfigDepart
-type Info2File = internal.Info2File
+type RepoFile = internal.RepoFile
 
 func (ci *ConfigInstance) Add() error {
 	cm := ConfigInfo{
@@ -92,5 +91,5 @@ func (ci *ConfigInstance) Add() error {
 }
 
 func GetInfoByConfigUUID(configuuid string) (ConfigInfo, error) {
-	return internal.GetInfoByConfigUUID(configuuid)
+	return internal.GetInfoByUUID(configuuid)
 }

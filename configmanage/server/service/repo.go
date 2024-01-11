@@ -1,58 +1,45 @@
 package service
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
-	"strconv"
+	"time"
 
-	"gitee.com/openeuler/PilotGo-plugins/sdk/utils/httputils"
-	"gitee.com/openeuler/PilotGo/sdk/common"
-	"github.com/google/uuid"
-
-	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 type RepoConfig struct {
-	UUID    string `json:"uuid"` //ConfigInstance的uuid
-	Name    string `json:"name"`
-	File    string `json:"file"`
-	Path    string `json:"path"`
-	Version string `json:"version"`
+	UUID           string      `json:"uuid"`
+	ConfigInfoUUID string      `json:"configinfouuid"` //ConfigInstance的uuid
+	Content        interface{} `json:"content"`
+	Version        string      `json:"version"`
+	IsIndex        bool        `json:"isindex"`
 }
 
 func (rc *RepoConfig) Record() error {
-	cf := ConfigFile{
-		UUID: uuid.New().String(),
-		Name: rc.Name,
-		File: rc.File,
-		Path: rc.Path,
+	//TODO:检查info的uuid是否存在
+	rf := RepoFile{
+		UUID:           rc.UUID,
+		ConfigInfoUUID: rc.ConfigInfoUUID,
+		Content:        rc.Content,
+		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
+		IsIndex:        rc.IsIndex,
 	}
-	err := cf.Add()
-	if err != nil {
-		return err
-	}
-	i2f := internal.Info2File{
-		ConfigInfoUUID: rc.UUID,
-		ConfigFileUUID: cf.UUID,
-		Version:        rc.Version,
-	}
-	return i2f.Add()
+	return rf.Add()
 }
 
 func (c *RepoConfig) Load() error {
-	cf, err := internal.GetConfigFileByUUID(c.UUID)
+	rf, err := internal.GetRepoFileByUUID(c.UUID)
 	if err != nil {
 		return err
 	}
-	c.Name = cf.Name
-	c.File = cf.File
-	c.Path = cf.Path
+	c.UUID = rf.UUID
+	c.Content = rf.Content
+	c.Version = rf.Version
+	c.IsIndex = rf.IsIndex
 	return nil
 }
 
+/*
 func (c *RepoConfig) Apply(de Deploy) (json.RawMessage, error) {
 	//TODO:检查de里面的参数是否存在于数据库
 
@@ -80,36 +67,4 @@ func (c *RepoConfig) Apply(de Deploy) (json.RawMessage, error) {
 	}
 	return nil, nil
 }
-
-/*
-	func (c *RepoConfig) UpdateRepoConfig(configuuid string) error {
-		ci, err := internal.GetInfoByConfigUUID(configuuid)
-		if err != nil {
-			return err
-		}
-		ci.ConfigFileUUID = c.UUID
-		return ci.Add()
-	}
-
-	func HistoryRepoConfig(configuuid string) ([]RepoConfig, error) {
-		var rcs []RepoConfig
-		ci, err := internal.GetInfoByConfigUUID(configuuid)
-		if err != nil {
-			return nil, err
-		}
-		cis, err := internal.GetInfoByUUID(ci.UUID)
-		for _, v := range cis {
-			cf, err := internal.GetConfigFileByUUID(v.ConfigFileUUID)
-			if err != nil {
-				logger.Error(err.Error())
-			}
-			rc := RepoConfig{
-				UUID: cf.UUID,
-				Name: cf.Name,
-				File: cf.File,
-			}
-			rcs = append(rcs, rc)
-		}
-		return rcs, err
-	}
 */
