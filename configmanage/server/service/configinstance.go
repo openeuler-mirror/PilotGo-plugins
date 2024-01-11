@@ -90,6 +90,6 @@ func (ci *ConfigInstance) Add() error {
 	return nil
 }
 
-func GetInfoByConfigUUID(configuuid string) (ConfigInfo, error) {
+func GetInfoByUUID(configuuid string) (ConfigInfo, error) {
 	return internal.GetInfoByUUID(configuuid)
 }

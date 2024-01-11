@@ -21,7 +21,7 @@ func (rf *RepoFile) Add() error {
 	return db.MySQL().Save(&rf).Error
 }
 
-func GetRepoFileByUUID(uuid string) (RepoFile, error) {
+func GetRepoFileByInfoUUID(uuid string) (RepoFile, error) {
 	var file RepoFile
 	err := db.MySQL().Where("config_info_uuid=? && is_index = 1", uuid).Find(&file).Error
 	return file, err

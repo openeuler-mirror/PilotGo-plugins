@@ -20,7 +20,8 @@ func RegisterAPIs(router *gin.Engine) {
 	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
 		pg.POST("/add", controller.AddConfigHandler)
-		pg.POST("/apply", controller.ApplyConfigHandler)
+		pg.GET("/load", controller.LoadConfigHandler)
+		//pg.POST("/apply", controller.ApplyConfigHandler)
 
 	}
 }
