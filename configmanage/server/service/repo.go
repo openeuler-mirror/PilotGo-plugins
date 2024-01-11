@@ -28,7 +28,7 @@ func (rc *RepoConfig) Record() error {
 }
 
 func (c *RepoConfig) Load() error {
-	rf, err := internal.GetRepoFileByUUID(c.UUID)
+	rf, err := internal.GetRepoFileByInfoUUID(c.UUID)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -22,7 +21,7 @@ func AddConfigHandler(c *gin.Context) {
 	}{}
 	err := c.ShouldBindJSON(query)
 	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
+		response.Fail(c, "parameter error", err.Error())
 		return
 	}
 
@@ -37,7 +36,7 @@ func AddConfigHandler(c *gin.Context) {
 	}
 	err = ci.Add()
 	if err != nil {
-		response.Fail(c, gin.H{"status": false}, err.Error())
+		response.Fail(c, "add configinfo fail:", err.Error())
 		return
 	}
 
@@ -55,7 +54,7 @@ func AddConfigHandler(c *gin.Context) {
 		//将参数添加到数据库
 		err = repoconfig.Record()
 		if err != nil {
-			response.Fail(c, gin.H{"status": false}, err.Error())
+			response.Fail(c, "add repofile fail:", err.Error())
 			return
 		}
 		response.Success(c, nil, "Add repo config success")
@@ -69,7 +68,52 @@ func AddConfigHandler(c *gin.Context) {
 	case global.Sysctl:
 
 	default:
-		fmt.Println("Unknown type:", query.Type)
+		response.Fail(c, nil, "Unknown type:"+query.Type)
+	}
+}
+
+func LoadConfigHandler(c *gin.Context) {
+	//TODO:修改请求的参数
+	query := &struct {
+		UUID string `json:"uuid"`
+	}{}
+	err := c.ShouldBindJSON(query)
+	if err != nil {
+		response.Fail(c, "parameter error", err.Error())
+		return
+	}
+
+	//获取configinfo
+	ci, err := service.GetInfoByUUID(query.UUID)
+	if err != nil {
+		response.Fail(c, "get configinfo fail:", err.Error())
+		return
+	}
+
+	//获取对应配置管理的参数
+	switch ci.Type {
+	case global.Repo:
+		repoconfig := &service.RepoConfig{
+			ConfigInfoUUID: ci.UUID,
+		}
+		//加载配置
+		err = repoconfig.Load()
+		if err != nil {
+			response.Fail(c, "get repofile fail:", err.Error())
+			return
+		}
+		response.Success(c, repoconfig, "load repo config success")
+
+	case global.Host:
+
+	case global.SSH:
+
+	case global.SSHD:
+
+	case global.Sysctl:
+
+	default:
+		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
 }
 
