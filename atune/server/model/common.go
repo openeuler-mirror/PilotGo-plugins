@@ -37,3 +37,9 @@ type Tasks struct {
 	RunResults []RunResult `gorm:"foreignKey:TaskID;constraint:OnDelete:CASCADE;" json:"results"`
 	Tune       Tunes       `gorm:"foreignKey:TuneID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"tune"`
 }
+
+type AtuneClient struct {
+	ID          int    `gorm:"primary_key;AUTO_INCREMENT" json:"id"`
+	MachineUUID string `json:"machine_uuid"`
+	MachineIP   string `json:"machine_ip"`
+}

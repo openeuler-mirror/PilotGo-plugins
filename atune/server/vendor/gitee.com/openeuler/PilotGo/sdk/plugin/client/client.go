@@ -1,6 +1,8 @@
 package client
 
 import (
+	"sync"
+
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"github.com/gin-gonic/gin"
 )
@@ -9,6 +11,8 @@ type GetTagsCallback func([]string) []common.Tag
 
 type Client struct {
 	PluginInfo *PluginInfo
+	// 并发锁
+	l sync.Mutex
 
 	// 远程PilotGo server地址
 	server string
@@ -25,7 +29,11 @@ type Client struct {
 	getTagsCallback GetTagsCallback
 
 	// 用于平台扩展点功能
-	extentions []*common.Extention
+	extentions []common.Extention
+
+	//bind阻塞功能支持
+	mu   sync.Mutex
+	cond *sync.Cond
 }
 
 var global_client *Client
@@ -40,6 +48,7 @@ func DefaultClient(desc *PluginInfo) *Client {
 		asyncCmdResultChan:      make(chan *common.AsyncCmdResult, 20),
 		cmdProcessorCallbackMap: make(map[string]CallbackHandler),
 	}
+	global_client.cond = sync.NewCond(&global_client.mu)
 
 	return global_client
 }
@@ -60,28 +69,28 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 		c.Set("__internal__client_instance", client)
 	})
 	{
-		mg.GET("/info", InfoHandler)
+		mg.GET("/info", infoHandler)
 		// 绑定PilotGo server
-		mg.PUT("/bind", BindHandler)
+		mg.PUT("/bind", bindHandler)
 	}
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
 		api.GET("/extentions", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, ExtentionsHandler)
+		}, extentionsHandler)
 
 		api.GET("/gettags", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, TagsHandler)
+		}, tagsHandler)
 
 		api.POST("/event", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, EventHandler)
+		}, eventHandler)
 
 		api.PUT("/command_result", func(c *gin.Context) {
 			c.Set("__internal__client_instance", client)
-		}, CommandResultHandler)
+		}, commandResultHandler)
 	}
 
 	// pg := router.Group("/plugin/" + desc.Name)
@@ -99,4 +108,12 @@ func (client *Client) RegisterHandlers(router *gin.Engine) {
 
 func (client *Client) OnGetTags(callback GetTagsCallback) {
 	client.getTagsCallback = callback
+}
+
+// client是否bind PilotGo server
+func (client *Client) IsBind() bool {
+	client.l.Lock()
+	defer client.l.Unlock()
+
+	return !(client.server == "")
 }

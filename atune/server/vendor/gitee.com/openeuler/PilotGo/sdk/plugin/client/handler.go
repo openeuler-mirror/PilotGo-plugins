@@ -33,7 +33,7 @@ func ReverseProxyHandler(c *gin.Context) {
 	proxy.ServeHTTP(c.Writer, c.Request)
 }
 
-func InfoHandler(c *gin.Context) {
+func infoHandler(c *gin.Context) {
 	v, ok := c.Get("__internal__client_instance")
 	if !ok {
 		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
@@ -53,7 +53,7 @@ func InfoHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, info)
 }
 
-func BindHandler(c *gin.Context) {
+func bindHandler(c *gin.Context) {
 	port := c.Query("port")
 
 	v, ok := c.Get("__internal__client_instance")
@@ -72,11 +72,12 @@ func BindHandler(c *gin.Context) {
 	} else if client.server != "" && client.server != server {
 		logger.Error("已有PilotGo-server与此插件绑定")
 	}
+	client.cond.Broadcast()
 	client.sendHeartBeat()
 	response.Success(c, nil, "bind server success")
 }
 
-func EventHandler(c *gin.Context) {
+func eventHandler(c *gin.Context) {
 	j, err := io.ReadAll(c.Request.Body) // 接收数据
 	if err != nil {
 		logger.Error("没获取到：%s", err.Error())
@@ -100,7 +101,7 @@ func EventHandler(c *gin.Context) {
 	client.ProcessEvent(&msg)
 }
 
-func ExtentionsHandler(c *gin.Context) {
+func extentionsHandler(c *gin.Context) {
 	v, ok := c.Get("__internal__client_instance")
 	if !ok {
 		response.Fail(c, gin.H{"status": false}, "未获取到client值信息")
@@ -115,7 +116,7 @@ func ExtentionsHandler(c *gin.Context) {
 	response.Success(c, client.extentions, "")
 }
 
-func CommandResultHandler(c *gin.Context) {
+func commandResultHandler(c *gin.Context) {
 	j, err := io.ReadAll(c.Request.Body) // 接收数据
 	if err != nil {
 		logger.Error("没获取到：%s", err.Error())
@@ -142,7 +143,7 @@ func CommandResultHandler(c *gin.Context) {
 
 }
 
-func TagsHandler(c *gin.Context) {
+func tagsHandler(c *gin.Context) {
 	j, err := io.ReadAll(c.Request.Body) // 接收数据
 	if err != nil {
 		logger.Error("没获取到：%s", err.Error())

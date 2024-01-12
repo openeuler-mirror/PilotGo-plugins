@@ -12,6 +12,7 @@ import (
 	"openeuler.org/PilotGo/atune-plugin/db"
 	"openeuler.org/PilotGo/atune-plugin/plugin"
 	"openeuler.org/PilotGo/atune-plugin/router"
+	"openeuler.org/PilotGo/atune-plugin/service"
 )
 
 func main() {
@@ -30,6 +31,8 @@ func main() {
 	}
 
 	plugin.GlobalClient = client.DefaultClient(plugin.Init(config.Config().PluginAtune))
+	service.GetTags()
+	service.AddExtentions()
 
 	err := router.HttpServerInit(config.Config().HttpServer)
 	if err != nil {

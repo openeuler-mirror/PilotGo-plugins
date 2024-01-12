@@ -8,7 +8,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"openeuler.org/PilotGo/atune-plugin/dao"
-	"openeuler.org/PilotGo/atune-plugin/global"
 	"openeuler.org/PilotGo/atune-plugin/model"
 )
 
@@ -25,7 +24,7 @@ func SaveTask(cmd string, task_name string, uuids []string, tuneId int) (int, er
 		TaskName:   task_name,
 		TuneID:     tuneId,
 		Script:     cmd,
-		TaskStatus: global.Executing,
+		TaskStatus: dao.Executing,
 		CreateTime: time.Now().Format("2006-01-02 15:04:05"),
 	}
 
