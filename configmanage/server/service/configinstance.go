@@ -84,6 +84,33 @@ func GetInfoByUUID(configuuid string) (ConfigInfo, error) {
 	return internal.GetInfoByUUID(configuuid)
 }
 
+func GetConfigByUUID(configuuid string) (*ConfigInstance, error) {
+	ci, err := GetInfoByUUID(configuuid)
+	if err != nil {
+		return nil, err
+	}
+
+	nodes, err := internal.GetConfigNodesByUUID(configuuid)
+	if err != nil {
+		return nil, err
+	}
+	batchids, err := internal.GetConfigBatchByUUID(configuuid)
+	if err != nil {
+		return nil, err
+	}
+	departids, err := internal.GetConfigDepartByUUID(configuuid)
+
+	config := &ConfigInstance{
+		UUID:        ci.UUID,
+		Type:        ci.Type,
+		Description: ci.Description,
+		Nodes:       nodes,
+		BatchIds:    batchids,
+		DepartIds:   departids,
+	}
+	return config, err
+}
+
 type Deploy struct {
 	Deploy_BatchIds  []int    `json:"deploy_batches"`
 	Deploy_DepartIds []int    `json:"deploy_departs"`

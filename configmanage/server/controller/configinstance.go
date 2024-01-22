@@ -88,8 +88,8 @@ func LoadConfigHandler(c *gin.Context) {
 	}
 	logger.Debug("load config")
 
-	//获取configinfo
-	ci, err := service.GetInfoByUUID(query.UUID)
+	//获取ConfigInstance
+	ci, err := service.GetConfigByUUID(query.UUID)
 	if err != nil {
 		logger.Error(err.Error())
 		response.Fail(c, "get configinfo fail:", err.Error())
@@ -109,8 +109,9 @@ func LoadConfigHandler(c *gin.Context) {
 			response.Fail(c, "get repofile fail:", err.Error())
 			return
 		}
+		ci.Config = repoconfig
 		logger.Debug("load repoconfig success")
-		response.Success(c, repoconfig, "load repo config success")
+		response.Success(c, ci, "load repo config success")
 
 	case global.Host:
 
@@ -136,7 +137,7 @@ func ApplyConfigHandler(c *gin.Context) {
 		return
 	}
 
-	//获取configinfo
+	//获取Configinfo
 	ci, err := service.GetInfoByUUID(query.UUID)
 	if err != nil {
 		logger.Error(err.Error())

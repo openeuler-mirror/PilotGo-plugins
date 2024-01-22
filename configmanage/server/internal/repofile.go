@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"encoding/json"
 	"time"
 
 	"openeuler.org/PilotGo/configmanage-plugin/db"
@@ -11,9 +12,9 @@ type RepoFile struct {
 	UUID           string     `gorm:"primary_key;type:varchar(50)" json:"uuid"`
 	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
 	ConfigInfoUUID string
-	Content        interface{} `gorm:"type:json" json:"content"`
-	Version        string      `gorm:"type:varchar(50)" json:"version"`
-	IsIndex        bool        `json:"isindex"`
+	Content        json.RawMessage `gorm:"type:json" json:"content"`
+	Version        string          `gorm:"type:varchar(50)" json:"version"`
+	IsIndex        bool            `json:"isindex"`
 	CreatedAt      time.Time
 }
 
