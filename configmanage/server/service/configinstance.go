@@ -6,6 +6,11 @@ import (
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
+type ConfigInfo = internal.ConfigInfo
+type ConfigNode = internal.ConfigNode
+type ConfigBatch = internal.ConfigBatch
+type ConfigDepart = internal.ConfigDepart
+
 type ConfigInstance struct {
 	UUID        string   `json:"uuid"`
 	Type        string   `json:"type"`
@@ -26,23 +31,8 @@ type Config interface {
 	Load() error
 
 	// 依据agent uuid进行配置下发
-	Apply(Deploy) (json.RawMessage, error)
+	Apply() (json.RawMessage, error)
 }
-
-type Deploy struct {
-	Deploy_BatchIds  []int    `json:"deploy_batches"`
-	Deploy_DepartIds []int    `json:"deploy_departs"`
-	Deploy_NodeUUIds []string `json:"deploy_nodes"`
-	Deploy_Path      string   `json:"deploy_path"`
-	Deploy_FileName  string   `json:"deploy_name"`
-	Deploy_Text      string   `json:"deploy_file"`
-}
-
-type ConfigInfo = internal.ConfigInfo
-type ConfigNode = internal.ConfigNode
-type ConfigBatch = internal.ConfigBatch
-type ConfigDepart = internal.ConfigDepart
-type RepoFile = internal.RepoFile
 
 func (ci *ConfigInstance) Add() error {
 	cm := ConfigInfo{
@@ -53,6 +43,17 @@ func (ci *ConfigInstance) Add() error {
 	err := cm.Add()
 	if err != nil {
 		return err
+	}
+
+	for _, v := range ci.Nodes {
+		cn := ConfigNode{
+			ConfigInfoUUID: ci.UUID,
+			NodeId:         v,
+		}
+		err = cn.Add()
+		if err != nil {
+			return err
+		}
 	}
 
 	for _, v := range ci.BatchIds {
@@ -76,20 +77,18 @@ func (ci *ConfigInstance) Add() error {
 			return err
 		}
 	}
-
-	for _, v := range ci.Nodes {
-		cn := ConfigNode{
-			ConfigInfoUUID: ci.UUID,
-			NodeId:         v,
-		}
-		err = cn.Add()
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 func GetInfoByUUID(configuuid string) (ConfigInfo, error) {
 	return internal.GetInfoByUUID(configuuid)
+}
+
+type Deploy struct {
+	Deploy_BatchIds  []int    `json:"deploy_batches"`
+	Deploy_DepartIds []int    `json:"deploy_departs"`
+	Deploy_NodeUUIds []string `json:"deploy_nodes"`
+	Deploy_Path      string   `json:"deploy_path"`
+	Deploy_FileName  string   `json:"deploy_name"`
+	Deploy_Text      string   `json:"deploy_file"`
 }
