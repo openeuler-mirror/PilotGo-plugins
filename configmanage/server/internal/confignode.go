@@ -15,7 +15,7 @@ func (cn *ConfigNode) Add() error {
 
 func GetConfigNodesByUUID(uuid string) ([]string, error) {
 	var nodes []string
-	err := db.MySQL().Where("config_info_uuid=?", uuid).Select("node_id").Find(&nodes).Error
+	err := db.MySQL().Model(&ConfigNode{}).Where("config_info_uuid=?", uuid).Select("node_id").Find(&nodes).Error
 	return nodes, err
 }
 
@@ -32,7 +32,7 @@ func (cb *ConfigBatch) Add() error {
 
 func GetConfigBatchByUUID(uuid string) ([]int, error) {
 	var nodes []int
-	err := db.MySQL().Where("config_info_uuid=?", uuid).Select("batch_id").Find(&nodes).Error
+	err := db.MySQL().Model(&ConfigBatch{}).Where("config_info_uuid=?", uuid).Select("batch_id").Find(&nodes).Error
 	return nodes, err
 }
 
@@ -49,6 +49,6 @@ func (cd *ConfigDepart) Add() error {
 
 func GetConfigDepartByUUID(uuid string) ([]int, error) {
 	var nodes []int
-	err := db.MySQL().Where("config_info_uuid=?", uuid).Select("depart_id").Find(&nodes).Error
+	err := db.MySQL().Model(&ConfigDepart{}).Where("config_info_uuid=?", uuid).Select("depart_id").Find(&nodes).Error
 	return nodes, err
 }

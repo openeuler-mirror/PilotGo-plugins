@@ -17,10 +17,10 @@ import (
 type RepoFile = internal.RepoFile
 
 type RepoConfig struct {
-	UUID           string      `json:"uuid"`
-	ConfigInfoUUID string      `json:"configinfouuid"`
-	Content        interface{} `json:"content"`
-	Version        string      `json:"version"`
+	UUID           string          `json:"uuid"`
+	ConfigInfoUUID string          `json:"configinfouuid"`
+	Content        json.RawMessage `json:"content"`
+	Version        string          `json:"version"`
 	//下发改变标志位
 	IsIndex bool `json:"isindex"`
 }
