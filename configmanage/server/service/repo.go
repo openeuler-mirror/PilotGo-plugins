@@ -1,22 +1,37 @@
 package service
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 	"time"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
+type RepoFile = internal.RepoFile
+
 type RepoConfig struct {
 	UUID           string      `json:"uuid"`
-	ConfigInfoUUID string      `json:"configinfouuid"` //ConfigInstance的uuid
+	ConfigInfoUUID string      `json:"configinfouuid"`
 	Content        interface{} `json:"content"`
 	Version        string      `json:"version"`
-	IsIndex        bool        `json:"isindex"`
+	//下发改变标志位
+	IsIndex bool `json:"isindex"`
 }
 
 func (rc *RepoConfig) Record() error {
-	//TODO:检查info的uuid是否存在
+	//检查info的uuid是否存在
+	ci, err := GetInfoByUUID(rc.ConfigInfoUUID)
+	if err != nil || ci.UUID == "" {
+		return errors.New("configinfo uuid not exist")
+	}
+
 	rf := RepoFile{
 		UUID:           rc.UUID,
 		ConfigInfoUUID: rc.ConfigInfoUUID,
@@ -27,22 +42,43 @@ func (rc *RepoConfig) Record() error {
 	return rf.Add()
 }
 
-func (c *RepoConfig) Load() error {
-	rf, err := internal.GetRepoFileByInfoUUID(c.UUID)
+func (rc *RepoConfig) Load() error {
+	rf, err := internal.GetRepoFileByInfoUUID(rc.ConfigInfoUUID)
 	if err != nil {
 		return err
 	}
-	c.UUID = rf.UUID
-	c.Content = rf.Content
-	c.Version = rf.Version
-	c.IsIndex = rf.IsIndex
+	rc.UUID = rf.UUID
+	rc.Content = rf.Content
+	rc.Version = rf.Version
+	rc.IsIndex = rf.IsIndex
 	return nil
 }
 
-/*
-func (c *RepoConfig) Apply(de Deploy) (json.RawMessage, error) {
-	//TODO:检查de里面的参数是否存在于数据库
+func (rc *RepoConfig) Apply() (json.RawMessage, error) {
+	//从数据库获取下发的信息
+	err := rc.Load()
+	if err != nil {
+		return nil, err
+	}
+	batchids, err := internal.GetConfigBatchByUUID(rc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+	departids, err := internal.GetConfigDepartByUUID(rc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+	nodes, err := internal.GetConfigNodesByUUID(rc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
 
+	//TODO:从rc中解析下发的文件内容，逐一进行下发
+	de := Deploy{
+		Deploy_BatchIds:  batchids,
+		Deploy_DepartIds: departids,
+		Deploy_NodeUUIds: nodes,
+	}
 	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
 	fmt.Println(url)
 	r, err := httputils.Post(url, &httputils.Params{
@@ -67,4 +103,3 @@ func (c *RepoConfig) Apply(de Deploy) (json.RawMessage, error) {
 	}
 	return nil, nil
 }
-*/
