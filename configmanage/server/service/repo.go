@@ -43,7 +43,7 @@ func (rc *RepoConfig) Record() error {
 }
 
 func (rc *RepoConfig) Load() error {
-	rf, err := internal.GetRepoFileByInfoUUID(rc.ConfigInfoUUID)
+	rf, err := internal.GetRepoFileByInfoUUID(rc.ConfigInfoUUID, true)
 	if err != nil {
 		return err
 	}
@@ -56,10 +56,14 @@ func (rc *RepoConfig) Load() error {
 
 func (rc *RepoConfig) Apply() (json.RawMessage, error) {
 	//从数据库获取下发的信息
-	err := rc.Load()
+	rf, err := internal.GetRepoFileByUUID(rc.UUID)
 	if err != nil {
 		return nil, err
 	}
+	if rf.ConfigInfoUUID != rc.ConfigInfoUUID || rf.UUID != rc.UUID {
+		return nil, errors.New("数据库不存在此配置")
+	}
+
 	batchids, err := internal.GetConfigBatchByUUID(rc.ConfigInfoUUID)
 	if err != nil {
 		return nil, err
@@ -73,14 +77,25 @@ func (rc *RepoConfig) Apply() (json.RawMessage, error) {
 		return nil, err
 	}
 
-	//TODO:从rc中解析下发的文件内容，逐一进行下发
+	//从rc中解析下发的文件内容，逐一进行下发
+	Repofiles := struct {
+		Name string `json:"name"`
+		File string `json:"file"`
+		Path string `json:"path"`
+	}{}
+	err = json.Unmarshal(rf.Content, &Repofiles)
+	if err != nil {
+		return nil, err
+	}
 	de := Deploy{
 		Deploy_BatchIds:  batchids,
 		Deploy_DepartIds: departids,
 		Deploy_NodeUUIds: nodes,
+		Deploy_Path:      Repofiles.Path,
+		Deploy_FileName:  Repofiles.Name,
+		Deploy_Text:      Repofiles.File,
 	}
 	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
-	fmt.Println(url)
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: de,
 	})
@@ -98,8 +113,11 @@ func (rc *RepoConfig) Apply() (json.RawMessage, error) {
 	if resp.Code != http.StatusOK {
 		return nil, errors.New(resp.Message)
 	}
-	if resp.Data != nil {
+
+	if string(resp.Data) != "null" {
 		return resp.Data, errors.New(resp.Message)
 	}
-	return nil, nil
+	//下发成功修改数据库应用版本
+	err = rf.UpdateByuuid()
+	return nil, err
 }

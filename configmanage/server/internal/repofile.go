@@ -22,8 +22,26 @@ func (rf *RepoFile) Add() error {
 	return db.MySQL().Save(&rf).Error
 }
 
-func GetRepoFileByInfoUUID(uuid string) (RepoFile, error) {
+func GetRepoFileByInfoUUID(uuid string, isindex interface{}) (RepoFile, error) {
 	var file RepoFile
-	err := db.MySQL().Where("config_info_uuid=? && is_index = 1", uuid).Find(&file).Error
+	if isindex != nil {
+		err := db.MySQL().Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Where("config_info_uuid=?", uuid).Find(&file).Error
 	return file, err
+}
+
+func GetRepoFileByUUID(uuid string) (RepoFile, error) {
+	var file RepoFile
+	err := db.MySQL().Where("uuid=?", uuid).Find(&file).Error
+	return file, err
+}
+
+func (rf *RepoFile) UpdateByuuid() error {
+	err := db.MySQL().Table("repo_file").Where("config_info_uuid=?", rf.ConfigInfoUUID).Update("is_index", 0).Error
+	if err != nil {
+		return err
+	}
+	return db.MySQL().Table("repo_file").Where("uuid=?", rf.UUID).Update("is_index", 1).Error
 }

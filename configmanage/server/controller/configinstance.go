@@ -129,16 +129,18 @@ func LoadConfigHandler(c *gin.Context) {
 func ApplyConfigHandler(c *gin.Context) {
 	//TODO:修改请求的参数
 	query := &struct {
-		UUID string `json:"uuid"`
+		ConfigInfoUUID string `json:"configinfouuid"`
+		UUID           string `json:"uuid"`
 	}{}
 	err := c.ShouldBindJSON(query)
 	if err != nil {
 		response.Fail(c, "parameter error", err.Error())
 		return
 	}
+	logger.Debug("start configuration apply")
 
-	//获取Configinfo
-	ci, err := service.GetInfoByUUID(query.UUID)
+	//获取ConfigInstance
+	ci, err := service.GetInfoByUUID(query.ConfigInfoUUID)
 	if err != nil {
 		logger.Error(err.Error())
 		response.Fail(c, "get configinfo fail:", err.Error())
@@ -148,8 +150,8 @@ func ApplyConfigHandler(c *gin.Context) {
 	//解析对应配置管理的参数
 	switch ci.Type {
 	case global.Repo:
-		//TODO:解析参数,data可以传输文件uuid,其余信息从数据库查询
 		repoconfig := &service.RepoConfig{
+			UUID:           query.UUID,
 			ConfigInfoUUID: ci.UUID,
 		}
 		result, err := repoconfig.Apply()
@@ -158,7 +160,7 @@ func ApplyConfigHandler(c *gin.Context) {
 			response.Fail(c, result, err.Error())
 			return
 		}
-		response.Success(c, nil, "Add repo config success")
+		response.Success(c, nil, "apply repo config success")
 
 	case global.Host:
 
