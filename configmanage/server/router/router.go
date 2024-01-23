@@ -21,7 +21,6 @@ func RegisterAPIs(router *gin.Engine) {
 	{
 		pg.POST("/add", controller.AddConfigHandler)
 		pg.GET("/load", controller.LoadConfigHandler)
-		//pg.POST("/apply", controller.ApplyConfigHandler)
-
+		pg.POST("/apply", controller.ApplyConfigHandler)
 	}
 }
