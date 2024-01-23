@@ -3,7 +3,7 @@ package internal
 import "openeuler.org/PilotGo/configmanage-plugin/db"
 
 type ConfigInfo struct {
-	ID          int    `gorm:"AUTO_INCREMENT"`
+	ID          int    `gorm:"unique;autoIncrement:true"`
 	UUID        string `gorm:"type:varchar(50);primary_key" json:"uuid"`
 	Type        string `json:"type"`
 	Description string `json:"description"`
