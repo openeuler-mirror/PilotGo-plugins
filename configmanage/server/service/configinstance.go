@@ -29,7 +29,8 @@ type Config interface {
 	Record() error
 	// 配置加载
 	Load() error
-
+	// 单机采集数据
+	Collection() error
 	// 依据agent uuid进行配置下发
 	Apply() (json.RawMessage, error)
 }

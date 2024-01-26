@@ -12,9 +12,13 @@ type RepoFile struct {
 	UUID           string     `gorm:"primary_key;type:varchar(50)" json:"uuid"`
 	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
 	ConfigInfoUUID string
+	Path           string          `json:"path"`
+	Name           string          `json:"name"`
 	Content        json.RawMessage `gorm:"type:json" json:"content"`
 	Version        string          `gorm:"type:varchar(50)" json:"version"`
 	IsIndex        bool            `json:"isindex"`
+	IsHost         bool            `gorm:"default:false" json:"ishost"`
+	Hostuuid       string          `gorm:"type:varchar(50)" json:"hostuuid"`
 	CreatedAt      time.Time
 }
 

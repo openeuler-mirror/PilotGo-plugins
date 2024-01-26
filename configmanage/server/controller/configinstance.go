@@ -46,18 +46,29 @@ func AddConfigHandler(c *gin.Context) {
 	switch query.Type {
 	case global.Repo:
 		//解析参数
-		repoconfig := &service.RepoConfig{
-			UUID:           uuid.New().String(),
-			ConfigInfoUUID: ci.UUID,
-			Content:        query.Data,
-			IsIndex:        false,
+		repoconfig := &service.RepoConfig{}
+		if err := json.Unmarshal(query.Data, repoconfig); err != nil {
+			logger.Error(err.Error())
+			response.Fail(c, "repoconfig parameter error  fail:", err.Error())
+			return
 		}
+
+		repoconfig.UUID = uuid.New().String()
+		repoconfig.ConfigInfoUUID = ci.UUID
+		repoconfig.IsIndex = false
 
 		//将参数添加到数据库
 		err = repoconfig.Record()
 		if err != nil {
 			logger.Error(err.Error())
 			response.Fail(c, "add repofile fail:", err.Error())
+			return
+		}
+		//收集机器的配置信息
+		err = repoconfig.Collection()
+		if err != nil {
+			logger.Error(err.Error())
+			response.Fail(c, "collect repofile fail:", err.Error())
 			return
 		}
 		logger.Debug("add repoconfig success")
