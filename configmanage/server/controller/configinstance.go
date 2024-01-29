@@ -37,8 +37,8 @@ func AddConfigHandler(c *gin.Context) {
 	}
 	err = ci.Add()
 	if err != nil {
-		logger.Error(err.Error())
-		response.Fail(c, "add configinfo fail:", err.Error())
+		logger.Error("failed to add configinstance: %s", err.Error())
+		response.Fail(c, "failed to add configinstance:", err.Error())
 		return
 	}
 
@@ -48,27 +48,27 @@ func AddConfigHandler(c *gin.Context) {
 		//解析参数
 		repoconfig := &service.RepoConfig{}
 		if err := json.Unmarshal(query.Data, repoconfig); err != nil {
-			logger.Error(err.Error())
-			response.Fail(c, "repoconfig parameter error  fail:", err.Error())
+			logger.Error("failed to parse repoconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse repoconfig parameter:", err.Error())
 			return
 		}
 
 		repoconfig.UUID = uuid.New().String()
 		repoconfig.ConfigInfoUUID = ci.UUID
-		repoconfig.IsIndex = false
+		repoconfig.IsActive = false
 
 		//将参数添加到数据库
 		err = repoconfig.Record()
 		if err != nil {
-			logger.Error(err.Error())
-			response.Fail(c, "add repofile fail:", err.Error())
+			logger.Error("failed to add repoconfig: %s", err.Error())
+			response.Fail(c, "failed to add repoconfig:", err.Error())
 			return
 		}
 		//收集机器的配置信息
-		err = repoconfig.Collection()
+		err = repoconfig.Collect()
 		if err != nil {
-			logger.Error(err.Error())
-			response.Fail(c, "collect repofile fail:", err.Error())
+			logger.Error("failed to collect repofile: %s", err.Error())
+			response.Fail(c, "failed to collect repofile:", err.Error())
 			return
 		}
 		logger.Debug("add repoconfig success")
@@ -102,7 +102,7 @@ func LoadConfigHandler(c *gin.Context) {
 	//获取ConfigInstance
 	ci, err := service.GetConfigByUUID(query.UUID)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("failed to get configinfo file: %s", err.Error())
 		response.Fail(c, "get configinfo fail:", err.Error())
 		return
 	}
@@ -116,8 +116,8 @@ func LoadConfigHandler(c *gin.Context) {
 		//加载配置
 		err = repoconfig.Load()
 		if err != nil {
-			logger.Error(err.Error())
-			response.Fail(c, "get repofile fail:", err.Error())
+			logger.Error("failed to get repofile file: %s", err.Error())
+			response.Fail(c, "failed to get repofile file:", err.Error())
 			return
 		}
 		ci.Config = repoconfig
@@ -143,7 +143,7 @@ func ApplyConfigHandler(c *gin.Context) {
 		ConfigInfoUUID string `json:"configinfouuid"`
 		UUID           string `json:"uuid"`
 	}{}
-	err := c.ShouldBindJSON(query)
+	err := c.Bind(query)
 	if err != nil {
 		response.Fail(c, "parameter error", err.Error())
 		return
@@ -153,8 +153,8 @@ func ApplyConfigHandler(c *gin.Context) {
 	//获取ConfigInstance
 	ci, err := service.GetInfoByUUID(query.ConfigInfoUUID)
 	if err != nil {
-		logger.Error(err.Error())
-		response.Fail(c, "get configinfo fail:", err.Error())
+		logger.Error("failed to get configinfo file: %s", err.Error())
+		response.Fail(c, "failed to get configinfo file:", err.Error())
 		return
 	}
 
@@ -165,10 +165,10 @@ func ApplyConfigHandler(c *gin.Context) {
 			UUID:           query.UUID,
 			ConfigInfoUUID: ci.UUID,
 		}
-		result, err := repoconfig.Apply()
+		_, err := repoconfig.Apply()
 		if err != nil {
-			logger.Error(err.Error())
-			response.Fail(c, result, err.Error())
+			logger.Error("failed to apply repoconfig file: %s", err.Error())
+			response.Fail(c, "failed to apply repofile:", err.Error())
 			return
 		}
 		response.Success(c, nil, "apply repo config success")

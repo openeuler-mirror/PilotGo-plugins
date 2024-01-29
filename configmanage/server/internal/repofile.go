@@ -16,8 +16,8 @@ type RepoFile struct {
 	Name           string          `json:"name"`
 	Content        json.RawMessage `gorm:"type:json" json:"content"`
 	Version        string          `gorm:"type:varchar(50)" json:"version"`
-	IsIndex        bool            `json:"isindex"`
-	IsHost         bool            `gorm:"default:false" json:"ishost"`
+	IsActive       bool            `json:"isactive"`
+	IsFromHost     bool            `gorm:"default:false" json:"isfromhost"`
 	Hostuuid       string          `gorm:"type:varchar(50)" json:"hostuuid"`
 	CreatedAt      time.Time
 }
