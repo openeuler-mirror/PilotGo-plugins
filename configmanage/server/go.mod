@@ -3,7 +3,7 @@ module openeuler.org/PilotGo/configmanage-plugin
 go 1.20
 
 require (
-	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240126080808-49aa485217c0
+	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240129073732-887bc07ab69c
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.2.0
 	gopkg.in/yaml.v2 v2.4.0

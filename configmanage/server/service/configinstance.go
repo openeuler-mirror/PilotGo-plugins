@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -30,7 +31,7 @@ type Config interface {
 	// 配置加载
 	Load() error
 	// 单机采集数据
-	Collection() error
+	Collect() error
 	// 依据agent uuid进行配置下发
 	Apply() (json.RawMessage, error)
 }
@@ -113,10 +114,8 @@ func GetConfigByUUID(configuuid string) (*ConfigInstance, error) {
 }
 
 type Deploy struct {
-	Deploy_BatchIds  []int    `json:"deploy_batches"`
-	Deploy_DepartIds []int    `json:"deploy_departs"`
-	Deploy_NodeUUIds []string `json:"deploy_nodes"`
-	Deploy_Path      string   `json:"deploy_path"`
-	Deploy_FileName  string   `json:"deploy_name"`
-	Deploy_Text      string   `json:"deploy_file"`
+	DeployBatch    common.Batch `json:"deploybatch"`
+	DeployPath     string       `json:"deploypath"`
+	DeployFileName string       `json:"deployname"`
+	DeployText     string       `json:"deployfile"`
 }
