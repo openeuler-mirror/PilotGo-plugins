@@ -1,8 +1,10 @@
 package controller
 
 import (
+	"encoding/base64"
 	"encoding/json"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
@@ -53,9 +55,25 @@ func AddConfigHandler(c *gin.Context) {
 			return
 		}
 
+		files := []common.File{}
+		if err := json.Unmarshal([]byte(repoconfig.Content), &files); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		for i, v := range files {
+			files[i].Content = base64.StdEncoding.EncodeToString([]byte(v.Content))
+		}
+
 		repoconfig.UUID = uuid.New().String()
 		repoconfig.ConfigInfoUUID = ci.UUID
 		repoconfig.IsActive = false
+		repoconfig.Content, err = json.Marshal(files)
+		if err != nil {
+			logger.Error("fError encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
 
 		//将参数添加到数据库
 		err = repoconfig.Record()
