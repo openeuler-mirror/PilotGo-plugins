@@ -3,8 +3,9 @@ package main
 import (
 	"gitee.com/openeuler/PilotGo-plugin-elk/conf"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
-	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 	"gitee.com/openeuler/PilotGo-plugin-elk/handler"
+	"gitee.com/openeuler/PilotGo-plugin-elk/logger"
+	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 )
 
 func main() {
@@ -27,4 +28,9 @@ func main() {
 		init web server
 	*/
 	handler.InitWebServer()
+
+	/*
+		init logger
+	*/
+	logger.InitLogger()
 }
