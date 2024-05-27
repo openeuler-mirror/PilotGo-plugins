@@ -2,10 +2,12 @@ package main
 
 import (
 	"gitee.com/openeuler/PilotGo-plugin-elk/conf"
+	"gitee.com/openeuler/PilotGo-plugin-elk/db"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
 	"gitee.com/openeuler/PilotGo-plugin-elk/handler"
 	"gitee.com/openeuler/PilotGo-plugin-elk/logger"
 	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
+	"gitee.com/openeuler/PilotGo-plugin-elk/signal"
 )
 
 func main() {
@@ -33,4 +35,15 @@ func main() {
 		init logger
 	*/
 	logger.InitLogger()
+
+	/*
+		init database
+		neo4j mysql redis prometheus
+	*/
+	db.InitDB()
+
+	/*
+		终止进程信号监听
+	*/
+	signal.SignalMonitoring()
 }
