@@ -8,6 +8,7 @@ require (
 	github.com/gin-contrib/timeout v1.0.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/pkg/errors v0.9.1
+	github.com/tidwall/gjson v1.17.1
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -46,6 +47,8 @@ require (
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/santhosh-tekuri/jsonschema v1.2.4 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.elastic.co/apm/module/apmhttp/v2 v2.0.0 // indirect
