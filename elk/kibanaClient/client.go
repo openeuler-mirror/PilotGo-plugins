@@ -7,6 +7,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo-plugin-elk/conf"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
+	"gitee.com/openeuler/PilotGo-plugin-elk/global"
 	"gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/meta"
 	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 	"github.com/elastic/elastic-agent-libs/kibana"
@@ -70,4 +71,35 @@ func (client *KibanaClient) pkgInfo2PkgPolicyInputs(pinfo *meta.PackageInfo_p) m
 		inputs[fmt.Sprintf("%s-%s", pinfo.Name, policy_template_input.Type)] = pkg_policy_input
 	}
 	return inputs
+}
+
+/*
+向kibana请求package info并生成package policy
+
+input(key) => policy_templates.inputs[0].type
+
+input(value).streams[0](key) => data_streams[0].dataset
+
+input(key) == data_streams[0].streams[0].input
+*/
+func (client *KibanaClient) ComposePackagePolicy(policyid, pkgname, pkgversion string) (*meta.PackagePolicyRequest_p, error) {
+	pkginfo, err := client.GetPackageInfo(client.Ctx, pkgname, pkgversion)
+	if err != nil {
+		return nil, err
+	}
+
+	inputs := client.pkgInfo2PkgPolicyInputs(pkginfo)
+
+	return &meta.PackagePolicyRequest_p{
+		Name:      fmt.Sprintf("%s-%s", pkginfo.Name, global.GenerateRandomID(5)),
+		Namespace: "",
+		PolicyID:  policyid,
+		Package: kibana.PackagePolicyRequestPackage{
+			Name:    pkgname,
+			Version: pkgversion,
+		},
+		Vars:   map[string]interface{}{},
+		Inputs: inputs,
+		Force:  true,
+	}, nil
 }
