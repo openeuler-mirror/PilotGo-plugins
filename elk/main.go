@@ -5,7 +5,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugin-elk/db"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
 	"gitee.com/openeuler/PilotGo-plugin-elk/handler"
-	kibanaclient "gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/8_13_0"
+	kibanaclient "gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/7_17_16"
 	"gitee.com/openeuler/PilotGo-plugin-elk/logger"
 	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 	"gitee.com/openeuler/PilotGo-plugin-elk/signal"
