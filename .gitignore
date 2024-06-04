@@ -1,6 +1,7 @@
 
 .vscode/
 !build
+config.yaml
 .DS_Store
 topology/pkg/
 topology/build
