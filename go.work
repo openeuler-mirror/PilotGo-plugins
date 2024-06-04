@@ -3,4 +3,5 @@ go 1.19
 use (
 	./configmanage/server
 	./container/server
+	./event/server
 )
