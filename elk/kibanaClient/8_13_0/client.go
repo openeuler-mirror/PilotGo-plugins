@@ -8,7 +8,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugin-elk/conf"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
 	"gitee.com/openeuler/PilotGo-plugin-elk/global"
-	"gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/meta"
+	"gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/8_13_0/meta"
 	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 	"github.com/elastic/elastic-agent-libs/kibana"
 )
