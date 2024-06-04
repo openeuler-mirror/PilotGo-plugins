@@ -13,9 +13,9 @@ import (
 	"github.com/elastic/elastic-agent-libs/kibana"
 )
 
-var Global_kibana *KibanaClient
+var Global_kibana *KibanaClient_v8
 
-type KibanaClient struct {
+type KibanaClient_v8 struct {
 	Client *kibana.Client
 	Ctx    context.Context
 }
@@ -35,13 +35,13 @@ func InitKibanaClient() {
 		return
 	}
 
-	Global_kibana = &KibanaClient{
+	Global_kibana = &KibanaClient_v8{
 		Client: ki_client,
 		Ctx:    context.Background(),
 	}
 }
 
-func (client *KibanaClient) pkgInfo2PkgPolicyInputs(pinfo *meta.PackageInfo_p) map[string]meta.PackagePolicyInput_p {
+func (client *KibanaClient_v8) pkgInfo2PkgPolicyInputs(pinfo *meta.PackageInfo_p) map[string]meta.PackagePolicyInput_p {
 	inputs := map[string]meta.PackagePolicyInput_p{}
 	for _, policy_template_input := range pinfo.PolicyTemplates[0].Inputs {
 		pkg_policy_input := meta.PackagePolicyInput_p{
@@ -82,7 +82,7 @@ input(value).streams[0](key) => data_streams[0].dataset
 
 input(key) == data_streams[0].streams[0].input
 */
-func (client *KibanaClient) ComposePackagePolicy(policyid, pkgname, pkgversion string) (*meta.PackagePolicyRequest_p, error) {
+func (client *KibanaClient_v8) ComposePackagePolicy(policyid, pkgname, pkgversion string) (*meta.PackagePolicyRequest_p, error) {
 	pkginfo, err := client.GetPackageInfo(client.Ctx, pkgname, pkgversion)
 	if err != nil {
 		return nil, err

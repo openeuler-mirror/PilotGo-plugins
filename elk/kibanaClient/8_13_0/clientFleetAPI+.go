@@ -13,7 +13,7 @@ import (
 	"github.com/elastic/elastic-agent-libs/kibana"
 )
 
-func (client *KibanaClient) GetPackageInfo(ctx context.Context, pkgname, pkgversion string) (*meta.PackageInfo_p, error) {
+func (client *KibanaClient_v8) GetPackageInfo(ctx context.Context, pkgname, pkgversion string) (*meta.PackageInfo_p, error) {
 	apiURL := fmt.Sprintf(meta.FleetPackageInfoAPI, pkgname, pkgversion)
 	resp, err := client.Client.Connection.SendWithContext(ctx, http.MethodGet, apiURL, nil, nil, nil)
 	if err != nil {
@@ -29,7 +29,7 @@ func (client *KibanaClient) GetPackageInfo(ctx context.Context, pkgname, pkgvers
 	return pinfo, nil
 }
 
-func (client *KibanaClient) InstallFleetPackage(ctx context.Context, reqbody *meta.PackagePolicyRequest_p) (*kibana.PackagePolicyResponse, error) {
+func (client *KibanaClient_v8) InstallFleetPackage(ctx context.Context, reqbody *meta.PackagePolicyRequest_p) (*kibana.PackagePolicyResponse, error) {
 	reqBytes, err := json.Marshal(reqbody)
 	if err != nil {
 		return nil, fmt.Errorf("marshalling request json: %w", err)
