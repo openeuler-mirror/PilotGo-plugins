@@ -5,7 +5,7 @@ import (
 	"gitee.com/openeuler/PilotGo-plugin-elk/db"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
 	"gitee.com/openeuler/PilotGo-plugin-elk/handler"
-	"gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient"
+	kibanaclient "gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/8_13_0"
 	"gitee.com/openeuler/PilotGo-plugin-elk/logger"
 	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 	"gitee.com/openeuler/PilotGo-plugin-elk/signal"
@@ -46,7 +46,7 @@ func main() {
 	/*
 		init kibana client
 	*/
-	kibanaClient.InitKibanaClient()
+	kibanaclient.InitKibanaClient()
 
 	/*
 		终止进程信号监听
