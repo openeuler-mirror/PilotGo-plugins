@@ -1,12 +1,16 @@
 package kibanaClient
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 
 	"gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/7_17_16/meta"
+	"github.com/elastic/elastic-agent-libs/kibana"
+	"gitee.com/openeuler/PilotGo-plugin-elk/global"
 )
 
 func (client *KibanaClient_v7) GetPackageInfo(ctx context.Context, pkgname string) (*meta.PackageInfo_p, error) {
@@ -23,4 +27,25 @@ func (client *KibanaClient_v7) GetPackageInfo(ctx context.Context, pkgname strin
 
 	pinfo := Gjson_GetPackageInfo(bytes, "response.name", "response.policy_templates", "response.data_streams", "response.version", "response.title")
 	return pinfo, nil
+}
+
+func (client *KibanaClient_v7) InstallFleetPackage(ctx context.Context, reqbody *meta.PackagePolicyRequest_p) (*kibana.PackagePolicy, error) {
+	reqBytes, err := json.Marshal(reqbody)
+	if err != nil {
+		return nil, fmt.Errorf("marshalling request json: %w", err)
+	}
+
+	apiURL := meta.FleetPackagePoliciesAPI
+	resp, err := client.Client.Connection.SendWithContext(ctx, http.MethodPost, apiURL, nil, nil, bytes.NewReader(reqBytes))
+	if err != nil {
+		return nil, fmt.Errorf("error calling %s API: %w", meta.FleetPackagePoliciesAPI, err)
+	}
+	defer resp.Body.Close()
+
+	pkg_policy_resp := &kibana.PackagePolicyResponse{}
+	err = global.ReadJSONResponse(resp, pkg_policy_resp)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	return &pkg_policy_resp.Item, nil
 }
