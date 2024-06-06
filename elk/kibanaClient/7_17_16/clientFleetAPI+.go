@@ -49,3 +49,19 @@ func (client *KibanaClient_v7) InstallFleetPackage(ctx context.Context, reqbody 
 	}
 	return &pkg_policy_resp.Item, nil
 }
+
+func (client *KibanaClient_v7) GetOutputs(ctx context.Context) ([]meta.FleetOutput_p, error) {
+	apiURL := meta.FleetOutputsAPI
+	resp, err := client.Client.Connection.SendWithContext(ctx, http.MethodGet, apiURL, nil, nil, nil)
+	if err != nil {
+		return nil, fmt.Errorf("error calling %s API: %w", meta.FleetOutputsAPI, err)
+	}
+	defer resp.Body.Close()
+
+	outputs_resp := &meta.FleetOutputsResponse_p{}
+	err = global.ReadJSONResponse(resp, outputs_resp)
+	if err != nil {
+		return nil, fmt.Errorf("error reading response body: %w", err)
+	}
+	return outputs_resp.Items, nil
+}
