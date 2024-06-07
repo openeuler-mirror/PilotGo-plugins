@@ -9,6 +9,14 @@ import (
 
 type ServerConfig struct {
 	Logopts *logger.LogOpts `yaml:"log"`
+	Influxd *Influxd        `yaml:"influxd"`
+}
+
+type Influxd struct {
+	URL          string `yaml:"url"`
+	Token        string `yaml:"token"`
+	Organization string `yaml:"organization"`
+	Bucket       string `yaml:"bucket"`
 }
 
 var config_file string

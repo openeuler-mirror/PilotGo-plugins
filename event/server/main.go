@@ -6,6 +6,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/config"
+	"openeuler.org/PilotGo/PilotGo-plugin-event/db"
 )
 
 func main() {
@@ -18,4 +19,5 @@ func main() {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
+	db.InfluxdbInit(config.Config().Influxd)
 }

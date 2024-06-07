@@ -4,3 +4,8 @@ log:
   path: ./log/pilotgo_plugin_event.log
   max_file: 1
   max_size: 10485760
+influxd:
+  url: http://localhost:8086
+  token: ""
+  organization: ""
+  bucket: ""
