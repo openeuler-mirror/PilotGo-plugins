@@ -5,6 +5,7 @@ go 1.20
 require (
 	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240516011326-59b5a9af0526
 	github.com/elastic/elastic-agent-libs v0.9.8
+	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/gin-contrib/timeout v1.0.1
 	github.com/gin-gonic/gin v1.9.1
 	github.com/pkg/errors v0.9.1
