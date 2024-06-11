@@ -12,7 +12,7 @@ export default defineConfig({
     cors: true,
     open:true, // 启动后是否浏览器自动打开
     hmr:true, // 为开发服务启用热更新，默认是不启用热更新的
-    /* proxy: {
+   /*  proxy: {
       '/': {
         target: 'https://10.41.107.29:9993',
         secure: false,
