@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import {resolve} from 'path';
+import { resolve } from 'path';
+
+import basicSsl from '@vitejs/plugin-basic-ssl'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -10,18 +12,18 @@ export default defineConfig({
     port: 8080,
     strictPort: false, // 设为 true 时若端口已被占用则会直接退出，而不是尝试下一个可用端口
     cors: true,
-    open:true, // 启动后是否浏览器自动打开
-    hmr:true, // 为开发服务启用热更新，默认是不启用热更新的
-   /*  proxy: {
-      '/': {
+    open: true, // 启动后是否浏览器自动打开
+    hmr: true, // 为开发服务启用热更新，默认是不启用热更新的
+    proxy: {
+      '/plugin/elk/api': {
         target: 'https://10.41.107.29:9993',
         secure: false,
         changeOrigin: true,
         rewrite: path => path.replace(/^\//, '')
       },
-    }, */
+    },
   },
-  plugins: [vue(),],
+  plugins: [vue(),basicSsl()],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

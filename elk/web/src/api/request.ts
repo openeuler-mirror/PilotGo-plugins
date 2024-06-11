@@ -1,8 +1,6 @@
 import axios from 'axios';
 import router from '../router/index';
-import  https  from 'https';
 
-// axios.get
 // 1.创建axios实例
 const request = axios.create({
   baseURL: '',
@@ -12,10 +10,7 @@ const request = axios.create({
     'Content-Type': 'application/json',
     token: '',
     'X-Requested-With': 'XMLHttpRequest',
-  },
- /*  httpsAgent: new https.Agent({  
-    rejectUnauthorized: false
-  }) */
+  }
 });
 
 // 2.1添加请求拦截器
