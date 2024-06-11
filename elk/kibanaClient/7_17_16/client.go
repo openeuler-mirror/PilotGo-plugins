@@ -2,8 +2,9 @@ package kibanaClient
 
 import (
 	"context"
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 
 	"gitee.com/openeuler/PilotGo-plugin-elk/conf"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
@@ -30,7 +31,7 @@ func InitKibanaClient() {
 
 	ki_client, err := kibana.NewClientWithConfig(cfg, "", "", "", "")
 	if err != nil {
-		err = errors.New("failed to init kibana client **errstackfatal**0") // err top
+		err = errors.Errorf("fail to init kibana client: %+v **errstackfatal**0", err.Error()) // err top
 		errormanager.ErrorTransmit(pluginclient.Global_Context, err, true)
 		return
 	}

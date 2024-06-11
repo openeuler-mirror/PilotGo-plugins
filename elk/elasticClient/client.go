@@ -2,11 +2,12 @@ package elasticClient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
 
 	"gitee.com/openeuler/PilotGo-plugin-elk/conf"
 	"gitee.com/openeuler/PilotGo-plugin-elk/errormanager"
@@ -37,7 +38,7 @@ func InitElasticClient() {
 
 	es_client, err := elastic.NewClient(cfg)
 	if err != nil {
-		err = errors.New("failed to init kibana client **errstackfatal**0") // err top
+		err = errors.Errorf("failed to init elastic client: %+v **errstackfatal**0", err.Error()) // err top
 		errormanager.ErrorTransmit(pluginclient.Global_Context, err, true)
 		return
 	}
