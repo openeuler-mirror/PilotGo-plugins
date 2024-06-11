@@ -1,7 +1,10 @@
 package conf
 
 type ElkConf struct {
-	Addr string `yaml:"http_addr"`
+	Https_enabled      bool   `yaml:"https_enabled"`
+	Public_certificate string `yaml:"public_certificate"`
+	Private_key        string `yaml:"private_key"`
+	Addr               string `yaml:"addr"`
 }
 
 type PilotGoConf struct {

@@ -28,10 +28,18 @@ func InitWebServer() {
 		InitRouter(engine)
 		StaticRouter(engine)
 
-		err := engine.Run(conf.Global_Config.Elk.Addr)
-		if err != nil {
-			err = errors.Errorf("%s **errstackfatal**2", err.Error()) // err top
-			errormanager.ErrorTransmit(pluginclient.Global_Context, err, true)
+		if conf.Global_Config.Elk.Https_enabled {
+			err := engine.RunTLS(conf.Global_Config.Elk.Addr, conf.Global_Config.Elk.Public_certificate, conf.Global_Config.Elk.Private_key)
+			if err != nil {
+				err = errors.Errorf("%s **errstackfatal**2", err.Error()) // err top
+				errormanager.ErrorTransmit(pluginclient.Global_Context, err, true)
+			}
+		} else {
+			err := engine.Run(conf.Global_Config.Elk.Addr)
+			if err != nil {
+				err = errors.Errorf("%s **errstackfatal**2", err.Error()) // err top
+				errormanager.ErrorTransmit(pluginclient.Global_Context, err, true)
+			}
 		}
 	}()
 }
@@ -42,7 +50,7 @@ func InitRouter(router *gin.Engine) {
 		api.POST("/create_policy", CreatePolicyHandle)
 	}
 
-	timeoutapi := router.Group("/plugin/topology/api")
+	timeoutapi := router.Group("/plugin/elk/api")
 	timeoutapi.Use(TimeoutMiddleware2(15 * time.Second))
 	{
 
