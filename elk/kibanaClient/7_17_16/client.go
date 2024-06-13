@@ -25,8 +25,14 @@ type KibanaClient_v7 struct {
 }
 
 func InitKibanaClient() {
+	protocol := ""
+	if conf.Global_Config.Elk.Https_enabled {
+		protocol = "https"
+	} else {
+		protocol = "http"
+	}
 	cfg := &kibana.ClientConfig{
-		Protocol: "https",
+		Protocol: protocol,
 		Host:     conf.Global_Config.Kibana.Addr,
 		Username: conf.Global_Config.Kibana.Username,
 		Password: conf.Global_Config.Kibana.Password,
