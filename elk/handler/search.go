@@ -15,6 +15,7 @@ import (
 )
 
 func SearchHandle(ctx *gin.Context) {
+	index := ctx.Query("index")
 	defer ctx.Request.Body.Close()
 	if elasticClient.Global_elastic.Client == nil {
 		err := errors.Errorf("%+v **warn**0", "global_elastic is null")
@@ -24,7 +25,7 @@ func SearchHandle(ctx *gin.Context) {
 	}
 	resp, err := elasticClient.Global_elastic.Client.Search(
 		elasticClient.Global_elastic.Client.Search.WithContext(context.Background()),
-		elasticClient.Global_elastic.Client.Search.WithIndex(".ds-logs-system.syslog-default-2024.06.04-000001"),
+		elasticClient.Global_elastic.Client.Search.WithIndex(index),
 		elasticClient.Global_elastic.Client.Search.WithBody(ctx.Request.Body),
 		elasticClient.Global_elastic.Client.Search.WithTrackTotalHits(true),
 		elasticClient.Global_elastic.Client.Search.WithPretty(),
