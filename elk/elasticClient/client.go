@@ -2,6 +2,7 @@ package elasticClient
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
@@ -23,16 +24,21 @@ type ElasticClient_v7 struct {
 }
 
 func InitElasticClient() {
+	addresses := []string{}
+	if conf.Global_Config.Elk.Https_enabled {
+		addresses = append(addresses, fmt.Sprintf("https://%s", conf.Global_Config.Elasticsearch.Addr))
+	} else {
+		addresses = append(addresses, fmt.Sprintf("http://%s", conf.Global_Config.Elasticsearch.Addr))
+	}
 	cfg := elastic.Config{
-		Addresses: []string{
-			fmt.Sprintf("http://%s", conf.Global_Config.Elasticsearch.Addr),
-		},
-		Username: conf.Global_Config.Elasticsearch.Username,
-		Password: conf.Global_Config.Elasticsearch.Password,
+		Addresses: addresses,
+		Username:  conf.Global_Config.Elasticsearch.Username,
+		Password:  conf.Global_Config.Elasticsearch.Password,
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   10,
 			ResponseHeaderTimeout: time.Second,
 			DialContext:           (&net.Dialer{Timeout: time.Second}).DialContext,
+			TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
 		},
 	}
 

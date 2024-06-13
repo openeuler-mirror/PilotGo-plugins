@@ -3,6 +3,7 @@ package kibanaClient
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -12,6 +13,8 @@ import (
 	"gitee.com/openeuler/PilotGo-plugin-elk/kibanaClient/7_17_16/meta"
 	"gitee.com/openeuler/PilotGo-plugin-elk/pluginclient"
 	"github.com/elastic/elastic-agent-libs/kibana"
+	"github.com/elastic/elastic-agent-libs/transport/httpcommon"
+	"github.com/elastic/elastic-agent-libs/transport/tlscommon"
 )
 
 var Global_kibana *KibanaClient_v7
@@ -23,10 +26,18 @@ type KibanaClient_v7 struct {
 
 func InitKibanaClient() {
 	cfg := &kibana.ClientConfig{
-		Protocol: "http",
+		Protocol: "https",
 		Host:     conf.Global_Config.Kibana.Addr,
 		Username: conf.Global_Config.Kibana.Username,
 		Password: conf.Global_Config.Kibana.Password,
+		Transport: httpcommon.HTTPTransportSettings{
+			Proxy:   httpcommon.DefaultHTTPClientProxySettings(),
+			Timeout: 90 * time.Second,
+			TLS: &tlscommon.Config{
+				Enabled:          kibana.TRUE,
+				VerificationMode: 1,
+			},
+		},
 	}
 
 	ki_client, err := kibana.NewClientWithConfig(cfg, "", "", "", "")
