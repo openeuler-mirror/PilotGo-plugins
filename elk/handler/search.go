@@ -16,6 +16,13 @@ import (
 
 func SearchHandle(ctx *gin.Context) {
 	index := ctx.Query("index")
+	if index == "" {
+		err := errors.Errorf("%+v **warn**0", "index is null")
+		errormanager.ErrorTransmit(pluginclient.Global_Context, err, false)
+		response.Fail(ctx, nil, err.Error())
+		return
+	}
+
 	defer ctx.Request.Body.Close()
 	if elasticClient.Global_elastic.Client == nil {
 		err := errors.Errorf("%+v **warn**0", "global_elastic is null")
