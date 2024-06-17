@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed static index.html
+//go:embed assets index.html
 var StaticFiles embed.FS
 
 func StaticRouter(router *gin.Engine) {
@@ -27,7 +27,7 @@ func StaticRouter(router *gin.Engine) {
 	mime.AddExtensionType(".js", "application/javascript")
 	static := router.Group("/plugin/template")
 	{
-		static.StaticFS("/static", http.FS(sf))
+		static.StaticFS("/assets", http.FS(sf))
 		static.GET("/", func(c *gin.Context) {
 			c.FileFromFS("/", http.FS(StaticFiles))
 		})
