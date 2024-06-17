@@ -6,26 +6,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func DoSomethingHandle(ctx *gin.Context) {
+func HelloWorldHandle(ctx *gin.Context) {
+	// 数据库分页查询
 	query := &response.PaginationQ{}
 	err := ctx.ShouldBindQuery(query)
-	if err != nil || (query.PageSize == 0 && query.Page == 0) {
+	if err != nil {
 		logger.Warn(err.Error())
 		response.Fail(ctx, nil, err.Error())
 		return
 	}
 
-	// condition: 1 成功响应 2 失败响应 3 翻页查询响应
-	condition := 1
-	switch condition {
-	case 1:
-		response.Success(ctx, nil, "")
-	case 2:
-		response.Fail(ctx, nil, "")
+	if query.PageSize == 0 && query.Page == 0 {
+		// 成功响应
+		response_data := "hello world"
+		response.Success(ctx, response_data, "")
 		return
-	default:
-		results := []string{}
-		total := 0
-		response.DataPagination(ctx, results, total, query)
+
+		// 失败响应
+		// response.Fail(ctx, nil, "")
+		// return
 	}
+
+	results := []string{
+		"hello world1",
+		"hello world2",
+		"hello world3",
+	}
+	total := 0
+	response.DataPagination(ctx, results, total, query)
 }
