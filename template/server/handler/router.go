@@ -41,6 +41,6 @@ func InitWebServer() {
 func InitRouter(router *gin.Engine) {
 	api := router.Group("/plugin/template/api")
 	{
-		api.GET("/do_something", DoSomethingHandle)
+		api.GET("/hello_world", HelloWorldHandle)
 	}
 }

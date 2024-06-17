@@ -30,6 +30,10 @@ func main() {
 	handler.InitWebServer()
 
 	/*
+		业务模块
+	*/
+
+	/*
 		终止进程信号监听
 	*/
 	signal.SignalMonitoring()
