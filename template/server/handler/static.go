@@ -13,7 +13,7 @@ import (
 func StaticRouter(router *gin.Engine) {
 	static := router.Group("/plugin/template")
 	{
-		static.Static("/static", "../web/dist/static")
+		static.Static("/assets", "../web/dist/assets")
 		static.StaticFile("/", "../web/dist/index.html")
 
 		// 解决页面刷新404的问题

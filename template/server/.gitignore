@@ -1,1 +1,10 @@
 template.yaml
+
+server/handler/assets/
+server/handler/index.html
+
+web/node_modules
+web/dist/
+
+handler/index.html
+handler/assets
