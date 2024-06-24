@@ -3,7 +3,6 @@ package pluginclient
 import (
 	"context"
 
-	"gitee.com/openeuler/PilotGo-plugin-template/conf"
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 )
@@ -13,12 +12,6 @@ var Global_Client *client.Client
 var Global_Context context.Context
 
 func InitPluginClient() {
-	if conf.Global_Config.Template.Https_enabled {
-		PluginInfo.Url = "https://" + conf.Global_Config.Template.Addr
-	} else {
-		PluginInfo.Url = "http://" + conf.Global_Config.Template.Addr
-	}
-
 	Global_Client = client.DefaultClient(PluginInfo)
 
 	// 注册插件扩展点
