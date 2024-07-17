@@ -7,9 +7,19 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/config"
 )
 
+type PluginEvent struct {
+	URL        string `yaml:"url"`
+	PluginType string `yaml:"plugin_type"`
+}
+
+type HttpServer struct {
+	Addr string `yaml:"addr"`
+}
 type ServerConfig struct {
-	Logopts *logger.LogOpts `yaml:"log"`
-	Influxd *Influxd        `yaml:"influxd"`
+	PluginEvent *PluginEvent    `yaml:"plugin_event"`
+	HttpServer  *HttpServer     `yaml:"http_server"`
+	Logopts     *logger.LogOpts `yaml:"log"`
+	Influxd     *Influxd        `yaml:"influxd"`
 }
 
 type Influxd struct {
