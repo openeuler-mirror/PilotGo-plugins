@@ -3,10 +3,15 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	plugin_manage "openeuler.org/PilotGo/PilotGo-plugin-event/client"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/config"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/db"
+	"openeuler.org/PilotGo/PilotGo-plugin-event/service"
 )
 
 func main() {
@@ -19,5 +24,24 @@ func main() {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
-	db.InfluxdbInit(config.Config().Influxd)
+	db.InfluxdbInit(config.Config().Influxd) // 连接influxdb2
+
+	plugin_manage.EventClient = client.DefaultClient(plugin_manage.Init(config.Config().PluginEvent)) //创建插件客户端
+	service.AddExtentions()                                                                           //添加页面拓展点
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	for {
+		s := <-c
+		switch s {
+		case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+			logger.Info("signal interrupted: %s", s.String())
+			goto EXIT
+		default:
+			logger.Info("unknown signal: %s", s.String())
+		}
+	}
+
+EXIT:
+	logger.Info("exit system, bye~")
 }
