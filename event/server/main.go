@@ -11,6 +11,7 @@ import (
 	plugin_manage "openeuler.org/PilotGo/PilotGo-plugin-event/client"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/config"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/db"
+	"openeuler.org/PilotGo/PilotGo-plugin-event/router"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/service"
 )
 
@@ -24,10 +25,22 @@ func main() {
 		fmt.Printf("logger init failed, please check the config file: %s", err)
 		os.Exit(-1)
 	}
-	db.InfluxdbInit(config.Config().Influxd) // 连接influxdb2
 
-	plugin_manage.EventClient = client.DefaultClient(plugin_manage.Init(config.Config().PluginEvent)) //创建插件客户端
-	service.AddExtentions()                                                                           //添加页面拓展点
+	/*
+		1. 连接influxdb2
+		2. 创建插件客户端
+		3. 添加页面拓展点
+		4. eventbus监听
+	*/
+	db.InfluxdbInit(config.Config().Influxd)
+	plugin_manage.EventClient = client.DefaultClient(plugin_manage.Init(config.Config().PluginEvent))
+	service.AddExtentions()
+	service.EventBusInit()
+
+	if err := router.HttpServerInit(config.Config().HttpServer); err != nil {
+		logger.Error("http server init failed, error:%v", err)
+		os.Exit(-1)
+	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
