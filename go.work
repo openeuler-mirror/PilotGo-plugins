@@ -1,9 +1,9 @@
-go 1.20
-
-toolchain go1.21.6
+go 1.21.6
 
 use (
 	./configmanage/server
 	./container/server
+	./event/sdk
 	./event/server
+	./template/server
 )
