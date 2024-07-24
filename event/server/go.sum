@@ -36,8 +36,8 @@ cloud.google.com/go/storage v1.8.0/go.mod h1:Wv1Oy7z6Yz3DshWRJFhqM/UCfaWIRTdp0RX
 cloud.google.com/go/storage v1.10.0/go.mod h1:FLPqc6j+Ki4BU591ie1oL6qBQGu2Bl/tZ9ullr3+Kg0=
 cloud.google.com/go/storage v1.14.0/go.mod h1:GrKmX003DSIwi9o29oFT7YDnHYwZoctc3fOKtUw0Xmo=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724015408-b4fa623c3dd4 h1:ibs45+Xj1lqIXUOsP9//zUBzBiGmo87/5VBkgPNj/tk=
-gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724015408-b4fa623c3dd4/go.mod h1:tqVD4Yq10/XdJnS35zMrxqSU8TFyMKtsG6HLiRzcnFk=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724025939-231bc58cf0e0 h1:qJxLL4KDSuQ8lYELtwBKAnfXg0j7SThcGN8mLlo2h8s=
+gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724025939-231bc58cf0e0/go.mod h1:tqVD4Yq10/XdJnS35zMrxqSU8TFyMKtsG6HLiRzcnFk=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/RaveNoX/go-jsoncommentstrip v1.0.0/go.mod h1:78ihd09MekBnJnxpICcwzCMzGrKSKYe4AqU6PDYYpjk=

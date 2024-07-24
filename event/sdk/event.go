@@ -93,7 +93,7 @@ func eventPluginServer() (string, error) {
 	return eventServer, nil
 }
 
-func registerEventCallback(eventType int, callback EventCallback) {
+func registerEventCallback(eventType int, callback common.EventCallback) {
 	plugin_client.EventCallbackMap[eventType] = callback
 }
 
