@@ -2,7 +2,7 @@ module openeuler.org/PilotGo/PilotGo-plugin-event
 
 go 1.20
 
-require gitee.com/openeuler/PilotGo/sdk v0.0.0-20240723080027-961f32bdf2b3
+require gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724015408-b4fa623c3dd4
 
 require (
 	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
