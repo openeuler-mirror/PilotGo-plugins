@@ -14,10 +14,8 @@ import (
 
 var plugin_client = client.GetClient()
 
-type EventCallback func(e *common.EventMessage)
-
 // 注册event事件监听
-func ListenEvent(eventTypes []int, callbacks []EventCallback) error {
+func ListenEvent(eventTypes []int, callbacks []common.EventCallback) error {
 	var eventtypes []string
 	for _, i := range eventTypes {
 		eventtypes = append(eventtypes, strconv.Itoa(i))
