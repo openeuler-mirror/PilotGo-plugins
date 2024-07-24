@@ -15,18 +15,20 @@ type Listener struct {
 	URL  string
 }
 
+var (
+	eventTypeMap   map[int][]Listener
+	globalEventBus *EventBus
+)
+
 type EventBus struct {
 	sync.Mutex
 	listeners []*Listener
 	stop      chan struct{}
+	wait      sync.WaitGroup
 	event     chan *common.EventMessage
 }
 
-var eventTypeMap map[int][]Listener
-
-var globalEventBus *EventBus
-
-func Init() {
+func EventBusInit() {
 	eventTypeMap = make(map[int][]Listener)
 	globalEventBus = &EventBus{
 		event: make(chan *common.EventMessage, 20),
@@ -125,14 +127,11 @@ func (e *EventBus) IsExitEventMap(l *Listener) bool {
 }
 
 func (e *EventBus) Run() {
-	go func() {
-		e.Stop()
-	}()
 	go func(e *EventBus) {
 		for {
 			select {
 			case <-e.stop:
-				return
+				e.wait.Done()
 			case m := <-e.event:
 				e.broadcast(m)
 			}
@@ -142,7 +141,9 @@ func (e *EventBus) Run() {
 }
 
 func (e *EventBus) Stop() {
+	e.wait.Add(1)
 	e.stop <- struct{}{}
+	e.wait.Done()
 }
 
 func (e *EventBus) publish(m *common.EventMessage) {

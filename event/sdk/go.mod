@@ -1,4 +1,4 @@
-module gitee.com/openeuler/PilotGo-plugin-event/sdk
+module gitee.com/openeuler/PilotGo-plugins/event/sdk
 
 go 1.21.6
 
