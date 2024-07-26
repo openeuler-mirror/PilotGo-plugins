@@ -12,10 +12,10 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 )
 
-var plugin_client = client.GetClient()
+var plugin_client *client.Client
 
 // 注册event事件监听
-func ListenEvent(eventTypes []int, callbacks []common.EventCallback) error {
+func ListenEvent(eventTypes []int, callbacks common.EventCallback) error {
 	var eventtypes []string
 	for _, i := range eventTypes {
 		eventtypes = append(eventtypes, strconv.Itoa(i))
@@ -52,8 +52,8 @@ func ListenEvent(eventTypes []int, callbacks []common.EventCallback) error {
 	if err := resp.ParseData(data); err != nil {
 		return err
 	}
-	for i, eventType := range eventTypes {
-		registerEventCallback(eventType, callbacks[i])
+	for _, eventType := range eventTypes {
+		registerEventCallback(eventType, callbacks)
 	}
 	return nil
 }
@@ -69,7 +69,7 @@ func UnListenEvent(eventTypes []int) error {
 		return err
 	}
 
-	url := eventServer + "/api/v1/pluginapi/listener?eventTypes=" + strings.Join(eventtypes, ",")
+	url := eventServer + "/plugin/event/listener/unregister?eventTypes=" + strings.Join(eventtypes, ",")
 	r, err := httputils.Delete(url, &httputils.Params{
 		Body: plugin_client.PluginInfo,
 	})
