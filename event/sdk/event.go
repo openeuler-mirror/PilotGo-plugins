@@ -9,18 +9,19 @@ import (
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterEventHandlers(router *gin.Engine) {
+func RegisterEventHandlers(router *gin.Engine, c *client.Client) {
 
 	api := router.Group("/plugin_manage/api/v1/")
 	{
 		api.POST("/event", eventHandler)
 	}
-
-	startEventProcessor()
+	plugin_client = c
+	startEventProcessor(c)
 }
 
 func eventHandler(c *gin.Context) {
@@ -44,7 +45,7 @@ func PublishEvent(msg common.EventMessage) error {
 	if err != nil {
 		return err
 	}
-	url := eventServer + "/api/v1/pluginapi/publish_event"
+	url := eventServer + "/plugin/event/publish_event"
 	r, err := httputils.Put(url, &httputils.Params{
 		Body: &msg,
 	})
@@ -105,17 +106,17 @@ func ProcessEvent(event *common.EventMessage) {
 	plugin_client.EventChan <- event
 }
 
-func startEventProcessor() {
-	go func() {
+func startEventProcessor(c *client.Client) {
+	go func(c *client.Client) {
 		for {
-			e := <-plugin_client.EventChan
+			e := <-c.EventChan
 
 			// TODO: process event message
-			cb, ok := plugin_client.EventCallbackMap[e.MessageType]
+			cb, ok := c.EventCallbackMap[e.MessageType]
 			if ok {
 				cb(e)
 			}
 		}
-	}()
+	}(c)
 
 }
