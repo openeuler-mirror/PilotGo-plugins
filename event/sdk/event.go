@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -11,6 +14,25 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func UnPluginListenEventHandler() {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	go func() {
+		logger.Info("插件监听注册goroutine已启动")
+		defer logger.Info("插件取消监听goroutine退出")
+		for {
+			s := <-sig
+			switch s {
+			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT:
+				logger.Info("接收到退出信号: %s", s.String())
+				UnPluginListenEvent()
+				os.Exit(0)
+			default:
+				logger.Info("接收到未知信号: %s", s.String())
+			}
+		}
+	}()
+}
 func RegisterEventHandlers(router *gin.Engine, c *client.Client) {
 
 	api := router.Group("/plugin_manage/api/v1/")
