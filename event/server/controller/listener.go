@@ -62,6 +62,26 @@ func UnregisterListenerHandler(c *gin.Context) {
 	response.Success(c, gin.H{"status": "ok"}, "删除eventType成功")
 }
 
+// 取消当前插件的所有event事件注册
+func UnPliginRegisterListenerHandler(c *gin.Context) {
+	p := client.PluginInfo{}
+	if err := c.ShouldBind(&p); err != nil {
+		response.Fail(c, gin.H{"status": false}, err.Error())
+		return
+	}
+	l := &service.Listener{
+		Name: p.Name,
+		URL:  p.Url,
+	}
+
+	eventTypes := service.GetEventMapTypes(l)
+	service.RemoveEventMaps(l)
+	if !service.IsExitEventMap(l) {
+		service.RemoveListener(l)
+	}
+	response.Success(c, gin.H{"eventType": eventTypes, "status": "ok"}, "删除插件event成功")
+}
+
 func PublishEventHandler(c *gin.Context) {
 	msg := &common.EventMessage{}
 	if err := c.ShouldBind(msg); err != nil {

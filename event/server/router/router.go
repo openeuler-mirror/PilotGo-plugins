@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
+	"gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	plugin_manage "openeuler.org/PilotGo/PilotGo-plugin-event/client"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/config"
@@ -40,31 +40,19 @@ func setupRouter() *gin.Engine {
 func registerAPIs(router *gin.Engine) {
 	logger.Debug("router register")
 	plugin_manage.EventClient.RegisterHandlers(router)
+	sdk.RegisterEventHandlers(router, plugin_manage.EventClient)
 	api := router.Group("/plugin/" + plugin_manage.EventClient.PluginInfo.Name)
 
 	eventpublish := api.Group("")
 	{
-		eventpublish.PUT("publish_event", controller.PublishEventHandler)
+		eventpublish.PUT("publishEvent", controller.PublishEventHandler)
 	}
 
 	listener := api.Group("listener")
 	{
 		listener.PUT("register", controller.RegisterListenerHandler)
 		listener.DELETE("unregister", controller.UnregisterListenerHandler)
-	}
-	test := api.Group("")
-	{
-		test.GET("test", func(ctx *gin.Context) {
-			s := plugin_manage.EventClient.Server()
-			logger.Info("%v", s)
-			ss, err := plugin_manage.EventClient.GetPlugins()
-			if err != nil {
-				response.Fail(ctx, nil, err.Error())
-				return
-			}
-			response.Success(ctx, ss, "chajian")
-		})
-
+		listener.DELETE("unpluginRegister", controller.UnPliginRegisterListenerHandler)
 	}
 }
 
@@ -81,15 +69,4 @@ func StaticRouter(router *gin.Engine) {
 		}
 		c.Status(http.StatusNotFound)
 	})
-}
-
-type PluginInfo struct {
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-	Author      string `json:"author"`
-	Email       string `json:"email"`
-	Url         string `json:"url"`
-	PluginType  string `json:"plugin_type"`
-	ReverseDest string `json:"reverse_dest"`
 }

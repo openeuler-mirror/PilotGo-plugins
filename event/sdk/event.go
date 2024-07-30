@@ -4,13 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
-	"strconv"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
-	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -39,40 +36,6 @@ func eventHandler(c *gin.Context) {
 	ProcessEvent(&msg)
 }
 
-// 发布event事件
-func PublishEvent(msg common.EventMessage) error {
-	eventServer, err := eventPluginServer()
-	if err != nil {
-		return err
-	}
-	url := eventServer + "/plugin/event/publish_event"
-	r, err := httputils.Put(url, &httputils.Params{
-		Body: &msg,
-	})
-	if err != nil {
-		return err
-	}
-	if r.StatusCode != http.StatusOK {
-		return errors.New("server process error:" + strconv.Itoa(r.StatusCode))
-	}
-
-	resp := &common.CommonResult{}
-	if err := json.Unmarshal(r.Body, resp); err != nil {
-		return err
-	}
-	if resp.Code != http.StatusOK {
-		return errors.New(resp.Message)
-	}
-
-	data := &struct {
-		Status string `json:"status"`
-		Error  string `json:"error"`
-	}{}
-	if err := resp.ParseData(data); err != nil {
-		return err
-	}
-	return nil
-}
 func eventPluginServer() (string, error) {
 	plugins, err := plugin_client.GetPlugins()
 	if err != nil {
