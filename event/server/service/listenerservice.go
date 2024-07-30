@@ -53,12 +53,19 @@ func PublishEvent(m *common.EventMessage) {
 	globalEventBus.publish(m)
 }
 
+func GetEventMapTypes(l *Listener) []int {
+	return globalEventBus.GetEventMapTypes(l)
+}
 func AddEventMap(eventtype int, l *Listener) {
 	globalEventBus.AddEventMap(eventtype, l)
 }
 
 func RemoveEventMap(eventtype int, l *Listener) {
 	globalEventBus.RemoveEventMap(eventtype, l)
+}
+
+func RemoveEventMaps(l *Listener) {
+	globalEventBus.RemoveEventMaps(l)
 }
 
 func IsExitEventMap(l *Listener) bool {
@@ -89,6 +96,20 @@ func (e *EventBus) RemoveListener(l *Listener) {
 	}
 }
 
+func (e *EventBus) GetEventMapTypes(l *Listener) []int {
+	e.Lock()
+	defer e.Unlock()
+	var eventTypes []int
+	for eventType, values := range eventTypeMap {
+		for _, v := range values {
+			if v.Name == l.Name && v.URL == l.URL {
+				eventTypes = append(eventTypes, eventType)
+			}
+		}
+	}
+	return eventTypes
+}
+
 // 添加event事件
 func (e *EventBus) AddEventMap(eventtpye int, l *Listener) {
 	e.Lock()
@@ -108,6 +129,24 @@ func (e *EventBus) RemoveEventMap(eventtpye int, l *Listener) {
 				eventTypeMap[eventtpye] = append(eventTypeMap[eventtpye][:i], eventTypeMap[eventtpye][i+1:]...)
 			}
 			break
+		}
+	}
+}
+
+// 删除整个插件的event事件
+func (e *EventBus) RemoveEventMaps(l *Listener) {
+	e.Lock()
+	defer e.Unlock()
+	for i, value := range eventTypeMap {
+		for j, v := range value {
+			if (v.Name == l.Name) && (v.URL == l.URL) {
+				if j == len(value)-1 {
+					eventTypeMap[i] = eventTypeMap[i][:j]
+				} else {
+					eventTypeMap[i] = append(eventTypeMap[i][:j], eventTypeMap[i][j+1:]...)
+				}
+				break
+			}
 		}
 	}
 }
