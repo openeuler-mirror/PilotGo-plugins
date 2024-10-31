@@ -113,6 +113,11 @@ func GetConfigByUUID(configuuid string) (*ConfigInstance, error) {
 	return config, err
 }
 
+// 分页获取configinfo
+func GetInfos(offset, size int) (int, []*ConfigInfo, error) {
+	return internal.GetInfos(offset, size)
+}
+
 type Deploy struct {
 	DeployBatch    common.Batch `json:"deploybatch"`
 	DeployPath     string       `json:"deploypath"`

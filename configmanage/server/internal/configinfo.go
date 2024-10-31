@@ -18,3 +18,14 @@ func GetInfoByUUID(uuid string) (ConfigInfo, error) {
 	err := db.MySQL().Where("uuid=?", uuid).Find(&ci).Error
 	return ci, err
 }
+
+func GetInfos(offset, size int) (int, []*ConfigInfo, error) {
+	infos := []*ConfigInfo{}
+	var count int64
+	err := db.MySQL().Model(&ConfigInfo{}).Count(&count).Error
+	if err != nil {
+		return 0, infos, err
+	}
+	err = db.MySQL().Limit(size).Offset(offset).Find(&infos).Error
+	return int(count), infos, err
+}
