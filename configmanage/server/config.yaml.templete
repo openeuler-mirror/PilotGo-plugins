@@ -1,6 +1,5 @@
 config_plugin:
   url: "http://localhost:8099/plugin/config"
-  plugin_type: "iframe"   # iframe   micro-app
 http_server:
   addr: "localhost:8099"
 log:
