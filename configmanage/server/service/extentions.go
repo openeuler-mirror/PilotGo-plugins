@@ -8,11 +8,11 @@ import (
 func AddPermission() {
 	var ps []common.Permission
 	p1 := common.Permission{
-		Resource: "plugin.atune",
+		Resource: "plugin.configmanage",
 		Operate:  "agent_install",
 	}
 	p2 := common.Permission{
-		Resource: "plugin.atune",
+		Resource: "plugin.configmanage",
 		Operate:  "agent_uninstall",
 	}
 	ps = append(ps, p1, p2)
