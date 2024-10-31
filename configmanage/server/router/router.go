@@ -23,6 +23,7 @@ func RegisterAPIs(router *gin.Engine) {
 		{
 			// 提供配置文件类型的列表
 			list.GET("/config_type", controller.ConfigTypeListHandler)
+			list.GET("/config", controller.ConfigHandler)
 		}
 		api.POST("/add", controller.AddConfigHandler)
 		api.GET("/load", controller.LoadConfigHandler)
