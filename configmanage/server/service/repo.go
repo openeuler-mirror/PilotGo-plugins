@@ -49,6 +49,7 @@ func (rc *RepoConfig) Record() error {
 }
 
 func (rc *RepoConfig) Load() error {
+	// 加载正在使用的某配置文件
 	rf, err := internal.GetRepoFileByInfoUUID(rc.ConfigInfoUUID, true)
 	if err != nil {
 		return err

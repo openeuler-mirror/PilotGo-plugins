@@ -17,10 +17,15 @@ func InitRouter() *gin.Engine {
 func RegisterAPIs(router *gin.Engine) {
 	//输出插件初始化的信息
 	global.GlobalClient.RegisterHandlers(router)
-	pg := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
+	api := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
 	{
-		pg.POST("/add", controller.AddConfigHandler)
-		pg.GET("/load", controller.LoadConfigHandler)
-		pg.POST("/apply", controller.ApplyConfigHandler)
+		list := api.Group("/list")
+		{
+			// 提供配置文件类型的列表
+			list.GET("/config_type", controller.ConfigTypeListHandler)
+		}
+		api.POST("/add", controller.AddConfigHandler)
+		api.GET("/load", controller.LoadConfigHandler)
+		api.POST("/apply", controller.ApplyConfigHandler)
 	}
 }

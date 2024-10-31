@@ -31,7 +31,7 @@ func AddConfigHandler(c *gin.Context) {
 	//存储配置管理类型
 	ci := service.ConfigInstance{
 		UUID:        uuid.New().String(),
-		Type:        global.Repo,
+		Type:        query.Type,
 		Description: query.Description,
 		BatchIds:    query.BatchIds,
 		DepartIds:   query.DepartIds,
@@ -70,7 +70,7 @@ func AddConfigHandler(c *gin.Context) {
 		repoconfig.IsActive = false
 		repoconfig.Content, err = json.Marshal(files)
 		if err != nil {
-			logger.Error("fError encoding JSON:: %s", err.Error())
+			logger.Error("Error encoding JSON:: %s", err.Error())
 			response.Fail(c, "Error encoding JSON:", err.Error())
 			return
 		}
@@ -131,7 +131,7 @@ func LoadConfigHandler(c *gin.Context) {
 		repoconfig := &service.RepoConfig{
 			ConfigInfoUUID: ci.UUID,
 		}
-		//加载配置
+		// 加载正在使用的配置
 		err = repoconfig.Load()
 		if err != nil {
 			logger.Error("failed to get repofile file: %s", err.Error())
