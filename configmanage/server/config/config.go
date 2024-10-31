@@ -9,8 +9,7 @@ import (
 )
 
 type ConfigPlugin struct {
-	URL        string `yaml:"url"`
-	PluginType string `yaml:"plugin_type"`
+	URL string `yaml:"url"`
 }
 
 type HttpServer struct {

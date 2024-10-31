@@ -15,7 +15,7 @@ func Init(plugin *config.ConfigPlugin) *client.PluginInfo {
 		Author:      "wubijie",
 		Email:       "wubijie@kylinos.cn",
 		Url:         plugin.URL,
-		PluginType:  "iframe",
+		PluginType:  "micro-app",
 	}
 	return &PluginInfo
 }

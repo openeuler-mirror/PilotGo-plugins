@@ -48,6 +48,8 @@ func main() {
 	server := router.InitRouter()
 	global.GlobalClient = client.DefaultClient(global.Init(config.Config().ConfigPlugin))
 
+	service.AddPermission()
+
 	go router.RegisterAPIs(server)
 	if err := server.Run(config.Config().HttpServer.Addr); err != nil {
 		logger.Error("failed to run server: %s", err)
