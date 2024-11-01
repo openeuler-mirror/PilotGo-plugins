@@ -50,6 +50,7 @@ func main() {
 	}
 
 	global.GlobalClient = client.DefaultClient(global.Init(config.Config().ConfigPlugin))
+	service.GetTags()
 	service.AddExtentions()
 	service.AddPermission()
 
