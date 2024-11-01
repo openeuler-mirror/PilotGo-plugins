@@ -13,6 +13,7 @@ import (
 	"openeuler.org/PilotGo/configmanage-plugin/service"
 )
 
+// AddConfigHandler 添加配置管理
 func AddConfigHandler(c *gin.Context) {
 	query := &struct {
 		Type        string          `json:"type"`
@@ -105,6 +106,7 @@ func AddConfigHandler(c *gin.Context) {
 	}
 }
 
+// 加载数据库中存储的正在使用的配置文件信息
 func LoadConfigHandler(c *gin.Context) {
 	//TODO:修改请求的参数
 	query := &struct {

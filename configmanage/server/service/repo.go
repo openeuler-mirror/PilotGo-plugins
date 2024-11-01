@@ -127,6 +127,7 @@ func (rc *RepoConfig) Apply() (json.RawMessage, error) {
 		if err := resp.ParseData(&data); err != nil {
 			return nil, err
 		}
+		// 将执行失败的机器信息和原因添加到结果字符串中
 		for _, v := range data {
 			if v.Error != "" {
 				result = result + v.UUID + ":" + v.Error + "\n"
@@ -209,4 +210,9 @@ func (rc *RepoConfig) Collect() error {
 		return errors.New(result + "failed to collect repo config")
 	}
 	return nil
+}
+
+// 根据配置uuid获取所有配置文件
+func GetRopeFilesByCinfigUUID(uuid string) ([]RepoFile, error) {
+	return internal.GetRopeFilesByCinfigUUID(uuid)
 }

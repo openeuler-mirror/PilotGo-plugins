@@ -49,3 +49,10 @@ func (rf *RepoFile) UpdateByuuid() error {
 	}
 	return db.MySQL().Table("repo_file").Where("uuid=?", rf.UUID).Update("is_index", 1).Error
 }
+
+// 根据配置uuid获取所有配置文件
+func GetRopeFilesByCinfigUUID(uuid string) ([]RepoFile, error) {
+	var files []RepoFile
+	err := db.MySQL().Where("config_info_uuid=?", uuid).Find(&files).Error
+	return files, err
+}

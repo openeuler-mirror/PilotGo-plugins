@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/configmanage-plugin/global"
@@ -20,7 +21,8 @@ func ConfigTypeListHandler(c *gin.Context) {
 	response.Success(c, result, "get config type success")
 }
 
-func ConfigHandler(c *gin.Context) {
+// 分页获取所有configinfo列表
+func ConfigInfosHandler(c *gin.Context) {
 	p := &PaginationQ{}
 	// 将查询参数绑定到分页查询对象 p 中
 	err := c.ShouldBindQuery(p)
@@ -38,4 +40,50 @@ func ConfigHandler(c *gin.Context) {
 	p.TotalPage = total
 
 	response.Success(c, p, "get config success")
+}
+
+// 根据列表中的configinfo_uuid获取某一个config信息
+func ConfigInfoHandler(c *gin.Context) {
+	//TODO:修改请求的参数
+	query := &struct {
+		UUID string `json:"uuid"`
+	}{}
+	err := c.ShouldBindJSON(query)
+	if err != nil {
+		response.Fail(c, "parameter error", err.Error())
+		return
+	}
+	logger.Debug("load config")
+
+	//获取ConfigInstance
+	ci, err := service.GetConfigByUUID(query.UUID)
+	if err != nil {
+		logger.Error("failed to get configinfo: %s", err.Error())
+		response.Fail(c, "get configinfo fail:", err.Error())
+		return
+	}
+	// 获取对应配置管理的参数
+	switch ci.Type {
+	case global.Repo:
+		// 获取有关配置的所有文件信息
+		repofiles, err := service.GetRopeFilesByCinfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get repoconfig file:s %s", err.Error())
+			response.Fail(c, "failed to get repoconfig files", err.Error())
+			return
+		}
+		logger.Debug("load repoconfig success")
+		response.Success(c, repofiles, "load repo config success")
+
+	case global.Host:
+
+	case global.SSH:
+
+	case global.SSHD:
+
+	case global.Sysctl:
+
+	default:
+		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
+	}
 }
