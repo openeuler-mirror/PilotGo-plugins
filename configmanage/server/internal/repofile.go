@@ -43,10 +43,12 @@ func GetRepoFileByUUID(uuid string) (RepoFile, error) {
 }
 
 func (rf *RepoFile) UpdateByuuid() error {
+	// 将同类配置的所有标志修改为未使用
 	err := db.MySQL().Table("repo_file").Where("config_info_uuid=?", rf.ConfigInfoUUID).Update("is_index", 0).Error
 	if err != nil {
 		return err
 	}
+	// 将成功下发的具体某一个配置状态修改为已使用
 	return db.MySQL().Table("repo_file").Where("uuid=?", rf.UUID).Update("is_index", 1).Error
 }
 

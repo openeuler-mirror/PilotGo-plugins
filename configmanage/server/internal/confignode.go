@@ -19,13 +19,10 @@ func GetConfigNodesByUUID(uuid string) ([]string, error) {
 	return nodes, err
 }
 
-func IsExistNode(uuid string) bool {
+func GetConfigNodesByNode(uuid string) ([]ConfigNode, error) {
 	var cns []ConfigNode
 	err := db.MySQL().Model(&ConfigNode{}).Where("node_id=?", uuid).Find(&cns).Error
-	if err != nil || len(cns) == 0 {
-		return false
-	}
-	return true
+	return cns, err
 }
 
 type ConfigBatch struct {

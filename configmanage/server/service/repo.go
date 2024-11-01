@@ -127,10 +127,10 @@ func (rc *RepoConfig) Apply() (json.RawMessage, error) {
 		if err := resp.ParseData(&data); err != nil {
 			return nil, err
 		}
-		// 将执行失败的机器信息和原因添加到结果字符串中
-		for _, v := range data {
-			if v.Error != "" {
-				result = result + v.UUID + ":" + v.Error + "\n"
+		// 将执行失败的文件、机器信息和原因添加到结果字符串中
+		for _, d := range data {
+			if d.Error != "" {
+				result = result + v.Content + "文件" + d.UUID + ":" + d.Error + "\n"
 			}
 		}
 	}
