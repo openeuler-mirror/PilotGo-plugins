@@ -216,3 +216,30 @@ func (rc *RepoConfig) Collect() error {
 func GetRopeFilesByCinfigUUID(uuid string) ([]RepoFile, error) {
 	return internal.GetRopeFilesByCinfigUUID(uuid)
 }
+
+// 查看某台机器某种类型的的历史配置信息
+func GetRopeFilesByNode(nodeid string) ([]RepoConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var rcs []RepoConfig
+	for _, v := range config_nodes {
+		rf, err := internal.GetRepoFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		rc := RepoConfig{
+			UUID:           rf.UUID,
+			ConfigInfoUUID: rf.ConfigInfoUUID,
+			Path:           rf.Path,
+			Name:           rf.Name,
+			Content:        rf.Content,
+			Version:        rf.Version,
+			IsActive:       rf.IsActive,
+		}
+		rcs = append(rcs, rc)
+	}
+	return rcs, nil
+}

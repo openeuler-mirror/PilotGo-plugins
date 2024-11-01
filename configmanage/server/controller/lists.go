@@ -87,3 +87,43 @@ func ConfigInfoHandler(c *gin.Context) {
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
 }
+
+// 查看某台机器某种类型的的历史配置信息
+func ConfigHistoryHandler(c *gin.Context) {
+	//TODO:修改请求的参数
+	query := &struct {
+		UUID string `json:"node_uuid"`
+		Type string `json:"type"`
+	}{}
+	err := c.ShouldBindJSON(query)
+	if err != nil {
+		response.Fail(c, "parameter error", err.Error())
+		return
+	}
+	logger.Debug("load config")
+
+	// 获取对应配置管理的参数
+	switch query.Type {
+	case global.Repo:
+		// 获取有关本台机器配置的所有文件信息
+		repofiles, err := service.GetRopeFilesByNode(query.UUID)
+		if err != nil {
+			logger.Error("failed to get repoconfig file:s %s", err.Error())
+			response.Fail(c, "failed to get repoconfig files", err.Error())
+			return
+		}
+		logger.Debug("load repoconfig success")
+		response.Success(c, repofiles, "load repo config success")
+
+	case global.Host:
+
+	case global.SSH:
+
+	case global.SSHD:
+
+	case global.Sysctl:
+
+	default:
+		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
+	}
+}

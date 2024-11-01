@@ -27,6 +27,8 @@ func RegisterAPIs(router *gin.Engine) {
 			list.GET("/config_infos", controller.ConfigInfosHandler)
 			// 根据列表中的configinfo_uuid获取某一个config信息
 			list.GET("/config_info", controller.ConfigInfoHandler)
+			// 查看某台机器某种类型的的历史配置信息
+			list.GET("/config_history", controller.ConfigHistoryHandler)
 		}
 		// 添加配置管理
 		api.POST("/add", controller.AddConfigHandler)
