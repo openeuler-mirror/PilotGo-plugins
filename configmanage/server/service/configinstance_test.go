@@ -16,7 +16,7 @@ func TestConfigInstance_Add(t *testing.T) {
 		Description: "test-repo-description",
 		BatchIds:    []int{1, 2, 3},
 		DepartIds:   []int{10, 20, 30},
-		Nodes:       []string{""},
+		Nodes:       []string{"11111111-5f8e-42df-b2d0-49bf55cfeb56"},
 	}
 	err := ci.Add()
 	if err != nil {

@@ -29,14 +29,8 @@ type RepoConfig struct {
 	IsActive bool `json:"isactive"`
 }
 
-func (rc *RepoConfig) Record() error {
-	//检查info的uuid是否存在
-	ci, err := GetInfoByUUID(rc.ConfigInfoUUID)
-	if err != nil || ci.UUID == "" {
-		return errors.New("configinfo uuid not exist")
-	}
-
-	rf := RepoFile{
+func (rc *RepoConfig) toRepoFile() RepoFile {
+	return RepoFile{
 		UUID:           rc.UUID,
 		ConfigInfoUUID: rc.ConfigInfoUUID,
 		Path:           rc.Path,
@@ -45,6 +39,28 @@ func (rc *RepoConfig) Record() error {
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       rc.IsActive,
 	}
+}
+
+func toRepoConfig(rf *RepoFile) RepoConfig {
+	return RepoConfig{
+		UUID:           rf.UUID,
+		ConfigInfoUUID: rf.ConfigInfoUUID,
+		Path:           rf.Path,
+		Name:           rf.Name,
+		Content:        rf.Content,
+		Version:        rf.Version,
+		IsActive:       rf.IsActive,
+	}
+}
+
+func (rc *RepoConfig) Record() error {
+	//检查info的uuid是否存在
+	ci, err := GetInfoByUUID(rc.ConfigInfoUUID)
+	if err != nil || ci.UUID == "" {
+		return errors.New("configinfo uuid not exist")
+	}
+
+	rf := rc.toRepoFile()
 	return rf.Add()
 }
 
@@ -230,15 +246,7 @@ func GetRopeFilesByNode(nodeid string) ([]RepoConfig, error) {
 		if err != nil {
 			return nil, err
 		}
-		rc := RepoConfig{
-			UUID:           rf.UUID,
-			ConfigInfoUUID: rf.ConfigInfoUUID,
-			Path:           rf.Path,
-			Name:           rf.Name,
-			Content:        rf.Content,
-			Version:        rf.Version,
-			IsActive:       rf.IsActive,
-		}
+		rc := toRepoConfig(&rf)
 		rcs = append(rcs, rc)
 	}
 	return rcs, nil
