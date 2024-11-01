@@ -35,15 +35,15 @@ func main() {
 
 	// mysql db初始化
 	if err := db.MysqldbInit(config.Config().Mysql); err != nil {
-		logger.Error("mysql db init failed, please check again: %s", err)
+		fmt.Printf("mysql db init failed, please check again: %s", err)
 		os.Exit(-1)
 	}
-
-	db.MySQL().AutoMigrate(&service.ConfigInfo{})
-	db.MySQL().AutoMigrate(&service.ConfigNode{})
-	db.MySQL().AutoMigrate(&service.ConfigDepart{})
-	db.MySQL().AutoMigrate(&service.ConfigBatch{})
-	db.MySQL().AutoMigrate(&service.RepoFile{})
+	// 初始化数据库表
+	err = service.Init()
+	if err != nil {
+		fmt.Printf("init sb table error: %s\n", err)
+		os.Exit(-1)
+	}
 
 	server := router.InitRouter()
 	global.GlobalClient = client.DefaultClient(global.Init(config.Config().ConfigPlugin))
@@ -52,7 +52,7 @@ func main() {
 
 	go router.RegisterAPIs(server)
 	if err := server.Run(config.Config().HttpServer.Addr); err != nil {
-		logger.Error("failed to run server: %s", err)
+		fmt.Printf("failed to run server: %s", err)
 		os.Exit(-1)
 	}
 }

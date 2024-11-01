@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"openeuler.org/PilotGo/configmanage-plugin/db"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -11,6 +12,30 @@ type ConfigInfo = internal.ConfigInfo
 type ConfigNode = internal.ConfigNode
 type ConfigBatch = internal.ConfigBatch
 type ConfigDepart = internal.ConfigDepart
+
+func Init() error {
+	err := db.MySQL().Set("gorm:table_options", "ENGINE=InnoDB CHARACTER SET utf8mb4").AutoMigrate(&internal.ConfigInfo{})
+	if err != nil {
+		return err
+	}
+	err = db.MySQL().Set("gorm:table_options", "ENGINE=InnoDB CHARACTER SET utf8mb4").AutoMigrate(&internal.ConfigNode{})
+	if err != nil {
+		return err
+	}
+	err = db.MySQL().Set("gorm:table_options", "ENGINE=InnoDB CHARACTER SET utf8mb4").AutoMigrate(&internal.ConfigDepart{})
+	if err != nil {
+		return err
+	}
+	err = db.MySQL().Set("gorm:table_options", "ENGINE=InnoDB CHARACTER SET utf8mb4").AutoMigrate(&internal.ConfigBatch{})
+	if err != nil {
+		return err
+	}
+	err = db.MySQL().Set("gorm:table_options", "ENGINE=InnoDB CHARACTER SET utf8mb4").AutoMigrate(&internal.RepoFile{})
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 type ConfigInstance struct {
 	UUID        string   `json:"uuid"`
