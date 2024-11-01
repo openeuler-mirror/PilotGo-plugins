@@ -10,7 +10,11 @@ func GetTags() {
 	tag_cb := func(uuids []string) []common.Tag {
 		var tags []common.Tag
 		for _, uuid := range uuids {
-			ok := internal.IsExistNode(uuid)
+			ok := true
+			cns, err := internal.GetConfigNodesByNode(uuid)
+			if err != nil || len(cns) == 0 {
+				ok = false
+			}
 			if ok {
 				tag := common.Tag{
 					UUID: uuid,
