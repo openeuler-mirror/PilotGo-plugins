@@ -19,6 +19,15 @@ func GetConfigNodesByUUID(uuid string) ([]string, error) {
 	return nodes, err
 }
 
+func IsExistNode(uuid string) bool {
+	var cns []ConfigNode
+	err := db.MySQL().Model(&ConfigNode{}).Where("node_id=?", uuid).Find(&cns).Error
+	if err != nil || len(cns) == 0 {
+		return false
+	}
+	return true
+}
+
 type ConfigBatch struct {
 	ID             int        `gorm:"primary_key;AUTO_INCREMENT"`
 	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
