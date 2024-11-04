@@ -6,10 +6,29 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/config"
+	"openeuler.org/PilotGo/configmanage-plugin/db"
 	"openeuler.org/PilotGo/configmanage-plugin/global"
 )
 
-func TestConfigInstance_Add(t *testing.T) {
+func TestMain(m *testing.M) {
+	fmt.Println("begin")
+	err := config.Init(".././config.yaml")
+	if err != nil {
+		fmt.Printf("load config error: %s\n", err)
+		os.Exit(-1)
+	}
+	err = db.MysqldbInit(config.Config().Mysql)
+	if err != nil {
+		fmt.Printf("init database error: %s\n", err)
+		os.Exit(-1)
+	}
+	Init()
+	m.Run()
+	fmt.Println("end")
+}
+
+func TestConfigInstanceTypeRepo_Add(t *testing.T) {
 	ci := &ConfigInstance{
 		UUID:        uuid.New().String(),
 		Type:        global.Repo,
@@ -51,4 +70,20 @@ func TestGetInfos(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Println(total, data)
+}
+
+func TestConfigInstanceTypeHost_Add(t *testing.T) {
+	ci := &ConfigInstance{
+		UUID:        uuid.New().String(),
+		Type:        global.Host,
+		Description: "test-host-description",
+		BatchIds:    []int{4, 5},
+		DepartIds:   []int{40, 50},
+		Nodes:       []string{"22222222-5f8e-42df-b2d0-49bf55cfeb56"},
+	}
+	err := ci.Add()
+	if err != nil {
+		fmt.Printf("Add() error = %v, want nil", err)
+		os.Exit(-1)
+	}
 }

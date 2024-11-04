@@ -34,6 +34,10 @@ func Init() error {
 	if err != nil {
 		return err
 	}
+	err = db.MySQL().Set("gorm:table_options", "ENGINE=InnoDB CHARACTER SET utf8mb4").AutoMigrate(&internal.HostFile{})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
