@@ -35,3 +35,19 @@ func GetHostFileByInfoUUID(uuid string, isindex interface{}) (HostFile, error) {
 	err := db.MySQL().Model(&HostFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
 	return file, err
 }
+
+func GetHostFileByUUID(uuid string) (HostFile, error) {
+	var file HostFile
+	err := db.MySQL().Model(&HostFile{}).Where("uuid=?", uuid).Find(&file).Error
+	return file, err
+}
+
+func (hf *HostFile) UpdateByuuid() error {
+	// 将同类配置的所有标志修改为未使用
+	err := db.MySQL().Model(&HostFile{}).Where("config_info_uuid=?", hf.ConfigInfoUUID).Update("is_index", 0).Error
+	if err != nil {
+		return err
+	}
+	// 将成功下发的具体某一个配置状态修改为已使用
+	return db.MySQL().Model(&HostFile{}).Where("uuid=?", hf.UUID).Update("is_index", 1).Error
+}
