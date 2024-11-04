@@ -244,7 +244,17 @@ func ApplyConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "apply repo config success")
 
 	case global.Host:
-
+		hostconfig := &service.HostConfig{
+			UUID:           query.UUID,
+			ConfigInfoUUID: ci.UUID,
+		}
+		_, err := hostconfig.Apply()
+		if err != nil {
+			logger.Error("failed to apply hostconfig file: %s", err.Error())
+			response.Fail(c, "failed to apply hostconfig:", err.Error())
+			return
+		}
+		response.Success(c, nil, "apply hostconfig success")
 	case global.SSH:
 
 	case global.SSHD:

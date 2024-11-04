@@ -242,8 +242,8 @@ func (rc *RepoConfig) Collect() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetRopeFilesByCinfigUUID(uuid string) ([]RepoFile, error) {
-	return internal.GetRopeFilesByCinfigUUID(uuid)
+func GetRopeFilesByConfigUUID(uuid string) ([]RepoFile, error) {
+	return internal.GetRopeFilesByConfigUUID(uuid)
 }
 
 // 查看某台机器某种类型的的历史配置信息
