@@ -68,3 +68,13 @@ func (hc *HostConfig) Load() error {
 	hc.IsActive = hf.IsActive
 	return nil
 }
+
+// TODO:
+func (rc *HostConfig) Apply() (json.RawMessage, error) {
+	return nil, errors.New("failed to apply host config")
+}
+
+// TODO:
+func (rc *HostConfig) Collect() error {
+	return nil
+}
