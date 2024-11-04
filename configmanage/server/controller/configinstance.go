@@ -183,7 +183,19 @@ func LoadConfigHandler(c *gin.Context) {
 		response.Success(c, ci, "load repo config success")
 
 	case global.Host:
-
+		hostconfig := &service.HostConfig{
+			ConfigInfoUUID: ci.UUID,
+		}
+		// 加载正在使用的配置
+		err = hostconfig.Load()
+		if err != nil {
+			logger.Error("failed to get hostconfig file: %s", err.Error())
+			response.Fail(c, "failed to get hostconfig file:", err.Error())
+			return
+		}
+		ci.Config = hostconfig
+		logger.Debug("load hostconfig success")
+		response.Success(c, ci, "load hostconfig success")
 	case global.SSH:
 
 	case global.SSHD:
