@@ -16,6 +16,19 @@ import (
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
+/*
+repo: 配置文件
+
+一般方法：	1、在/etc/yum.repo.d/下创建repo文件
+
+	2、执行命令使用repo文件dnf clear all 和 dnf makecache
+
+考虑的问题：1、路径下存在多个repo文件，使用的时候都生效，用文件中某一字段控制某一链接不生效
+
+	2、采集和下发的时候都存在多个repo文件，如果下发的文件同名将如何处理？
+
+	3、下发之前采集还是创建相关配置的时候采集？
+*/
 type RepoFile = internal.RepoFile
 
 type RepoConfig struct {
