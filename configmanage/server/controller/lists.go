@@ -124,7 +124,15 @@ func ConfigHistoryHandler(c *gin.Context) {
 		response.Success(c, repofiles, "load repo config success")
 
 	case global.Host:
-
+		// 获取有关本台机器配置的所有文件信息
+		repofiles, err := service.GetHostFilesByNode(query.UUID)
+		if err != nil {
+			logger.Error("failed to get hostconfig file:s %s", err.Error())
+			response.Fail(c, "failed to get hostconfig files", err.Error())
+			return
+		}
+		logger.Debug("load hostconfig success")
+		response.Success(c, repofiles, "load hostconfig success")
 	case global.SSH:
 
 	case global.SSHD:
