@@ -76,7 +76,15 @@ func ConfigInfoHandler(c *gin.Context) {
 		response.Success(c, repofiles, "load repo config success")
 
 	case global.Host:
-
+		// 获取有关配置的所有文件信息
+		repofiles, err := service.GetHostFilesByConfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get hostconfig file:s %s", err.Error())
+			response.Fail(c, "failed to get hostconfig files", err.Error())
+			return
+		}
+		logger.Debug("load hostconfig success")
+		response.Success(c, repofiles, "load hostconfig success")
 	case global.SSH:
 
 	case global.SSHD:
