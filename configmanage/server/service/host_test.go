@@ -68,3 +68,16 @@ func TestGetHostFilesByConfigUUID(t *testing.T) {
 	}
 	fmt.Println(len(files))
 }
+
+func TestGetHostFilesByNode(t *testing.T) {
+	// 设置测试数据
+	nodeid := "11111111-5f8e-42df-b2d0-49bf55cfeb56"
+
+	// 调用被测试的函数
+	rcs, err := GetHostFilesByNode(nodeid)
+	if err != nil {
+		fmt.Printf("GetHostFilesByNode error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Println(len(rcs))
+}

@@ -48,6 +48,18 @@ func (hc *HostConfig) toHostFile() HostFile {
 	}
 }
 
+func toHostConfig(hf *HostFile) HostConfig {
+	return HostConfig{
+		UUID:           hf.UUID,
+		ConfigInfoUUID: hf.ConfigInfoUUID,
+		Path:           hf.Path,
+		Name:           hf.Name,
+		Content:        hf.Content,
+		Version:        hf.Version,
+		IsActive:       hf.IsActive,
+	}
+}
+
 func (hc *HostConfig) Record() error {
 	//检查info的uuid是否存在
 	ci, err := GetInfoByUUID(hc.ConfigInfoUUID)
@@ -161,4 +173,23 @@ func (hc *HostConfig) Collect() error {
 // 根据配置uuid获取所有配置文件
 func GetHostFilesByConfigUUID(uuid string) ([]HostFile, error) {
 	return internal.GetHostFilesByConfigUUID(uuid)
+}
+
+// 查看某台机器某种类型的的历史配置信息
+func GetHostFilesByNode(nodeid string) ([]HostConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var hcs []HostConfig
+	for _, v := range config_nodes {
+		hf, err := internal.GetHostFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		hc := toHostConfig(&hf)
+		hcs = append(hcs, hc)
+	}
+	return hcs, nil
 }
