@@ -52,12 +52,12 @@ func TestGetHostFileByUUID(t *testing.T) {
 	fmt.Printf("hc: %v\n", hf)
 }
 
-func TestGetHostFilesByCinfigUUID(t *testing.T) {
+func TestGetHostFilesByConfigUUID(t *testing.T) {
 	// 设置测试数据
 	testUUID := "158e0acf-159b-4876-83b1-fa5f3d6460b1"
 
 	// 调用被测试的函数
-	files, err := GetHostFilesByCinfigUUID(testUUID)
+	files, err := GetHostFilesByConfigUUID(testUUID)
 	if err != nil {
 		fmt.Printf("load hostfiles error: %s\n", err)
 		os.Exit(-1)

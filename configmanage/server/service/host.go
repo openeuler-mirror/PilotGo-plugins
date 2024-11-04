@@ -159,6 +159,6 @@ func (hc *HostConfig) Collect() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetHostFilesByCinfigUUID(uuid string) ([]HostFile, error) {
-	return internal.GetHostFilesByCinfigUUID(uuid)
+func GetHostFilesByConfigUUID(uuid string) ([]HostFile, error) {
+	return internal.GetHostFilesByConfigUUID(uuid)
 }

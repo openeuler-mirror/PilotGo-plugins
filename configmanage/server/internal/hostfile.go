@@ -53,7 +53,7 @@ func (hf *HostFile) UpdateByuuid() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetHostFilesByCinfigUUID(uuid string) ([]HostFile, error) {
+func GetHostFilesByConfigUUID(uuid string) ([]HostFile, error) {
 	var files []HostFile
 	err := db.MySQL().Model(&HostFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
 	return files, err
