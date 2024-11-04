@@ -53,7 +53,7 @@ func (rf *RepoFile) UpdateByuuid() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetRopeFilesByCinfigUUID(uuid string) ([]RepoFile, error) {
+func GetRopeFilesByConfigUUID(uuid string) ([]RepoFile, error) {
 	var files []RepoFile
 	err := db.MySQL().Model(&RepoFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
 	return files, err

@@ -66,7 +66,7 @@ func ConfigInfoHandler(c *gin.Context) {
 	switch ci.Type {
 	case global.Repo:
 		// 获取有关配置的所有文件信息
-		repofiles, err := service.GetRopeFilesByCinfigUUID(ci.UUID)
+		repofiles, err := service.GetRopeFilesByConfigUUID(ci.UUID)
 		if err != nil {
 			logger.Error("failed to get repoconfig file:s %s", err.Error())
 			response.Fail(c, "failed to get repoconfig files", err.Error())

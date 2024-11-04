@@ -33,7 +33,7 @@ func TestGetRopeFilesByCinfigUUID(t *testing.T) {
 	testUUID := "9c3f8e3d-5f8e-42df-b2d0-49bf55cfeb56"
 
 	// 调用被测试的函数
-	files, err := GetRopeFilesByCinfigUUID(testUUID)
+	files, err := GetRopeFilesByConfigUUID(testUUID)
 	if err != nil {
 		fmt.Printf("load repofiles error: %s\n", err)
 		os.Exit(-1)
