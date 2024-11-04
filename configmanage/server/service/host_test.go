@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 func TestHostConfig_Record(t *testing.T) {
@@ -39,4 +40,14 @@ func TestHostConfig_Load(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Printf("hc: %v\n", hc)
+}
+
+func TestGetHostFileByUUID(t *testing.T) {
+	uuid := "4254b485-8e8a-427c-bed1-5da05e363657"
+	hf, err := internal.GetHostFileByUUID(uuid)
+	if err != nil {
+		fmt.Printf("get host file error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("hc: %v\n", hf)
 }

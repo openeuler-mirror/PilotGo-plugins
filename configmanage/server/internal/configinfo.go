@@ -15,7 +15,7 @@ func (cm *ConfigInfo) Add() error {
 
 func GetInfoByUUID(uuid string) (ConfigInfo, error) {
 	var ci ConfigInfo
-	err := db.MySQL().Where("uuid=?", uuid).Find(&ci).Error
+	err := db.MySQL().Model(&ConfigInfo{}).Where("uuid=?", uuid).Find(&ci).Error
 	return ci, err
 }
 
@@ -26,6 +26,6 @@ func GetInfos(offset, size int) (int, []*ConfigInfo, error) {
 	if err != nil {
 		return 0, infos, err
 	}
-	err = db.MySQL().Limit(size).Offset(offset).Find(&infos).Error
+	err = db.MySQL().Model(&ConfigInfo{}).Limit(size).Offset(offset).Find(&infos).Error
 	return int(count), infos, err
 }
