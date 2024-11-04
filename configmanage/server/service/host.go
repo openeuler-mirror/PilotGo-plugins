@@ -157,3 +157,8 @@ func (hc *HostConfig) Apply() (json.RawMessage, error) {
 func (hc *HostConfig) Collect() error {
 	return nil
 }
+
+// 根据配置uuid获取所有配置文件
+func GetHostFilesByCinfigUUID(uuid string) ([]HostFile, error) {
+	return internal.GetHostFilesByCinfigUUID(uuid)
+}
