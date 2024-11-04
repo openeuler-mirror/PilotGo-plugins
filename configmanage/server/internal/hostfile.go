@@ -25,3 +25,13 @@ type HostFile struct {
 func (hf *HostFile) Add() error {
 	return db.MySQL().Save(&hf).Error
 }
+
+func GetHostFileByInfoUUID(uuid string, isindex interface{}) (HostFile, error) {
+	var file HostFile
+	if isindex != nil {
+		err := db.MySQL().Model(&HostFile{}).Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Model(&HostFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
+	return file, err
+}

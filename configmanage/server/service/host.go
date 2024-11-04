@@ -53,3 +53,18 @@ func (hc *HostConfig) Record() error {
 	hf := hc.toHostFile()
 	return hf.Add()
 }
+
+func (hc *HostConfig) Load() error {
+	// 加载正在使用的某配置文件
+	hf, err := internal.GetHostFileByInfoUUID(hc.ConfigInfoUUID, true)
+	if err != nil {
+		return err
+	}
+	hc.UUID = hf.UUID
+	hc.Path = hf.Path
+	hc.Name = hf.Name
+	hc.Content = hf.Content
+	hc.Version = hf.Version
+	hc.IsActive = hf.IsActive
+	return nil
+}

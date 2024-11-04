@@ -27,3 +27,16 @@ func TestHostConfig_Record(t *testing.T) {
 		os.Exit(-1)
 	}
 }
+
+func TestHostConfig_Load(t *testing.T) {
+	// 设置测试数据
+	hc := &HostConfig{
+		ConfigInfoUUID: "158e0acf-159b-4876-83b1-fa5f3d6460b1",
+	}
+	err := hc.Load()
+	if err != nil {
+		fmt.Printf("record error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("hc: %v\n", hc)
+}
