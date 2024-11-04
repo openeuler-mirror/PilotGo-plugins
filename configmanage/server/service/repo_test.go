@@ -7,8 +7,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"openeuler.org/PilotGo/configmanage-plugin/config"
-	"openeuler.org/PilotGo/configmanage-plugin/db"
 )
 
 func TestRepoConfig_Record(t *testing.T) {
@@ -58,21 +56,4 @@ func TestGetRopeFilesByNode(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Println(len(rcs))
-}
-
-func TestMain(m *testing.M) {
-	fmt.Println("begin")
-	err := config.Init(".././config.yaml")
-	if err != nil {
-		fmt.Printf("load config error: %s\n", err)
-		os.Exit(-1)
-	}
-	err = db.MysqldbInit(config.Config().Mysql)
-	if err != nil {
-		fmt.Printf("init database error: %s\n", err)
-		os.Exit(-1)
-	}
-	Init()
-	m.Run()
-	fmt.Println("end")
 }

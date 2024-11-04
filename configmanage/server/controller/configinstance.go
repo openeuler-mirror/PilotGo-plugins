@@ -94,6 +94,44 @@ func AddConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "Add repo config success")
 
 	case global.Host:
+		// 解析参数
+		hostconfig := &service.HostConfig{}
+		if err := json.Unmarshal(query.Data, hostconfig); err != nil {
+			logger.Error("failed to parse hostconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse hostconfig parameter:", err.Error())
+			return
+		}
+
+		files := []common.File{}
+		if err := json.Unmarshal([]byte(hostconfig.Content), &files); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		for i, v := range files {
+			files[i].Content = base64.StdEncoding.EncodeToString([]byte(v.Content))
+		}
+
+		hostconfig.UUID = uuid.New().String()
+		hostconfig.ConfigInfoUUID = ci.UUID
+		hostconfig.IsActive = false
+		hostconfig.Content, err = json.Marshal(files)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = hostconfig.Record()
+		if err != nil {
+			logger.Error("failed to add hostconfig: %s", err.Error())
+			response.Fail(c, "failed to add hostconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("add hostconfig success")
+		response.Success(c, nil, "Add host config success")
 
 	case global.SSH:
 
