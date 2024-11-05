@@ -85,7 +85,17 @@ func ConfigInfoHandler(c *gin.Context) {
 		}
 		logger.Debug("load hostconfig success")
 		response.Success(c, repofiles, "load hostconfig success")
+
 	case global.SSH:
+		// 获取有关配置的所有文件信息
+		repofiles, err := service.GetSSHFilesByCinfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get sshconfig file:s %s", err.Error())
+			response.Fail(c, "failed to get sshconfig files", err.Error())
+			return
+		}
+		logger.Debug("load sshconfig success")
+		response.Success(c, repofiles, "load sshconfig success")
 
 	case global.SSHD:
 
@@ -133,6 +143,7 @@ func ConfigHistoryHandler(c *gin.Context) {
 		}
 		logger.Debug("load hostconfig success")
 		response.Success(c, repofiles, "load hostconfig success")
+
 	case global.SSH:
 
 	case global.SSHD:
