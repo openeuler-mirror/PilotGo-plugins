@@ -155,3 +155,8 @@ func (rc *SSHConfig) Apply() (json.RawMessage, error) {
 func (sc *SSHConfig) Collect() error {
 	return nil
 }
+
+// 根据配置uuid获取所有配置文件
+func GetSSHFilesByCinfigUUID(uuid string) ([]SSHFile, error) {
+	return internal.GetSSHFilesByCinfigUUID(uuid)
+}
