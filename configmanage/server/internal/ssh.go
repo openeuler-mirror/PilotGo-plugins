@@ -25,3 +25,13 @@ type SSHFile struct {
 func (sf *SSHFile) Add() error {
 	return db.MySQL().Save(&sf).Error
 }
+
+func GetSSHFileByInfoUUID(uuid string, isindex interface{}) (SSHFile, error) {
+	var file SSHFile
+	if isindex != nil {
+		err := db.MySQL().Model(&SSHFile{}).Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Model(&SSHFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
+	return file, err
+}

@@ -10,7 +10,7 @@ import (
 )
 
 /*
-ssh: 配置文件
+ssh: 配置文件，ssh_config文件只有一个
 
 一般方法：	1、在/etc/ssh/ssh_config中修改内容
 
@@ -51,4 +51,18 @@ func (sc *SSHConfig) Record() error {
 
 	sf := sc.toSSHFile()
 	return sf.Add()
+}
+func (sc *SSHConfig) Load() error {
+	// 加载正在使用的某配置文件
+	sf, err := internal.GetSSHFileByInfoUUID(sc.ConfigInfoUUID, true)
+	if err != nil {
+		return err
+	}
+	sc.UUID = sf.UUID
+	sc.Path = sf.Path
+	sc.Name = sf.Name
+	sc.Content = sf.Content
+	sc.Version = sf.Version
+	sc.IsActive = sf.IsActive
+	return nil
 }
