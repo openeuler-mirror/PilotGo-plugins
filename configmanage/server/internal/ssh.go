@@ -51,3 +51,10 @@ func (sf *SSHFile) UpdateByuuid() error {
 	// 将成功下发的具体某一个配置状态修改为已使用
 	return db.MySQL().Model(&SSHFile{}).Where("uuid=?", sf.UUID).Update("is_index", 1).Error
 }
+
+// 根据配置uuid获取所有配置文件
+func GetSSHFilesByCinfigUUID(uuid string) ([]SSHFile, error) {
+	var files []SSHFile
+	err := db.MySQL().Model(&SSHFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
+	return files, err
+}
