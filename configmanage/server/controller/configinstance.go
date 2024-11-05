@@ -102,20 +102,18 @@ func AddConfigHandler(c *gin.Context) {
 			return
 		}
 
-		files := []common.File{}
-		if err := json.Unmarshal([]byte(hostconfig.Content), &files); err != nil {
+		file := common.File{}
+		if err := json.Unmarshal([]byte(hostconfig.Content), &file); err != nil {
 			logger.Error("failed to parse file parameter: %s", err.Error())
 			response.Fail(c, "failed to parse file parameter:", err.Error())
 			return
 		}
-		for i, v := range files {
-			files[i].Content = base64.StdEncoding.EncodeToString([]byte(v.Content))
-		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
 
 		hostconfig.UUID = uuid.New().String()
 		hostconfig.ConfigInfoUUID = ci.UUID
 		hostconfig.IsActive = false
-		hostconfig.Content, err = json.Marshal(files)
+		hostconfig.Content, err = json.Marshal(file)
 		if err != nil {
 			logger.Error("Error encoding JSON:: %s", err.Error())
 			response.Fail(c, "Error encoding JSON:", err.Error())
@@ -134,6 +132,42 @@ func AddConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "Add host config success")
 
 	case global.SSH:
+		// 解析参数
+		sshconfig := &service.SSHConfig{}
+		if err := json.Unmarshal(query.Data, sshconfig); err != nil {
+			logger.Error("failed to parse sshconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse sshconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(sshconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		sshconfig.UUID = uuid.New().String()
+		sshconfig.ConfigInfoUUID = ci.UUID
+		sshconfig.IsActive = false
+		sshconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = sshconfig.Record()
+		if err != nil {
+			logger.Error("failed to add sshconfig: %s", err.Error())
+			response.Fail(c, "failed to add sshconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("add sshconfig success")
+		response.Success(c, nil, "Add sshconfig success")
 
 	case global.SSHD:
 
