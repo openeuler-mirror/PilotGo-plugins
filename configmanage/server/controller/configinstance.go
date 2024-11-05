@@ -207,6 +207,7 @@ func LoadConfigHandler(c *gin.Context) {
 	}
 }
 
+// TODO： 考虑问价下发和执行命令使用配置
 func ApplyConfigHandler(c *gin.Context) {
 	//TODO:修改请求的参数
 	query := &struct {
