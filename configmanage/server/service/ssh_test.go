@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 func TestSSHConfig_Record(t *testing.T) {
@@ -39,4 +40,14 @@ func TestSSHConfig_Load(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Printf("sc: %v\n", sc)
+}
+
+func TestGetSSHFileByUUID(t *testing.T) {
+	uuid := "64636f68-b6fa-426d-a253-ff03c6d529be"
+	sf, err := internal.GetSSHFileByUUID(uuid)
+	if err != nil {
+		fmt.Printf("get ssh file error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("hc: %v\n", sf)
 }
