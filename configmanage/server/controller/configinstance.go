@@ -231,7 +231,19 @@ func LoadConfigHandler(c *gin.Context) {
 		logger.Debug("load hostconfig success")
 		response.Success(c, ci, "load hostconfig success")
 	case global.SSH:
-
+		sshconfig := &service.SSHConfig{
+			ConfigInfoUUID: ci.UUID,
+		}
+		// 加载正在使用的配置
+		err = sshconfig.Load()
+		if err != nil {
+			logger.Error("failed to get sshconfig file: %s", err.Error())
+			response.Fail(c, "failed to get sshconfig file:", err.Error())
+			return
+		}
+		ci.Config = sshconfig
+		logger.Debug("load sshconfig success")
+		response.Success(c, ci, "load sshconfig success")
 	case global.SSHD:
 
 	case global.Sysctl:

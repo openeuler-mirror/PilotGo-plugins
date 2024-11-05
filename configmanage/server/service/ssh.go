@@ -66,3 +66,13 @@ func (sc *SSHConfig) Load() error {
 	sc.IsActive = sf.IsActive
 	return nil
 }
+
+// TODO:
+func (rc *SSHConfig) Apply() (json.RawMessage, error) {
+	return nil, errors.New("failed to apply SSHConfig")
+}
+
+// TODO:
+func (rc *SSHConfig) Collect() error {
+	return nil
+}
