@@ -27,3 +27,16 @@ func TestSSHConfig_Record(t *testing.T) {
 		os.Exit(-1)
 	}
 }
+
+func TestSSHConfig_Load(t *testing.T) {
+	// 设置测试数据
+	sc := &SSHConfig{
+		ConfigInfoUUID: "5973e993-6236-4b53-9eb6-0cc23c652460",
+	}
+	err := sc.Load()
+	if err != nil {
+		fmt.Printf("record error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("sc: %v\n", sc)
+}
