@@ -87,3 +87,19 @@ func TestConfigInstanceTypeHost_Add(t *testing.T) {
 		os.Exit(-1)
 	}
 }
+
+func TestConfigInstanceTypeSSH_Add(t *testing.T) {
+	ci := &ConfigInstance{
+		UUID:        uuid.New().String(),
+		Type:        global.SSH,
+		Description: "test-SSH-description",
+		BatchIds:    []int{6},
+		DepartIds:   []int{60},
+		Nodes:       []string{"33333333-5f8e-42df-b2d0-49bf55cfeb56"},
+	}
+	err := ci.Add()
+	if err != nil {
+		fmt.Printf("Add() error = %v, want nil", err)
+		os.Exit(-1)
+	}
+}
