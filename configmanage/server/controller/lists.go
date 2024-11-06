@@ -77,27 +77,36 @@ func ConfigInfoHandler(c *gin.Context) {
 
 	case global.Host:
 		// 获取有关配置的所有文件信息
-		repofiles, err := service.GetHostFilesByConfigUUID(ci.UUID)
+		hostfiles, err := service.GetHostFilesByConfigUUID(ci.UUID)
 		if err != nil {
 			logger.Error("failed to get hostconfig files: %s", err.Error())
 			response.Fail(c, "failed to get hostconfig files", err.Error())
 			return
 		}
 		logger.Debug("load hostconfig success")
-		response.Success(c, repofiles, "load hostconfig success")
+		response.Success(c, hostfiles, "load hostconfig success")
 
 	case global.SSH:
 		// 获取有关配置的所有文件信息
-		repofiles, err := service.GetSSHFilesByCinfigUUID(ci.UUID)
+		sshfiles, err := service.GetSSHFilesByCinfigUUID(ci.UUID)
 		if err != nil {
 			logger.Error("failed to get sshconfig files: %s", err.Error())
 			response.Fail(c, "failed to get sshconfig files", err.Error())
 			return
 		}
 		logger.Debug("load sshconfig success")
-		response.Success(c, repofiles, "load sshconfig success")
+		response.Success(c, sshfiles, "load sshconfig success")
 
 	case global.SSHD:
+		// 获取有关配置的所有文件信息
+		sshdfiles, err := service.GetSSHFilesByCinfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get sshdconfig files: %s", err.Error())
+			response.Fail(c, "failed to get sshdconfig files", err.Error())
+			return
+		}
+		logger.Debug("load sshdconfig success")
+		response.Success(c, sshdfiles, "load sshdconfig success")
 
 	case global.Sysctl:
 
@@ -156,6 +165,15 @@ func ConfigHistoryHandler(c *gin.Context) {
 		response.Success(c, sshconfig, "load sshconfig success")
 
 	case global.SSHD:
+		// 获取有关本台机器配置的所有文件信息
+		sshdconfig, err := service.GetSSHDFilesByNode(query.UUID)
+		if err != nil {
+			logger.Error("failed to get sshdconfig files: %s", err.Error())
+			response.Fail(c, "failed to get sshdconfig files", err.Error())
+			return
+		}
+		logger.Debug("load sshdconfig success")
+		response.Success(c, sshdconfig, "load sshdconfig success")
 
 	case global.Sysctl:
 
