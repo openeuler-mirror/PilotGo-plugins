@@ -84,25 +84,25 @@ func (sc *SSHConfig) Load() error {
 	return nil
 }
 
-func (rc *SSHConfig) Apply() (json.RawMessage, error) {
+func (sc *SSHConfig) Apply() (json.RawMessage, error) {
 	// 从数据库获取下发的信息
-	sf, err := internal.GetHostFileByUUID(rc.UUID)
+	sf, err := internal.GetHostFileByUUID(sc.UUID)
 	if err != nil {
 		return nil, err
 	}
-	if sf.ConfigInfoUUID != rc.ConfigInfoUUID || sf.UUID != rc.UUID {
+	if sf.ConfigInfoUUID != sc.ConfigInfoUUID || sf.UUID != sc.UUID {
 		return nil, errors.New("数据库不存在此配置")
 	}
 
-	batchids, err := internal.GetConfigBatchByUUID(rc.ConfigInfoUUID)
+	batchids, err := internal.GetConfigBatchByUUID(sc.ConfigInfoUUID)
 	if err != nil {
 		return nil, err
 	}
-	departids, err := internal.GetConfigDepartByUUID(rc.ConfigInfoUUID)
+	departids, err := internal.GetConfigDepartByUUID(sc.ConfigInfoUUID)
 	if err != nil {
 		return nil, err
 	}
-	nodes, err := internal.GetConfigNodesByUUID(rc.ConfigInfoUUID)
+	nodes, err := internal.GetConfigNodesByUUID(sc.ConfigInfoUUID)
 	if err != nil {
 		return nil, err
 	}
