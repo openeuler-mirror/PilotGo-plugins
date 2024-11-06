@@ -52,3 +52,18 @@ func (sdc *SSHDConfig) Record() error {
 	sdf := sdc.toSSHDFile()
 	return sdf.Add()
 }
+
+func (sdc *SSHDConfig) Load() error {
+	// 加载正在使用的某配置文件
+	sdf, err := internal.GetSSHFileByInfoUUID(sdc.ConfigInfoUUID, true)
+	if err != nil {
+		return err
+	}
+	sdc.UUID = sdf.UUID
+	sdc.Path = sdf.Path
+	sdc.Name = sdf.Name
+	sdc.Content = sdf.Content
+	sdc.Version = sdf.Version
+	sdc.IsActive = sdf.IsActive
+	return nil
+}
