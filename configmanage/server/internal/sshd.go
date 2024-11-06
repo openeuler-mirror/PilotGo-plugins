@@ -25,3 +25,12 @@ type SSHDFile struct {
 func (sdf *SSHDFile) Add() error {
 	return db.MySQL().Save(&sdf).Error
 }
+func GetSSHDFileByInfoUUID(uuid string, isindex interface{}) (SSHDFile, error) {
+	var file SSHDFile
+	if isindex != nil {
+		err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
+	return file, err
+}
