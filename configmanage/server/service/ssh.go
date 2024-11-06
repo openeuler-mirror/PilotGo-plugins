@@ -47,6 +47,18 @@ func (sc *SSHConfig) toSSHFile() SSHFile {
 	}
 }
 
+func toSSHConfig(sf *SSHFile) SSHConfig {
+	return SSHConfig{
+		UUID:           sf.UUID,
+		ConfigInfoUUID: sf.ConfigInfoUUID,
+		Path:           sf.Path,
+		Name:           sf.Name,
+		Content:        sf.Content,
+		Version:        sf.Version,
+		IsActive:       sf.IsActive,
+	}
+}
+
 func (sc *SSHConfig) Record() error {
 	//检查info的uuid是否存在
 	ci, err := GetInfoByUUID(sc.ConfigInfoUUID)
@@ -159,4 +171,23 @@ func (sc *SSHConfig) Collect() error {
 // 根据配置uuid获取所有配置文件
 func GetSSHFilesByCinfigUUID(uuid string) ([]SSHFile, error) {
 	return internal.GetSSHFilesByCinfigUUID(uuid)
+}
+
+// 查看某台机器某种类型的的历史配置信息
+func GetSSHFilesByNode(nodeid string) ([]SSHConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var scs []SSHConfig
+	for _, v := range config_nodes {
+		sf, err := internal.GetSSHFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		sc := toSSHConfig(&sf)
+		scs = append(scs, sc)
+	}
+	return scs, nil
 }
