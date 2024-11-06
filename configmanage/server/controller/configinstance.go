@@ -368,6 +368,17 @@ func ApplyConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "apply sshconfig success")
 
 	case global.SSHD:
+		sshdconfig := &service.SSHDConfig{
+			UUID:           query.UUID,
+			ConfigInfoUUID: ci.UUID,
+		}
+		_, err := sshdconfig.Apply()
+		if err != nil {
+			logger.Error("failed to apply sshdconfig file: %s", err.Error())
+			response.Fail(c, "failed to apply sshdconfig:", err.Error())
+			return
+		}
+		response.Success(c, nil, "apply sshdconfig success")
 
 	case global.Sysctl:
 
