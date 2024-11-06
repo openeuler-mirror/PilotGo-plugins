@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 func TestSSHDConfig_Record(t *testing.T) {
@@ -16,7 +17,7 @@ func TestSSHDConfig_Record(t *testing.T) {
 		ConfigInfoUUID: "4d415c77-5a3d-45fb-a221-67dba74db56d",
 		Content:        json.RawMessage(`{"test": "test"}`),
 		Path:           "/ssh",
-		Name:           "ssh.txt",
+		Name:           "sshd.txt",
 		IsActive:       false,
 	}
 
@@ -38,5 +39,15 @@ func TestSSHDConfig_Load(t *testing.T) {
 		fmt.Printf("record error: %s\n", err)
 		os.Exit(-1)
 	}
-	fmt.Printf("sdc: %v\n", sdc)
+	fmt.Printf("sshdconfig: %v\n", sdc)
+}
+
+func TestGetSSHDFileByUUID(t *testing.T) {
+	uuid := "ab9b9ee6-8750-46ce-958c-4d3e26bbf877"
+	sdf, err := internal.GetSSHDFileByUUID(uuid)
+	if err != nil {
+		fmt.Printf("get sshd file error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("sshdfile: %v\n", sdf)
 }

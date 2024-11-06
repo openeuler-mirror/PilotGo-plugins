@@ -34,3 +34,19 @@ func GetSSHDFileByInfoUUID(uuid string, isindex interface{}) (SSHDFile, error) {
 	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
 	return file, err
 }
+
+func GetSSHDFileByUUID(uuid string) (SSHDFile, error) {
+	var file SSHDFile
+	err := db.MySQL().Model(&SSHDFile{}).Where("uuid=?", uuid).Find(&file).Error
+	return file, err
+}
+
+func (sdf *SSHDFile) UpdateByuuid() error {
+	// 将同类配置的所有标志修改为未使用
+	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=?", sdf.ConfigInfoUUID).Update("is_index", 0).Error
+	if err != nil {
+		return err
+	}
+	// 将成功下发的具体某一个配置状态修改为已使用
+	return db.MySQL().Model(&SSHDFile{}).Where("uuid=?", sdf.UUID).Update("is_index", 1).Error
+}
