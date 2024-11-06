@@ -170,6 +170,42 @@ func AddConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "Add sshconfig success")
 
 	case global.SSHD:
+		// 解析参数
+		sshdconfig := &service.SSHDConfig{}
+		if err := json.Unmarshal(query.Data, sshdconfig); err != nil {
+			logger.Error("failed to parse sshdconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse sshdconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(sshdconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		sshdconfig.UUID = uuid.New().String()
+		sshdconfig.ConfigInfoUUID = ci.UUID
+		sshdconfig.IsActive = false
+		sshdconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = sshdconfig.Record()
+		if err != nil {
+			logger.Error("failed to add sshdconfig: %s", err.Error())
+			response.Fail(c, "failed to add sshdconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("add sshdconfig success")
+		response.Success(c, nil, "Add sshdconfig success")
 
 	case global.Sysctl:
 
