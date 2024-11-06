@@ -39,7 +39,7 @@ func TestSSHConfig_Load(t *testing.T) {
 		fmt.Printf("record error: %s\n", err)
 		os.Exit(-1)
 	}
-	fmt.Printf("sc: %v\n", sc)
+	fmt.Printf("sshconfig: %v\n", sc)
 }
 
 func TestGetSSHFileByUUID(t *testing.T) {
@@ -49,15 +49,15 @@ func TestGetSSHFileByUUID(t *testing.T) {
 		fmt.Printf("get ssh file error: %s\n", err)
 		os.Exit(-1)
 	}
-	fmt.Printf("hc: %v\n", sf)
+	fmt.Printf("sshfile: %v\n", sf)
 }
 
 func TestGetSSHFilesByCinfigUUID(t *testing.T) {
 	// 设置测试数据
-	testUUID := "5973e993-6236-4b53-9eb6-0cc23c652460"
+	scUUID := "5973e993-6236-4b53-9eb6-0cc23c652460"
 
 	// 调用被测试的函数
-	files, err := GetSSHFilesByCinfigUUID(testUUID)
+	files, err := GetSSHFilesByCinfigUUID(scUUID)
 	if err != nil {
 		fmt.Printf("load sshfiles error: %s\n", err)
 		os.Exit(-1)
