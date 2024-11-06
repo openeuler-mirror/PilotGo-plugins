@@ -81,3 +81,19 @@ func TestGetSSHFilesByNode(t *testing.T) {
 	}
 	fmt.Println(len(rcs))
 }
+func TestGetSSHDFilesByCinfigUUID(t *testing.T) {
+	// 设置测试数据
+	sdcUUID := "5973e993-6236-4b53-9eb6-0cc23c652460"
+
+	// 调用被测试的函数
+	files, err := GetSSHDFilesByCinfigUUID(sdcUUID)
+	if err != nil {
+		fmt.Printf("load sshdfiles error: %s\n", err)
+		os.Exit(-1)
+	}
+	if len(files) == 0 {
+		fmt.Printf("files is empty: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Println(len(files))
+}
