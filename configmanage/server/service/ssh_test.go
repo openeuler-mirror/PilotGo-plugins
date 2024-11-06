@@ -74,13 +74,14 @@ func TestGetSSHFilesByNode(t *testing.T) {
 	nodeid := "33333333-5f8e-42df-b2d0-49bf55cfeb56"
 
 	// 调用被测试的函数
-	rcs, err := GetSSHFilesByNode(nodeid)
+	scs, err := GetSSHFilesByNode(nodeid)
 	if err != nil {
 		fmt.Printf("GetSSHFilesByNode error: %s\n", err)
 		os.Exit(-1)
 	}
-	fmt.Println(len(rcs))
+	fmt.Println(len(scs))
 }
+
 func TestGetSSHDFilesByCinfigUUID(t *testing.T) {
 	// 设置测试数据
 	sdcUUID := "5973e993-6236-4b53-9eb6-0cc23c652460"

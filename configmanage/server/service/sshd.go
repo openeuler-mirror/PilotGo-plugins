@@ -47,6 +47,18 @@ func (sdc *SSHDConfig) toSSHDFile() SSHDFile {
 	}
 }
 
+func toSSHDConfig(sdf *SSHDFile) SSHDConfig {
+	return SSHDConfig{
+		UUID:           sdf.UUID,
+		ConfigInfoUUID: sdf.ConfigInfoUUID,
+		Path:           sdf.Path,
+		Name:           sdf.Name,
+		Content:        sdf.Content,
+		Version:        sdf.Version,
+		IsActive:       sdf.IsActive,
+	}
+}
+
 func (sdc *SSHDConfig) Record() error {
 	//检查info的uuid是否存在
 	ci, err := GetInfoByUUID(sdc.ConfigInfoUUID)
@@ -161,4 +173,23 @@ func (sdc *SSHDConfig) Collect() error {
 // 根据配置uuid获取所有配置文件
 func GetSSHDFilesByCinfigUUID(uuid string) ([]SSHDFile, error) {
 	return internal.GetSSHDFilesByCinfigUUID(uuid)
+}
+
+// 查看某台机器某种类型的的历史配置信息
+func GetSSHDFilesByNode(nodeid string) ([]SSHDConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var sdcs []SSHDConfig
+	for _, v := range config_nodes {
+		sdf, err := internal.GetSSHDFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		sdc := toSSHDConfig(&sdf)
+		sdcs = append(sdcs, sdc)
+	}
+	return sdcs, nil
 }
