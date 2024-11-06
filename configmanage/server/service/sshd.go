@@ -67,3 +67,13 @@ func (sdc *SSHDConfig) Load() error {
 	sdc.IsActive = sdf.IsActive
 	return nil
 }
+
+// TODO:
+func (sdc *SSHDConfig) Apply() (json.RawMessage, error) {
+	return nil, errors.New("failed to apply SSHDConfig")
+}
+
+// TODO:
+func (sdc *SSHDConfig) Collect() error {
+	return nil
+}
