@@ -50,3 +50,10 @@ func (sdf *SSHDFile) UpdateByuuid() error {
 	// 将成功下发的具体某一个配置状态修改为已使用
 	return db.MySQL().Model(&SSHDFile{}).Where("uuid=?", sdf.UUID).Update("is_index", 1).Error
 }
+
+// 根据配置uuid获取所有配置文件
+func GetSSHDFilesByCinfigUUID(uuid string) ([]SSHDFile, error) {
+	var files []SSHDFile
+	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
+	return files, err
+}

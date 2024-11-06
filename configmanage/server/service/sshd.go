@@ -157,3 +157,8 @@ func (sdc *SSHDConfig) Apply() (json.RawMessage, error) {
 func (sdc *SSHDConfig) Collect() error {
 	return nil
 }
+
+// 根据配置uuid获取所有配置文件
+func GetSSHDFilesByCinfigUUID(uuid string) ([]SSHDFile, error) {
+	return internal.GetSSHDFilesByCinfigUUID(uuid)
+}
