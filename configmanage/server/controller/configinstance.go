@@ -334,6 +334,19 @@ func LoadConfigHandler(c *gin.Context) {
 		response.Success(c, ci, "load sshdconfig success")
 
 	case global.Sysctl:
+		sysctlconfig := &service.SysctlConfig{
+			ConfigInfoUUID: ci.UUID,
+		}
+		// 加载正在使用的配置
+		err = sysctlconfig.Load()
+		if err != nil {
+			logger.Error("failed to get sysctlconfig file: %s", err.Error())
+			response.Fail(c, "failed to get sysctlconfig file:", err.Error())
+			return
+		}
+		ci.Config = sysctlconfig
+		logger.Debug("load sysctlconfig success")
+		response.Success(c, ci, "load sysctlconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)

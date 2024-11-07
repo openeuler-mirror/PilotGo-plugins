@@ -78,3 +78,13 @@ func (sysc *SysctlConfig) Load() error {
 	sysc.IsActive = sysf.IsActive
 	return nil
 }
+
+// TODO:
+func (sysc *SysctlConfig) Apply() (json.RawMessage, error) {
+	return nil, errors.New("failed to apply SysctlConfig")
+}
+
+// TODO:
+func (sysc *SysctlConfig) Collect() error {
+	return nil
+}
