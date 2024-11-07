@@ -1,7 +1,9 @@
 
 .vscode/
 !build
-config.yaml
 .DS_Store
 topology/pkg/
 topology/build
+*.yaml
+# python build cache
+__pycache__
