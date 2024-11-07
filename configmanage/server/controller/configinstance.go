@@ -208,6 +208,42 @@ func AddConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "Add sshdconfig success")
 
 	case global.Sysctl:
+		// 解析参数
+		sysctlconfig := &service.SysctlConfig{}
+		if err := json.Unmarshal(query.Data, sysctlconfig); err != nil {
+			logger.Error("failed to parse sysctlconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse sysctlconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(sysctlconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		sysctlconfig.UUID = uuid.New().String()
+		sysctlconfig.ConfigInfoUUID = ci.UUID
+		sysctlconfig.IsActive = false
+		sysctlconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = sysctlconfig.Record()
+		if err != nil {
+			logger.Error("failed to add sysctlconfig: %s", err.Error())
+			response.Fail(c, "failed to add sysctlconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("add sysctlconfig success")
+		response.Success(c, nil, "Add sysctlconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type:"+query.Type)
