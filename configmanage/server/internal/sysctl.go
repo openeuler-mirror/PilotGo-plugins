@@ -35,3 +35,19 @@ func GetSysctlFileByInfoUUID(uuid string, isindex interface{}) (SysctlFile, erro
 	err := db.MySQL().Model(&SysctlFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
 	return file, err
 }
+
+func GetSysctlFileByUUID(uuid string) (SysctlFile, error) {
+	var file SysctlFile
+	err := db.MySQL().Model(&SysctlFile{}).Where("uuid=?", uuid).Find(&file).Error
+	return file, err
+}
+
+func (sysf *SysctlFile) UpdateByuuid() error {
+	// 将同类配置的所有标志修改为未使用
+	err := db.MySQL().Model(&SysctlFile{}).Where("config_info_uuid=?", sysf.ConfigInfoUUID).Update("is_index", 0).Error
+	if err != nil {
+		return err
+	}
+	// 将成功下发的具体某一个配置状态修改为已使用
+	return db.MySQL().Model(&SysctlFile{}).Where("uuid=?", sysf.UUID).Update("is_index", 1).Error
+}
