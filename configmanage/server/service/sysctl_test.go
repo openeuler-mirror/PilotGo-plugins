@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 func TestSysctlConfig_Record(t *testing.T) {
@@ -39,4 +40,14 @@ func TestSysctlConfig_Load(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Printf("sysc: %v\n", sysc)
+}
+
+func TestGetSysctlFileByUUID(t *testing.T) {
+	uuid := "9eb2dda0-1005-4bfa-acab-3daa9b6fbcc6"
+	sysf, err := internal.GetSysctlFileByUUID(uuid)
+	if err != nil {
+		fmt.Printf("get SysctlFile error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("SysctlFile: %v\n", sysf)
 }
