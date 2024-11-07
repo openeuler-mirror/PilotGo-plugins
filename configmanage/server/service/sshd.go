@@ -88,7 +88,7 @@ func (sdc *SSHDConfig) Load() error {
 // TODO:
 func (sdc *SSHDConfig) Apply() (json.RawMessage, error) {
 	// 从数据库获取下发的信息
-	sdf, err := internal.GetHostFileByUUID(sdc.UUID)
+	sdf, err := internal.GetSSHDFileByUUID(sdc.UUID)
 	if err != nil {
 		return nil, err
 	}

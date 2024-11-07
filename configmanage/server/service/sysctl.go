@@ -4,8 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 	"time"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -79,9 +84,83 @@ func (sysc *SysctlConfig) Load() error {
 	return nil
 }
 
-// TODO:
 func (sysc *SysctlConfig) Apply() (json.RawMessage, error) {
-	return nil, errors.New("failed to apply SysctlConfig")
+	// 从数据库获取下发的信息
+	sysf, err := internal.GetSysctlFileByUUID(sysc.UUID)
+	if err != nil {
+		return nil, err
+	}
+	if sysf.ConfigInfoUUID != sysc.ConfigInfoUUID || sysf.UUID != sysc.UUID {
+		return nil, errors.New("数据库不存在此配置")
+	}
+
+	batchids, err := internal.GetConfigBatchByUUID(sysc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+	departids, err := internal.GetConfigDepartByUUID(sysc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+	nodes, err := internal.GetConfigNodesByUUID(sysc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 从hc中解析下发的文件内容，逐一进行下发
+	Repofile := common.File{}
+	err = json.Unmarshal([]byte(sysf.Content), &Repofile)
+	if err != nil {
+		return nil, err
+	}
+	result := ""
+	de := Deploy{
+		DeployBatch: common.Batch{
+			BatchIds:      batchids,
+			DepartmentIDs: departids,
+			MachineUUIDs:  nodes,
+		},
+		DeployPath:     Repofile.Path,
+		DeployFileName: Repofile.Name,
+		DeployText:     Repofile.Content,
+	}
+	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: de,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if r.StatusCode != http.StatusOK {
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+	}
+
+	resp := &common.CommonResult{}
+	if err := json.Unmarshal(r.Body, resp); err != nil {
+		return nil, err
+	}
+	if resp.Code != http.StatusOK {
+		return nil, errors.New(resp.Message)
+	}
+
+	data := []common.NodeResult{}
+	if err := resp.ParseData(&data); err != nil {
+		return nil, err
+	}
+	// 将执行失败的文件、机器信息和原因添加到结果字符串中
+	for _, d := range data {
+		if d.Error != "" {
+			result = result + Repofile.Content + "文件" + d.UUID + ":" + d.Error + "\n"
+		}
+	}
+
+	// TODO:部分成功如何修改数据库
+	if result == "" {
+		//下发成功修改数据库应用版本
+		err = sysf.UpdateByuuid()
+		return nil, err
+	}
+	return nil, errors.New(result + "failed to apply SysctlConfig")
 }
 
 // TODO:
