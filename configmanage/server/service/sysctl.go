@@ -63,3 +63,18 @@ func (sysc *SysctlConfig) Record() error {
 	sysf := sysc.toSysctlFile()
 	return sysf.Add()
 }
+
+func (sysc *SysctlConfig) Load() error {
+	// 加载正在使用的某配置文件
+	sysf, err := internal.GetSysctlFileByInfoUUID(sysc.ConfigInfoUUID, true)
+	if err != nil {
+		return err
+	}
+	sysc.UUID = sysf.UUID
+	sysc.Path = sysf.Path
+	sysc.Name = sysf.Name
+	sysc.Content = sysf.Content
+	sysc.Version = sysf.Version
+	sysc.IsActive = sysf.IsActive
+	return nil
+}
