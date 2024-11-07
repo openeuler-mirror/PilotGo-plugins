@@ -58,6 +58,18 @@ func (sysc *SysctlConfig) toSysctlFile() SysctlFile {
 	}
 }
 
+func toSysctlConfig(sysf *SysctlFile) SysctlConfig {
+	return SysctlConfig{
+		UUID:           sysf.UUID,
+		ConfigInfoUUID: sysf.ConfigInfoUUID,
+		Path:           sysf.Path,
+		Name:           sysf.Name,
+		Content:        sysf.Content,
+		Version:        sysf.Version,
+		IsActive:       sysf.IsActive,
+	}
+}
+
 func (sysc *SysctlConfig) Record() error {
 	//检查info的uuid是否存在
 	ci, err := GetInfoByUUID(sysc.ConfigInfoUUID)
@@ -171,4 +183,23 @@ func (sysc *SysctlConfig) Collect() error {
 // 根据配置uuid获取所有配置文件
 func GetSysctlFilesByCinfigUUID(uuid string) ([]SysctlFile, error) {
 	return internal.GetSysctlFilesByCinfigUUID(uuid)
+}
+
+// 查看某台机器某种类型的的历史配置信息
+func GetSysctlFilesByNode(nodeid string) ([]SysctlConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var syscs []SysctlConfig
+	for _, v := range config_nodes {
+		sysf, err := internal.GetSysctlFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		sysc := toSysctlConfig(&sysf)
+		syscs = append(syscs, sysc)
+	}
+	return syscs, nil
 }
