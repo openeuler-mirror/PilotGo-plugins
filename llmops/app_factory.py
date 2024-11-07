@@ -1,6 +1,7 @@
 from flask import Flask
 from config.config import init_config
 from utils.logger import setup_logger
+from router.task import task_blueprint
 
 
 def create_app() -> Flask:
@@ -16,6 +17,8 @@ def create_app() -> Flask:
     logger = setup_logger()
     app.logger = logger
 
+    # 注册蓝图
+    app.register_blueprint(task_blueprint, url_prefix="/task")
     return app
 
 
