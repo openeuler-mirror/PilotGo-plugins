@@ -25,3 +25,13 @@ type SysctlFile struct {
 func (sysf *SysctlFile) Add() error {
 	return db.MySQL().Save(&sysf).Error
 }
+
+func GetSysctlFileByInfoUUID(uuid string, isindex interface{}) (SysctlFile, error) {
+	var file SysctlFile
+	if isindex != nil {
+		err := db.MySQL().Model(&SysctlFile{}).Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Model(&SysctlFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
+	return file, err
+}
