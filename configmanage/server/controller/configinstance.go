@@ -430,6 +430,17 @@ func ApplyConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "apply sshdconfig success")
 
 	case global.Sysctl:
+		sysctlconfig := &service.SysctlConfig{
+			UUID:           query.UUID,
+			ConfigInfoUUID: ci.UUID,
+		}
+		_, err := sysctlconfig.Apply()
+		if err != nil {
+			logger.Error("failed to apply sysctlconfig file: %s", err.Error())
+			response.Fail(c, "failed to apply sysctlconfig:", err.Error())
+			return
+		}
+		response.Success(c, nil, "apply sysctlconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
