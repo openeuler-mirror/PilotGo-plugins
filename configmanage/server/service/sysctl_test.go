@@ -68,3 +68,16 @@ func TestGetSysctlFilesByCinfigUUID(t *testing.T) {
 	}
 	fmt.Println(len(files))
 }
+
+func TestGetSysctlFilesByNode(t *testing.T) {
+	// 设置测试数据
+	nodeid := "55555555-5f8e-42df-b2d0-49bf55cfeb56"
+
+	// 调用被测试的函数
+	syscs, err := GetSysctlFilesByNode(nodeid)
+	if err != nil {
+		fmt.Printf("GetSysctlFilesByNode error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Println(len(syscs))
+}
