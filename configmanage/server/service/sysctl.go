@@ -167,3 +167,8 @@ func (sysc *SysctlConfig) Apply() (json.RawMessage, error) {
 func (sysc *SysctlConfig) Collect() error {
 	return nil
 }
+
+// 根据配置uuid获取所有配置文件
+func GetSysctlFilesByCinfigUUID(uuid string) ([]SysctlFile, error) {
+	return internal.GetSysctlFilesByCinfigUUID(uuid)
+}
