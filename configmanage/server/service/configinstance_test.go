@@ -119,3 +119,19 @@ func TestConfigInstanceTypeSSHD_Add(t *testing.T) {
 		os.Exit(-1)
 	}
 }
+
+func TestConfigInstanceTypeSysctl_Add(t *testing.T) {
+	ci := &ConfigInstance{
+		UUID:        uuid.New().String(),
+		Type:        global.Sysctl,
+		Description: "test-Sysctl-description",
+		BatchIds:    []int{6},
+		DepartIds:   []int{60},
+		Nodes:       []string{"55555555-5f8e-42df-b2d0-49bf55cfeb56"},
+	}
+	err := ci.Add()
+	if err != nil {
+		fmt.Printf("Add() error = %v, want nil", err)
+		os.Exit(-1)
+	}
+}
