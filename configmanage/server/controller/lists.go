@@ -109,6 +109,15 @@ func ConfigInfoHandler(c *gin.Context) {
 		response.Success(c, sshdfiles, "load sshdconfig success")
 
 	case global.Sysctl:
+		// 获取有关配置的所有文件信息
+		sysctlfiles, err := service.GetSysctlFilesByCinfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get sysctlconfig files: %s", err.Error())
+			response.Fail(c, "failed to get sysctlconfig files", err.Error())
+			return
+		}
+		logger.Debug("load sysctlconfig success")
+		response.Success(c, sysctlfiles, "load sysctlconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
@@ -176,6 +185,15 @@ func ConfigHistoryHandler(c *gin.Context) {
 		response.Success(c, sshdconfig, "load sshdconfig success")
 
 	case global.Sysctl:
+		// 获取有关本台机器配置的所有文件信息
+		sysctlfiles, err := service.GetSysctlFilesByNode(query.UUID)
+		if err != nil {
+			logger.Error("failed to get sysctlconfig files: %s", err.Error())
+			response.Fail(c, "failed to get sysctlconfig files", err.Error())
+			return
+		}
+		logger.Debug("load sysctlconfig success")
+		response.Success(c, sysctlfiles, "load sysctlconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
