@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
+	"github.com/google/uuid"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -175,8 +177,72 @@ func (sysc *SysctlConfig) Apply() (json.RawMessage, error) {
 	return nil, errors.New(result + "failed to apply SysctlConfig")
 }
 
-// TODO:
 func (sysc *SysctlConfig) Collect() error {
+	ci, err := GetConfigByUUID(sysc.ConfigInfoUUID)
+	if err != nil {
+		return err
+	}
+
+	//发请求获取配置详情
+	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/getnodefiles"
+	p := struct {
+		DeployBatch common.Batch `json:"deploybatch"`
+		Path        string       `json:"path"`
+		FileName    string       `json:"filename"`
+	}{
+		DeployBatch: common.Batch{
+			BatchIds:      ci.BatchIds,
+			DepartmentIDs: ci.DepartIds,
+			MachineUUIDs:  ci.Nodes,
+		},
+		Path:     sysc.Path,
+		FileName: sysc.Name,
+	}
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+	})
+	if err != nil {
+		return err
+	}
+	if r.StatusCode != http.StatusOK {
+		return errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+	}
+
+	resp := &common.CommonResult{}
+	if err := json.Unmarshal(r.Body, resp); err != nil {
+		return err
+	}
+	if resp.Code != http.StatusOK {
+		return errors.New(resp.Message)
+	}
+
+	data := []common.NodeResult{}
+	if err := resp.ParseData(&data); err != nil {
+		return err
+	}
+	result := ""
+	for _, v := range data {
+		if v.Error == "" {
+			file, _ := json.Marshal(v.Data)
+			rf := RepoFile{
+				UUID:           uuid.New().String(),
+				ConfigInfoUUID: sysc.ConfigInfoUUID,
+				Content:        file,
+				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
+				IsFromHost:     true,
+				Hostuuid:       v.UUID,
+			}
+			err = rf.Add()
+			if err != nil {
+				logger.Error("failed to add sysctl config: %s", err.Error())
+			}
+		} else {
+			result = result + v.UUID + ":" + v.Error + "\n"
+		}
+	}
+	if result != "" {
+		return errors.New(result + "failed to collect sysctl config")
+	}
 	return nil
 }
 
