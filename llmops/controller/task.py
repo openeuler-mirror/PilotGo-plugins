@@ -23,3 +23,18 @@ def task_status(task_id):
         return not_found(None, "未找到该任务")
 
     return success(task_info, "获取到任务状态")
+
+
+# 确认用户选择的方案
+def confirm_option():
+    data = request.json
+    task_id = data.get("task_id")
+    selected_option = data.get("selected_option")
+
+    if not task_id or not selected_option:
+        return not_found(None, "任务id和所选方案内容不能为空")
+
+    result = confirm_task_option(task_id, selected_option)
+    if "error" in result:
+        return fail(None, result)
+    return success(result, "已确认所选方案")
