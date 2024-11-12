@@ -353,7 +353,7 @@ func LoadConfigHandler(c *gin.Context) {
 	}
 }
 
-// TODO： 考虑问价下发和执行命令使用配置
+// TODO： 考虑文件下发和执行命令使用配置
 func ApplyConfigHandler(c *gin.Context) {
 	//TODO:修改请求的参数
 	query := &struct {
@@ -442,6 +442,63 @@ func ApplyConfigHandler(c *gin.Context) {
 		}
 		response.Success(c, nil, "apply sysctlconfig success")
 
+	default:
+		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
+	}
+}
+
+// 修改某配置信息
+func UpdateConfigHandler(c *gin.Context) {
+	// 某配置的uuid和类型不可以修改，具体配置中的uuid不可修改
+	query := &struct {
+		UUID        string          `json:"uuid"`
+		Type        string          `json:"type"`
+		Description string          `json:"description"`
+		BatchIds    []int           `json:"batchids"`
+		DepartIds   []int           `json:"departids"`
+		Nodes       []string        `json:"uuids"`
+		Data        json.RawMessage `json:"data"`
+	}{}
+	err := c.ShouldBindJSON(query)
+	if err != nil {
+		response.Fail(c, "parameter error", err.Error())
+		return
+	}
+	logger.Debug("load config")
+
+	// 获取ConfigInstance
+	ci, err := service.GetConfigByUUID(query.UUID)
+	if err != nil {
+		logger.Error("failed to get configinfo file: %s", err.Error())
+		response.Fail(c, "get configinfo fail:", err.Error())
+		return
+	}
+
+	// 判断类型是否一致，或者数据库
+	if ci == nil || ci.Type != query.Type {
+		response.Fail(c, "configinfo not exist", "")
+		return
+	}
+
+	// 更新配置信息
+	ci.Description = query.Description
+	ci.BatchIds = query.BatchIds
+	ci.DepartIds = query.DepartIds
+	ci.Nodes = query.Nodes
+	err = ci.Add()
+	if err != nil {
+		logger.Error("failed to update configinstance: %s", err.Error())
+		response.Fail(c, "failed to update configinstance:", err.Error())
+		return
+	}
+
+	// 获取对应配置管理的参数
+	switch ci.Type {
+	case global.Repo:
+	case global.Host:
+	case global.SSH:
+	case global.SSHD:
+	case global.Sysctl:
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}

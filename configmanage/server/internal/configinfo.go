@@ -10,7 +10,19 @@ type ConfigInfo struct {
 }
 
 func (cm *ConfigInfo) Add() error {
-	return db.MySQL().Create(cm).Error
+	sql := `
+	INSERT INTO config_info (uuid,type,description) 
+	VALUES (?, ?, ?) 
+	ON DUPLICATE KEY UPDATE
+		uuid = VALUES(uuid),
+		type = VALUES(type),
+		description = VALUES(description);
+	`
+	return db.MySQL().Exec(sql,
+		cm.UUID,
+		cm.Type,
+		cm.Description,
+	).Error
 }
 
 func GetInfoByUUID(uuid string) (ConfigInfo, error) {

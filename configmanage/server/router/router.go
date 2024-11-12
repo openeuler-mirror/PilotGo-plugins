@@ -36,5 +36,7 @@ func RegisterAPIs(router *gin.Engine) {
 		api.POST("/load", controller.LoadConfigHandler)
 		// 下发配置管理
 		api.POST("/apply", controller.ApplyConfigHandler)
+		// 修改配置信息
+		api.POST("/update", controller.UpdateConfigHandler)
 	}
 }
