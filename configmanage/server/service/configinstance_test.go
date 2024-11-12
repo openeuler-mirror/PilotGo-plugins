@@ -135,3 +135,19 @@ func TestConfigInstanceTypeSysctl_Add(t *testing.T) {
 		os.Exit(-1)
 	}
 }
+
+func TestUpdate(t *testing.T) {
+	ci := &ConfigInstance{
+		UUID:        "9c3f8e3d-5f8e-42df-b2d0-49bf55cfeb56",
+		Type:        global.Repo,
+		Description: "test-repo",
+		BatchIds:    []int{6},
+		DepartIds:   []int{60},
+		Nodes:       []string{"qqqqqqqq-aac8-44c1-8c21-7de4ef03c04b"},
+	}
+	err := ci.Add()
+	if err != nil {
+		fmt.Printf("Add() error = %v, want nil", err)
+		os.Exit(-1)
+	}
+}

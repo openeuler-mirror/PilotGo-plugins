@@ -88,6 +88,20 @@ func (ci *ConfigInstance) Add() error {
 		return err
 	}
 
+	// 删除配置和机器关联信息，重新添加，删除的时候忽略记录不存在错误
+	err = internal.DelConfigNodeByUUID(ci.UUID)
+	if err != nil {
+		return err
+	}
+	err = internal.DelConfigBatchByUUID(ci.UUID)
+	if err != nil {
+		return err
+	}
+	err = internal.DelConfigDepartByUUID(ci.UUID)
+	if err != nil {
+		return err
+	}
+
 	for _, v := range ci.Nodes {
 		cn := ConfigNode{
 			ConfigInfoUUID: ci.UUID,
