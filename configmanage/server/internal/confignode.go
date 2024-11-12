@@ -1,6 +1,8 @@
 package internal
 
-import "openeuler.org/PilotGo/configmanage-plugin/db"
+import (
+	"openeuler.org/PilotGo/configmanage-plugin/db"
+)
 
 type ConfigNode struct {
 	ID             int        `gorm:"primary_key;AUTO_INCREMENT"`
@@ -10,7 +12,7 @@ type ConfigNode struct {
 }
 
 func (cn *ConfigNode) Add() error {
-	return db.MySQL().Save(&cn).Error
+	return db.MySQL().Create(&cn).Error
 }
 
 func GetConfigNodesByUUID(uuid string) ([]string, error) {
@@ -25,6 +27,11 @@ func GetConfigNodesByNode(uuid string) ([]ConfigNode, error) {
 	return cns, err
 }
 
+func DelConfigNodeByUUID(uuid string) error {
+	err := db.MySQL().Model(&ConfigNode{}).Where("config_info_uuid=?", uuid).Delete(&ConfigNode{}).Error
+	return err
+}
+
 type ConfigBatch struct {
 	ID             int        `gorm:"primary_key;AUTO_INCREMENT"`
 	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
@@ -33,13 +40,18 @@ type ConfigBatch struct {
 }
 
 func (cb *ConfigBatch) Add() error {
-	return db.MySQL().Save(&cb).Error
+	return db.MySQL().Create(&cb).Error
 }
 
 func GetConfigBatchByUUID(uuid string) ([]int, error) {
 	var nodes []int
 	err := db.MySQL().Model(&ConfigBatch{}).Where("config_info_uuid=?", uuid).Select("batch_id").Find(&nodes).Error
 	return nodes, err
+}
+
+func DelConfigBatchByUUID(uuid string) error {
+	err := db.MySQL().Where("config_info_uuid=?", uuid).Delete(&ConfigBatch{}).Error
+	return err
 }
 
 type ConfigDepart struct {
@@ -50,11 +62,16 @@ type ConfigDepart struct {
 }
 
 func (cd *ConfigDepart) Add() error {
-	return db.MySQL().Save(&cd).Error
+	return db.MySQL().Create(&cd).Error
 }
 
 func GetConfigDepartByUUID(uuid string) ([]int, error) {
 	var nodes []int
 	err := db.MySQL().Model(&ConfigDepart{}).Where("config_info_uuid=?", uuid).Select("depart_id").Find(&nodes).Error
 	return nodes, err
+}
+
+func DelConfigDepartByUUID(uuid string) error {
+	err := db.MySQL().Where("config_info_uuid=?", uuid).Delete(&ConfigDepart{}).Error
+	return err
 }
