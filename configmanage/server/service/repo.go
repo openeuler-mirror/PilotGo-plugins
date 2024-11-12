@@ -51,6 +51,7 @@ func (rc *RepoConfig) toRepoFile() RepoFile {
 		Content:        rc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       rc.IsActive,
+		CreatedAt:      time.Now(),
 	}
 }
 
@@ -67,12 +68,6 @@ func toRepoConfig(rf *RepoFile) RepoConfig {
 }
 
 func (rc *RepoConfig) Record() error {
-	//检查info的uuid是否存在
-	ci, err := GetInfoByUUID(rc.ConfigInfoUUID)
-	if err != nil || ci.UUID == "" {
-		return errors.New("configinfo uuid not exist")
-	}
-
 	rf := rc.toRepoFile()
 	return rf.Add()
 }

@@ -46,6 +46,7 @@ func (sdc *SSHDConfig) toSSHDFile() SSHDFile {
 		Content:        sdc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       sdc.IsActive,
+		CreatedAt:      time.Now(),
 	}
 }
 
@@ -62,12 +63,6 @@ func toSSHDConfig(sdf *SSHDFile) SSHDConfig {
 }
 
 func (sdc *SSHDConfig) Record() error {
-	//检查info的uuid是否存在
-	ci, err := GetInfoByUUID(sdc.ConfigInfoUUID)
-	if err != nil || ci.UUID == "" {
-		return errors.New("configinfo uuid not exist")
-	}
-
 	sdf := sdc.toSSHDFile()
 	return sdf.Add()
 }
