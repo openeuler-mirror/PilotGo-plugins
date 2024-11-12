@@ -23,7 +23,31 @@ type HostFile struct {
 }
 
 func (hf *HostFile) Add() error {
-	return db.MySQL().Save(&hf).Error
+	sql := `
+	INSERT INTO host_file (uuid,config_info_uuid,path,name,content,version,is_active,is_from_host,hostuuid) 
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+	ON DUPLICATE KEY UPDATE
+		uuid = VALUES(uuid),
+		config_info_uuid = VALUES(config_info_uuid),
+		path = VALUES(path),
+		name = VALUES(name),
+		content = VALUES(content),
+		version = VALUES(version),
+		is_active = VALUES(is_active),
+		is_from_host = VALUES(is_from_host),
+		hostuuid = VALUES(hostuuid);
+	`
+	return db.MySQL().Exec(sql,
+		hf.UUID,
+		hf.ConfigInfoUUID,
+		hf.Path,
+		hf.Name,
+		hf.Content,
+		hf.Version,
+		hf.IsActive,
+		hf.IsFromHost,
+		hf.Hostuuid,
+	).Error
 }
 
 func GetHostFileByInfoUUID(uuid string, isindex interface{}) (HostFile, error) {

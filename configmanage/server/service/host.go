@@ -63,12 +63,6 @@ func toHostConfig(hf *HostFile) HostConfig {
 }
 
 func (hc *HostConfig) Record() error {
-	//检查info的uuid是否存在
-	ci, err := GetInfoByUUID(hc.ConfigInfoUUID)
-	if err != nil || ci.UUID == "" {
-		return errors.New("configinfo uuid not exist")
-	}
-
 	hf := hc.toHostFile()
 	return hf.Add()
 }
