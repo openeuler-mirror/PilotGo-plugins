@@ -179,10 +179,10 @@ func (sysc *SysctlConfig) Apply() ([]NodeResult, error) {
 	return results, errors.New("failed to apply SysctlConfig")
 }
 
-func (sysc *SysctlConfig) Collect() error {
+func (sysc *SysctlConfig) Collect() ([]NodeResult, error) {
 	ci, err := GetConfigByUUID(sysc.ConfigInfoUUID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//发请求获取配置详情
@@ -204,25 +204,25 @@ func (sysc *SysctlConfig) Collect() error {
 		Body: p,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if r.StatusCode != http.StatusOK {
-		return errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
 	}
 
 	resp := &common.CommonResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
-		return err
+		return nil, err
 	}
 	if resp.Code != http.StatusOK {
-		return errors.New(resp.Message)
+		return nil, errors.New(resp.Message)
 	}
 
 	data := []common.NodeResult{}
 	if err := resp.ParseData(&data); err != nil {
-		return err
+		return nil, err
 	}
-	result := ""
+	results := []NodeResult{}
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
@@ -237,15 +237,26 @@ func (sysc *SysctlConfig) Collect() error {
 			err = rf.Add()
 			if err != nil {
 				logger.Error("failed to add sysctl config: %s", err.Error())
+				results = append(results, NodeResult{
+					Type:     global.Sysctl,
+					NodeUUID: v.UUID,
+					Detail:   "failed to collect sysctl config to db",
+					Result:   false,
+					Err:      err.Error()})
 			}
 		} else {
-			result = result + v.UUID + ":" + v.Error + "\n"
+			results = append(results, NodeResult{
+				Type:     global.Sysctl,
+				NodeUUID: v.UUID,
+				Detail:   "failed to collect sysctl config:" + v.Data.(string),
+				Result:   false,
+				Err:      v.Error})
 		}
 	}
-	if result != "" {
-		return errors.New(result + "failed to collect sysctl config")
+	if results != nil {
+		return results, errors.New("failed to collect sysctl config")
 	}
-	return nil
+	return nil, nil
 }
 
 func GetSysctlFileByInfoUUID(uuid string, isindex interface{}) (SysctlFile, error) {
