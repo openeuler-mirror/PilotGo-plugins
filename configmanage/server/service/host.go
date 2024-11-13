@@ -168,10 +168,10 @@ func (hc *HostConfig) Apply() ([]NodeResult, error) {
 	return results, errors.New("failed to apply host config")
 }
 
-func (hc *HostConfig) Collect() error {
+func (hc *HostConfig) Collect() ([]NodeResult, error) {
 	ci, err := GetConfigByUUID(hc.ConfigInfoUUID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//发请求获取配置详情
@@ -193,25 +193,25 @@ func (hc *HostConfig) Collect() error {
 		Body: p,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if r.StatusCode != http.StatusOK {
-		return errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
 	}
 
 	resp := &common.CommonResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
-		return err
+		return nil, err
 	}
 	if resp.Code != http.StatusOK {
-		return errors.New(resp.Message)
+		return nil, errors.New(resp.Message)
 	}
 
 	data := []common.NodeResult{}
 	if err := resp.ParseData(&data); err != nil {
-		return err
+		return nil, err
 	}
-	result := ""
+	results := []NodeResult{}
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
@@ -226,15 +226,26 @@ func (hc *HostConfig) Collect() error {
 			err = rf.Add()
 			if err != nil {
 				logger.Error("failed to add hostconfig: %s", err.Error())
+				results = append(results, NodeResult{
+					Type:     global.Host,
+					NodeUUID: v.UUID,
+					Detail:   "failed to collect host config to db",
+					Result:   false,
+					Err:      err.Error()})
 			}
 		} else {
-			result = result + v.UUID + ":" + v.Error + "\n"
+			results = append(results, NodeResult{
+				Type:     global.Host,
+				NodeUUID: v.UUID,
+				Detail:   "failed to collect host config:" + v.Data.(string),
+				Result:   false,
+				Err:      v.Error})
 		}
 	}
-	if result != "" {
-		return errors.New(result + "failed to collect host config")
+	if results != nil {
+		return results, errors.New("failed to collect host config")
 	}
-	return nil
+	return nil, nil
 }
 
 func GetHostFileByInfoUUID(uuid string, isindex interface{}) (HostFile, error) {
