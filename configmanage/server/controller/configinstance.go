@@ -495,10 +495,61 @@ func UpdateConfigHandler(c *gin.Context) {
 	// 获取对应配置管理的参数
 	switch ci.Type {
 	case global.Repo:
+		// 解析参数
+		repoconfig := &service.RepoConfig{}
+		if err := json.Unmarshal(query.Data, repoconfig); err != nil {
+			logger.Error("failed to parse repoconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse repoconfig parameter:", err.Error())
+			return
+		}
+
+		files := []common.File{}
+		if err := json.Unmarshal([]byte(repoconfig.Content), &files); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		for i, v := range files {
+			files[i].Content = base64.StdEncoding.EncodeToString([]byte(v.Content))
+		}
+
+		// 查询此配置的内容
+		rf, err := service.GetRepoFileByInfoUUID(ci.UUID, nil)
+		if err != nil {
+			logger.Error("failed to parse repoconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse repoconfig parameter:", err.Error())
+			return
+		}
+
+		// 更新参数
+		repoconfig.UUID = rf.UUID
+		repoconfig.ConfigInfoUUID = ci.UUID
+		repoconfig.IsActive = false
+		repoconfig.Content, err = json.Marshal(files)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = repoconfig.Record()
+		if err != nil {
+			logger.Error("failed to add repoconfig: %s", err.Error())
+			response.Fail(c, "failed to add repoconfig:", err.Error())
+			return
+		}
+		logger.Debug("add repoconfig success")
+		response.Success(c, nil, "Add repo config success")
+
 	case global.Host:
+
 	case global.SSH:
+
 	case global.SSHD:
+
 	case global.Sysctl:
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
