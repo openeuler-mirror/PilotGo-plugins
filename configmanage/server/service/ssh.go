@@ -46,6 +46,7 @@ func (sc *SSHConfig) toSSHFile() SSHFile {
 		Content:        sc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       sc.IsActive,
+		CreatedAt:      time.Now(),
 	}
 }
 
@@ -62,12 +63,6 @@ func toSSHConfig(sf *SSHFile) SSHConfig {
 }
 
 func (sc *SSHConfig) Record() error {
-	//检查info的uuid是否存在
-	ci, err := GetInfoByUUID(sc.ConfigInfoUUID)
-	if err != nil || ci.UUID == "" {
-		return errors.New("configinfo uuid not exist")
-	}
-
 	sf := sc.toSSHFile()
 	return sf.Add()
 }

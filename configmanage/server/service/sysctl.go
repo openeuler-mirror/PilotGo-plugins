@@ -57,6 +57,7 @@ func (sysc *SysctlConfig) toSysctlFile() SysctlFile {
 		Content:        sysc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       sysc.IsActive,
+		CreatedAt:      time.Now(),
 	}
 }
 
@@ -73,12 +74,6 @@ func toSysctlConfig(sysf *SysctlFile) SysctlConfig {
 }
 
 func (sysc *SysctlConfig) Record() error {
-	//检查info的uuid是否存在
-	ci, err := GetInfoByUUID(sysc.ConfigInfoUUID)
-	if err != nil || ci.UUID == "" {
-		return errors.New("configinfo uuid not exist")
-	}
-
 	sysf := sysc.toSysctlFile()
 	return sysf.Add()
 }
