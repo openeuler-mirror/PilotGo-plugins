@@ -231,6 +231,10 @@ func (sdc *SSHDConfig) Collect() error {
 	return nil
 }
 
+func GetSSHDFileByInfoUUID(uuid string, isindex interface{}) (SSHDFile, error) {
+	return internal.GetSSHDFileByInfoUUID(uuid, isindex)
+}
+
 // 根据配置uuid获取所有配置文件
 func GetSSHDFilesByCinfigUUID(uuid string) ([]SSHDFile, error) {
 	return internal.GetSSHDFilesByCinfigUUID(uuid)
