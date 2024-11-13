@@ -516,8 +516,8 @@ func UpdateConfigHandler(c *gin.Context) {
 		// 查询此配置的内容
 		rf, err := service.GetRepoFileByInfoUUID(ci.UUID, nil)
 		if err != nil {
-			logger.Error("failed to parse repoconfig parameter: %s", err.Error())
-			response.Fail(c, "failed to parse repoconfig parameter:", err.Error())
+			logger.Error("failed to get repoconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to get repoconfig parameter:", err.Error())
 			return
 		}
 
@@ -535,14 +535,59 @@ func UpdateConfigHandler(c *gin.Context) {
 		// 将参数添加到数据库
 		err = repoconfig.Record()
 		if err != nil {
-			logger.Error("failed to add repoconfig: %s", err.Error())
-			response.Fail(c, "failed to add repoconfig:", err.Error())
+			logger.Error("failed to update repoconfig: %s", err.Error())
+			response.Fail(c, "failed to update repoconfig:", err.Error())
 			return
 		}
-		logger.Debug("add repoconfig success")
-		response.Success(c, nil, "Add repo config success")
+		logger.Debug("update repoconfig success")
+		response.Success(c, nil, "update repo config success")
 
 	case global.Host:
+		// 解析参数
+		hostconfig := &service.HostConfig{}
+		if err := json.Unmarshal(query.Data, hostconfig); err != nil {
+			logger.Error("failed to parse hostconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse hostconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(hostconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		// 查询此配置的内容
+		hf, err := service.GetHostFileByInfoUUID(ci.UUID, nil)
+		if err != nil {
+			logger.Error("failed to get hostconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to get hostconfig parameter:", err.Error())
+			return
+		}
+
+		// 更新参数
+		hostconfig.UUID = hf.UUID
+		hostconfig.ConfigInfoUUID = ci.UUID
+		hostconfig.IsActive = false
+		hostconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = hostconfig.Record()
+		if err != nil {
+			logger.Error("failed to update hostconfig: %s", err.Error())
+			response.Fail(c, "failed to update hostconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("update hostconfig success")
+		response.Success(c, nil, "update host config success")
 
 	case global.SSH:
 
