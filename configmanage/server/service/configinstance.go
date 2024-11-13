@@ -1,8 +1,6 @@
 package service
 
 import (
-	"encoding/json"
-
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"openeuler.org/PilotGo/configmanage-plugin/db"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
@@ -74,7 +72,7 @@ type Config interface {
 	// 单机采集数据
 	Collect() error
 	// 依据agent uuid进行配置下发
-	Apply() (json.RawMessage, error)
+	Apply() ([]NodeResult, error)
 }
 
 func (ci *ConfigInstance) Add() error {
@@ -178,4 +176,13 @@ type Deploy struct {
 	DeployPath     string       `json:"deploypath"`
 	DeployFileName string       `json:"deployname"`
 	DeployText     string       `json:"deployfile"`
+}
+
+// 构造单机采集和配置下发结果结构
+type NodeResult struct {
+	Type     string `json:"type"`     // 指明配置类型
+	NodeUUID string `json:"nodeuuid"` // 指明执行机器的uuid
+	Detail   string `json:"detail"`   // 执行详情
+	Result   bool   `json:"result"`   // 执行结果
+	Err      string `json:"err"`      // 错误信息
 }
