@@ -241,6 +241,10 @@ func (sysc *SysctlConfig) Collect() error {
 	return nil
 }
 
+func GetSysctlFileByInfoUUID(uuid string, isindex interface{}) (SysctlFile, error) {
+	return internal.GetSysctlFileByInfoUUID(uuid, isindex)
+}
+
 // 根据配置uuid获取所有配置文件
 func GetSysctlFilesByCinfigUUID(uuid string) ([]SysctlFile, error) {
 	return internal.GetSysctlFilesByCinfigUUID(uuid)
