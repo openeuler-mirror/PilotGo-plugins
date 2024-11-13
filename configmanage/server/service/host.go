@@ -13,6 +13,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/global"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -82,7 +83,7 @@ func (hc *HostConfig) Load() error {
 	return nil
 }
 
-func (hc *HostConfig) Apply() (json.RawMessage, error) {
+func (hc *HostConfig) Apply() ([]NodeResult, error) {
 	//从数据库获取下发的信息
 	hf, err := internal.GetHostFileByUUID(hc.UUID)
 	if err != nil {
@@ -106,21 +107,21 @@ func (hc *HostConfig) Apply() (json.RawMessage, error) {
 	}
 
 	//从hc中解析下发的文件内容，逐一进行下发
-	Repofile := common.File{}
-	err = json.Unmarshal([]byte(hf.Content), &Repofile)
+	hostfile := common.File{}
+	err = json.Unmarshal([]byte(hf.Content), &hostfile)
 	if err != nil {
 		return nil, err
 	}
-	result := ""
+	results := []NodeResult{}
 	de := Deploy{
 		DeployBatch: common.Batch{
 			BatchIds:      batchids,
 			DepartmentIDs: departids,
 			MachineUUIDs:  nodes,
 		},
-		DeployPath:     Repofile.Path,
-		DeployFileName: Repofile.Name,
-		DeployText:     Repofile.Content,
+		DeployPath:     hostfile.Path,
+		DeployFileName: hostfile.Name,
+		DeployText:     hostfile.Content,
 	}
 	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
 	r, err := httputils.Post(url, &httputils.Params{
@@ -148,17 +149,23 @@ func (hc *HostConfig) Apply() (json.RawMessage, error) {
 	// 将执行失败的文件、机器信息和原因添加到结果字符串中
 	for _, d := range data {
 		if d.Error != "" {
-			result = result + Repofile.Content + "文件" + d.UUID + ":" + d.Error + "\n"
+			results = append(results, NodeResult{
+				Type:     global.Host,
+				NodeUUID: d.UUID,
+				Detail:   hostfile.Content,
+				Result:   false,
+				Err:      d.Error,
+			})
 		}
 	}
 
 	//TODO:部分成功如何修改数据库
-	if result == "" {
+	if results == nil {
 		//下发成功修改数据库应用版本
 		err = hf.UpdateByuuid()
 		return nil, err
 	}
-	return nil, errors.New(result + "failed to apply host config")
+	return results, errors.New("failed to apply host config")
 }
 
 func (hc *HostConfig) Collect() error {
