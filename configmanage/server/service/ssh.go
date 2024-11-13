@@ -13,6 +13,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/global"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -81,7 +82,7 @@ func (sc *SSHConfig) Load() error {
 	return nil
 }
 
-func (sc *SSHConfig) Apply() (json.RawMessage, error) {
+func (sc *SSHConfig) Apply() ([]NodeResult, error) {
 	// 从数据库获取下发的信息
 	sf, err := internal.GetHostFileByUUID(sc.UUID)
 	if err != nil {
@@ -105,21 +106,21 @@ func (sc *SSHConfig) Apply() (json.RawMessage, error) {
 	}
 
 	// 从hc中解析下发的文件内容，逐一进行下发
-	Repofile := common.File{}
-	err = json.Unmarshal([]byte(sf.Content), &Repofile)
+	sshfile := common.File{}
+	err = json.Unmarshal([]byte(sf.Content), &sshfile)
 	if err != nil {
 		return nil, err
 	}
-	result := ""
+	results := []NodeResult{}
 	de := Deploy{
 		DeployBatch: common.Batch{
 			BatchIds:      batchids,
 			DepartmentIDs: departids,
 			MachineUUIDs:  nodes,
 		},
-		DeployPath:     Repofile.Path,
-		DeployFileName: Repofile.Name,
-		DeployText:     Repofile.Content,
+		DeployPath:     sshfile.Path,
+		DeployFileName: sshfile.Name,
+		DeployText:     sshfile.Content,
 	}
 	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
 	r, err := httputils.Post(url, &httputils.Params{
@@ -147,17 +148,23 @@ func (sc *SSHConfig) Apply() (json.RawMessage, error) {
 	// 将执行失败的文件、机器信息和原因添加到结果字符串中
 	for _, d := range data {
 		if d.Error != "" {
-			result = result + Repofile.Content + "文件" + d.UUID + ":" + d.Error + "\n"
+			results = append(results, NodeResult{
+				Type:     global.SSH,
+				NodeUUID: d.UUID,
+				Detail:   sshfile.Content,
+				Result:   false,
+				Err:      d.Error,
+			})
 		}
 	}
 
 	// TODO:部分成功如何修改数据库
-	if result == "" {
+	if results == nil {
 		//下发成功修改数据库应用版本
 		err = sf.UpdateByuuid()
 		return nil, err
 	}
-	return nil, errors.New(result + "failed to apply SSHConfig")
+	return results, errors.New("failed to apply SSHConfig")
 }
 
 func (sc *SSHConfig) Collect() error {
