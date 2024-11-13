@@ -236,6 +236,10 @@ func (rc *RepoConfig) Collect() error {
 	return nil
 }
 
+func GetRepoFileByInfoUUID(uuid string, isindex interface{}) (RepoFile, error) {
+	return internal.GetRepoFileByInfoUUID(uuid, isindex)
+}
+
 // 根据配置uuid获取所有配置文件
 func GetRopeFilesByConfigUUID(uuid string) ([]RepoFile, error) {
 	return internal.GetRopeFilesByConfigUUID(uuid)
