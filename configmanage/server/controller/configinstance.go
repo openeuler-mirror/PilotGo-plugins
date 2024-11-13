@@ -84,10 +84,10 @@ func AddConfigHandler(c *gin.Context) {
 			return
 		}
 		//收集机器的配置信息
-		err = repoconfig.Collect()
+		result, err := repoconfig.Collect()
 		if err != nil {
 			logger.Error("failed to collect repofile: %s", err.Error())
-			response.Fail(c, "failed to collect repofile:", err.Error())
+			response.Fail(c, result, err.Error())
 			return
 		}
 		logger.Debug("add repoconfig success")

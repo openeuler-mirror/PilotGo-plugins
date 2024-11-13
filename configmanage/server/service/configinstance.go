@@ -70,7 +70,7 @@ type Config interface {
 	// 配置加载
 	Load() error
 	// 单机采集数据
-	Collect() error
+	Collect() ([]NodeResult, error)
 	// 依据agent uuid进行配置下发
 	Apply() ([]NodeResult, error)
 }
