@@ -169,10 +169,10 @@ func (sdc *SSHDConfig) Apply() ([]NodeResult, error) {
 	return results, errors.New("failed to apply SSHDConfig")
 }
 
-func (sdc *SSHDConfig) Collect() error {
+func (sdc *SSHDConfig) Collect() ([]NodeResult, error) {
 	ci, err := GetConfigByUUID(sdc.ConfigInfoUUID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//发请求获取配置详情
@@ -194,25 +194,25 @@ func (sdc *SSHDConfig) Collect() error {
 		Body: p,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if r.StatusCode != http.StatusOK {
-		return errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
 	}
 
 	resp := &common.CommonResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
-		return err
+		return nil, err
 	}
 	if resp.Code != http.StatusOK {
-		return errors.New(resp.Message)
+		return nil, errors.New(resp.Message)
 	}
 
 	data := []common.NodeResult{}
 	if err := resp.ParseData(&data); err != nil {
-		return err
+		return nil, err
 	}
-	result := ""
+	results := []NodeResult{}
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
@@ -227,15 +227,26 @@ func (sdc *SSHDConfig) Collect() error {
 			err = rf.Add()
 			if err != nil {
 				logger.Error("failed to add sshd config: %s", err.Error())
+				results = append(results, NodeResult{
+					Type:     global.SSHD,
+					NodeUUID: v.UUID,
+					Detail:   "failed to collect sshd config to db",
+					Result:   false,
+					Err:      err.Error()})
 			}
 		} else {
-			result = result + v.UUID + ":" + v.Error + "\n"
+			results = append(results, NodeResult{
+				Type:     global.SSHD,
+				NodeUUID: v.UUID,
+				Detail:   "failed to collect sshd config:" + v.Data.(string),
+				Result:   false,
+				Err:      v.Error})
 		}
 	}
-	if result != "" {
-		return errors.New(result + "failed to collect sshd config")
+	if results != nil {
+		return results, errors.New("failed to collect sshd config")
 	}
-	return nil
+	return nil, nil
 }
 
 func GetSSHDFileByInfoUUID(uuid string, isindex interface{}) (SSHDFile, error) {
