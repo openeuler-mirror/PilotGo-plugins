@@ -590,6 +590,51 @@ func UpdateConfigHandler(c *gin.Context) {
 		response.Success(c, nil, "update host config success")
 
 	case global.SSH:
+		// 解析参数
+		sshconfig := &service.SSHConfig{}
+		if err := json.Unmarshal(query.Data, sshconfig); err != nil {
+			logger.Error("failed to parse sshconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse sshconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(sshconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		// 查询此配置的内容
+		sf, err := service.GetSSHFileByInfoUUID(ci.UUID, nil)
+		if err != nil {
+			logger.Error("failed to get sshconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to get sshconfig parameter:", err.Error())
+			return
+		}
+
+		// 更新参数
+		sshconfig.UUID = sf.UUID
+		sshconfig.ConfigInfoUUID = ci.UUID
+		sshconfig.IsActive = false
+		sshconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = sshconfig.Record()
+		if err != nil {
+			logger.Error("failed to update sshconfig: %s", err.Error())
+			response.Fail(c, "failed to update sshconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("update sshconfig success")
+		response.Success(c, nil, "update sshconfig success")
 
 	case global.SSHD:
 
