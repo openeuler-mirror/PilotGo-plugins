@@ -229,6 +229,10 @@ func (sc *SSHConfig) Collect() error {
 	return nil
 }
 
+func GetSSHFileByInfoUUID(uuid string, isindex interface{}) (SSHFile, error) {
+	return internal.GetSSHFileByInfoUUID(uuid, isindex)
+}
+
 // 根据配置uuid获取所有配置文件
 func GetSSHFilesByCinfigUUID(uuid string) ([]SSHFile, error) {
 	return internal.GetSSHFilesByCinfigUUID(uuid)
