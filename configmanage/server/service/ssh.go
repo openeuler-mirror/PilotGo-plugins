@@ -167,10 +167,10 @@ func (sc *SSHConfig) Apply() ([]NodeResult, error) {
 	return results, errors.New("failed to apply SSHConfig")
 }
 
-func (sc *SSHConfig) Collect() error {
+func (sc *SSHConfig) Collect() ([]NodeResult, error) {
 	ci, err := GetConfigByUUID(sc.ConfigInfoUUID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	//发请求获取配置详情
@@ -192,25 +192,25 @@ func (sc *SSHConfig) Collect() error {
 		Body: p,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if r.StatusCode != http.StatusOK {
-		return errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
 	}
 
 	resp := &common.CommonResult{}
 	if err := json.Unmarshal(r.Body, resp); err != nil {
-		return err
+		return nil, err
 	}
 	if resp.Code != http.StatusOK {
-		return errors.New(resp.Message)
+		return nil, errors.New(resp.Message)
 	}
 
 	data := []common.NodeResult{}
 	if err := resp.ParseData(&data); err != nil {
-		return err
+		return nil, err
 	}
-	result := ""
+	results := []NodeResult{}
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
@@ -225,15 +225,26 @@ func (sc *SSHConfig) Collect() error {
 			err = rf.Add()
 			if err != nil {
 				logger.Error("failed to add sshconfig: %s", err.Error())
+				results = append(results, NodeResult{
+					Type:     global.SSH,
+					NodeUUID: v.UUID,
+					Detail:   "failed to collect SSH config to db",
+					Result:   false,
+					Err:      err.Error()})
 			}
 		} else {
-			result = result + v.UUID + ":" + v.Error + "\n"
+			results = append(results, NodeResult{
+				Type:     global.SSH,
+				NodeUUID: v.UUID,
+				Detail:   "failed to collect SSH config:" + v.Data.(string),
+				Result:   false,
+				Err:      v.Error})
 		}
 	}
-	if result != "" {
-		return errors.New(result + "failed to collect ssh config")
+	if results != nil {
+		return results, errors.New("failed to collect ssh config")
 	}
-	return nil
+	return nil, nil
 }
 
 func GetSSHFileByInfoUUID(uuid string, isindex interface{}) (SSHFile, error) {
