@@ -52,6 +52,7 @@ func (rc *RepoConfig) toRepoFile() RepoFile {
 		Content:        rc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       rc.IsActive,
+		IsFromHost:     false,
 		CreatedAt:      time.Now(),
 	}
 }
@@ -252,9 +253,13 @@ func (rc *RepoConfig) Collect() ([]NodeResult, error) {
 				UUID:           uuid.New().String(),
 				ConfigInfoUUID: rc.ConfigInfoUUID,
 				Content:        file,
+				Path:           rc.Path,
+				Name:           rc.Name,
 				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 				IsFromHost:     true,
+				IsActive:       true,
 				Hostuuid:       v.UUID,
+				CreatedAt:      time.Now(),
 			}
 			err = rf.Add()
 			if err != nil {
