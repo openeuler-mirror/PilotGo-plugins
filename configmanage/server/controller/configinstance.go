@@ -127,7 +127,13 @@ func AddConfigHandler(c *gin.Context) {
 			response.Fail(c, "failed to add hostconfig:", err.Error())
 			return
 		}
-
+		// 收集机器的配置信息
+		result, err := hostconfig.Collect()
+		if err != nil {
+			logger.Error("failed to collect hostconfig: %s", err.Error())
+			response.Fail(c, result, err.Error())
+			return
+		}
 		logger.Debug("add hostconfig success")
 		response.Success(c, nil, "Add host config success")
 
@@ -165,7 +171,13 @@ func AddConfigHandler(c *gin.Context) {
 			response.Fail(c, "failed to add sshconfig:", err.Error())
 			return
 		}
-
+		// 收集机器的配置信息
+		result, err := sshconfig.Collect()
+		if err != nil {
+			logger.Error("failed to collect sshconfig: %s", err.Error())
+			response.Fail(c, result, err.Error())
+			return
+		}
 		logger.Debug("add sshconfig success")
 		response.Success(c, nil, "Add sshconfig success")
 
@@ -203,7 +215,13 @@ func AddConfigHandler(c *gin.Context) {
 			response.Fail(c, "failed to add sshdconfig:", err.Error())
 			return
 		}
-
+		// 收集机器的配置信息
+		result, err := sshdconfig.Collect()
+		if err != nil {
+			logger.Error("failed to collect sshdconfig: %s", err.Error())
+			response.Fail(c, result, err.Error())
+			return
+		}
 		logger.Debug("add sshdconfig success")
 		response.Success(c, nil, "Add sshdconfig success")
 
@@ -241,7 +259,13 @@ func AddConfigHandler(c *gin.Context) {
 			response.Fail(c, "failed to add sysctlconfig:", err.Error())
 			return
 		}
-
+		// 收集机器的配置信息
+		result, err := sysctlconfig.Collect()
+		if err != nil {
+			logger.Error("failed to collect sysctlconfig: %s", err.Error())
+			response.Fail(c, result, err.Error())
+			return
+		}
 		logger.Debug("add sysctlconfig success")
 		response.Success(c, nil, "Add sysctlconfig success")
 
