@@ -48,6 +48,7 @@ func (hc *HostConfig) toHostFile() HostFile {
 		Content:        hc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       hc.IsActive,
+		IsFromHost:     false,
 	}
 }
 
@@ -241,15 +242,19 @@ func (hc *HostConfig) Collect() ([]NodeResult, error) {
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
-			rf := RepoFile{
+			hf := HostFile{
 				UUID:           uuid.New().String(),
 				ConfigInfoUUID: hc.ConfigInfoUUID,
+				Path:           hc.Path,
+				Name:           hc.Name,
 				Content:        file,
 				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
+				IsActive:       true,
 				IsFromHost:     true,
 				Hostuuid:       v.UUID,
+				CreatedAt:      time.Now(),
 			}
-			err = rf.Add()
+			err = hf.Add()
 			if err != nil {
 				logger.Error("failed to add hostconfig: %s", err.Error())
 				results = append(results, NodeResult{
