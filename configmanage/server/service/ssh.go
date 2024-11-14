@@ -47,6 +47,7 @@ func (sc *SSHConfig) toSSHFile() SSHFile {
 		Content:        sc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       sc.IsActive,
+		IsFromHost:     false,
 		CreatedAt:      time.Now(),
 	}
 }
@@ -240,15 +241,19 @@ func (sc *SSHConfig) Collect() ([]NodeResult, error) {
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
-			rf := RepoFile{
+			sf := SSHFile{
 				UUID:           uuid.New().String(),
 				ConfigInfoUUID: sc.ConfigInfoUUID,
+				Path:           sc.Path,
+				Name:           sc.Name,
 				Content:        file,
 				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 				IsFromHost:     true,
+				IsActive:       true,
 				Hostuuid:       v.UUID,
+				CreatedAt:      time.Now(),
 			}
-			err = rf.Add()
+			err = sf.Add()
 			if err != nil {
 				logger.Error("failed to add sshconfig: %s", err.Error())
 				results = append(results, NodeResult{
