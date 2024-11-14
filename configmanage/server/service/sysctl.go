@@ -58,6 +58,7 @@ func (sysc *SysctlConfig) toSysctlFile() SysctlFile {
 		Content:        sysc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       sysc.IsActive,
+		IsFromHost:     false,
 		CreatedAt:      time.Now(),
 	}
 }
@@ -252,15 +253,19 @@ func (sysc *SysctlConfig) Collect() ([]NodeResult, error) {
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
-			rf := RepoFile{
+			sysf := SysctlFile{
 				UUID:           uuid.New().String(),
 				ConfigInfoUUID: sysc.ConfigInfoUUID,
+				Path:           sysc.Path,
+				Name:           sysc.Name,
 				Content:        file,
 				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 				IsFromHost:     true,
+				IsActive:       true,
 				Hostuuid:       v.UUID,
+				CreatedAt:      time.Now(),
 			}
-			err = rf.Add()
+			err = sysf.Add()
 			if err != nil {
 				logger.Error("failed to add sysctl config: %s", err.Error())
 				results = append(results, NodeResult{
