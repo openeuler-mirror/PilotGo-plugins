@@ -47,6 +47,7 @@ func (sdc *SSHDConfig) toSSHDFile() SSHDFile {
 		Content:        sdc.Content,
 		Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 		IsActive:       sdc.IsActive,
+		IsFromHost:     false,
 		CreatedAt:      time.Now(),
 	}
 }
@@ -242,15 +243,19 @@ func (sdc *SSHDConfig) Collect() ([]NodeResult, error) {
 	for _, v := range data {
 		if v.Error == "" {
 			file, _ := json.Marshal(v.Data)
-			rf := RepoFile{
+			sdf := SSHDFile{
 				UUID:           uuid.New().String(),
 				ConfigInfoUUID: sdc.ConfigInfoUUID,
+				Path:           sdc.Path,
+				Name:           sdc.Name,
 				Content:        file,
 				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
 				IsFromHost:     true,
+				IsActive:       true,
 				Hostuuid:       v.UUID,
+				CreatedAt:      time.Now(),
 			}
-			err = rf.Add()
+			err = sdf.Add()
 			if err != nil {
 				logger.Error("failed to add sshd config: %s", err.Error())
 				results = append(results, NodeResult{
