@@ -154,7 +154,23 @@ func (rc *RepoConfig) Apply() ([]NodeResult, error) {
 		}
 		// 将执行失败的文件、机器信息和原因添加到结果字符串中
 		for _, d := range data {
+			// 存储每一台机器的执行结果
+			rfNode := RepoFile{
+				UUID:           rf.UUID,
+				ConfigInfoUUID: rf.ConfigInfoUUID,
+				Path:           rf.Path,
+				Name:           rf.Name,
+				Content:        rf.Content,
+				Version:        rf.Version,
+				IsActive:       true,
+				IsFromHost:     false,
+				Hostuuid:       d.UUID,
+				CreatedAt:      time.Now(),
+			}
+
+			// 返回执行失败的机器详情
 			if d.Error != "" {
+				rfNode.IsActive = false
 				results = append(results, NodeResult{
 					Type:     global.Repo,
 					NodeUUID: d.UUID,
@@ -163,9 +179,20 @@ func (rc *RepoConfig) Apply() ([]NodeResult, error) {
 					Err:      d.Error,
 				})
 			}
+			err = rfNode.Add()
+			if err != nil {
+				results = append(results, NodeResult{
+					Type:     global.Repo,
+					NodeUUID: d.UUID,
+					Detail:   "failed to collect repo config to db",
+					Result:   false,
+					Err:      err.Error(),
+				})
+			}
 		}
 	}
-	//TODO:部分成功如何修改数据库
+
+	// 全部下发成功直接修改数据库是否激活字段
 	if results == nil {
 		//下发成功修改数据库应用版本
 		err = rf.UpdateByuuid()
