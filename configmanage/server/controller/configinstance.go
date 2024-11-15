@@ -269,6 +269,44 @@ func AddConfigHandler(c *gin.Context) {
 		logger.Debug("add sysctlconfig success")
 		response.Success(c, nil, "Add sysctlconfig success")
 
+	case global.DNS:
+		// 解析参数
+		dnsconfig := &service.DNSConfig{}
+		if err := json.Unmarshal(query.Data, dnsconfig); err != nil {
+			logger.Error("failed to parse dnsconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse dnsconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(dnsconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		dnsconfig.UUID = uuid.New().String()
+		dnsconfig.ConfigInfoUUID = ci.UUID
+		dnsconfig.IsActive = false
+		dnsconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = dnsconfig.Record()
+		if err != nil {
+			logger.Error("failed to add dnsconfig: %s", err.Error())
+			response.Fail(c, "failed to add dnsconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("add dnsconfig success")
+		response.Success(c, nil, "Add dnsconfig success")
+
 	default:
 		response.Fail(c, nil, "Unknown type:"+query.Type)
 	}
