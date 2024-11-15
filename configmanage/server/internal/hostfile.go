@@ -8,7 +8,7 @@ import (
 )
 
 type HostFile struct {
-	ID             int        `gorm:"unique;autoIncrement:true"`
+	ID             int        `gorm:"autoIncrement:true"`
 	UUID           string     `gorm:"primary_key;type:varchar(50)" json:"uuid"`
 	ConfigInfo     ConfigInfo `gorm:"Foreignkey:ConfigInfoUUID"`
 	ConfigInfoUUID string
