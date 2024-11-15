@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 func TestDNSConfig_Record(t *testing.T) {
@@ -26,4 +27,27 @@ func TestDNSConfig_Record(t *testing.T) {
 		fmt.Printf("record error: %s\n", err)
 		os.Exit(-1)
 	}
+}
+
+func TestDNSConfig_Load(t *testing.T) {
+	// 设置测试数据
+	dc := &DNSConfig{
+		ConfigInfoUUID: "cd1574a4-cdad-4a55-9561-9ef371456b90",
+	}
+	err := dc.Load()
+	if err != nil {
+		fmt.Printf("record error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("hc: %v\n", dc)
+}
+
+func TestGetDNSFileByUUID(t *testing.T) {
+	uuid := "a134a449-d635-4f08-8dd8-1e3de2a6a509"
+	df, err := internal.GetDNSFileByUUID(uuid)
+	if err != nil {
+		fmt.Printf("get dnsfile error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("hc: %v\n", df)
 }
