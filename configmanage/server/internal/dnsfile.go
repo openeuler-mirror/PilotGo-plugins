@@ -49,3 +49,12 @@ func (df *DNSFile) Add() error {
 		df.Hostuuid,
 	).Error
 }
+func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
+	var file DNSFile
+	if isindex != nil {
+		err := db.MySQL().Model(&DNSFile{}).Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Model(&DNSFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
+	return file, err
+}

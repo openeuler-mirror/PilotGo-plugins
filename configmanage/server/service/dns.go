@@ -42,7 +42,27 @@ func (dc *DNSConfig) toDNSFile() DNSFile {
 		IsFromHost:     false,
 	}
 }
+
 func (dc *DNSConfig) Record() error {
 	df := dc.toDNSFile()
 	return df.Add()
+}
+
+func (dc *DNSConfig) Load() error {
+	// 加载正在使用的某配置文件
+	df, err := internal.GetDNSFileByInfoUUID(dc.ConfigInfoUUID, true)
+	if err != nil {
+		return err
+	}
+	dc.UUID = df.UUID
+	dc.Path = df.Path
+	dc.Name = df.Name
+	dc.Content = df.Content
+	dc.Version = df.Version
+	dc.IsActive = df.IsActive
+	return nil
+}
+
+func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
+	return internal.GetDNSFileByInfoUUID(uuid, isindex)
 }
