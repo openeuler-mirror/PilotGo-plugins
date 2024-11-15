@@ -26,4 +26,5 @@ const (
 	SSH    = "ssh"
 	SSHD   = "sshd"
 	Sysctl = "sysctl"
+	DNS    = "dns"
 )
