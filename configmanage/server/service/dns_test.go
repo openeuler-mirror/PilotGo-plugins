@@ -1,0 +1,29 @@
+package service
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"testing"
+
+	"github.com/google/uuid"
+)
+
+func TestDNSConfig_Record(t *testing.T) {
+	// 设置测试数据
+	dc := &DNSConfig{
+		UUID:           uuid.New().String(),
+		ConfigInfoUUID: "cd1574a4-cdad-4a55-9561-9ef371456b90",
+		Content:        json.RawMessage(`{"test": "test"}`),
+		Path:           "/root",
+		Name:           "resolv.conf",
+		IsActive:       false,
+	}
+
+	// 调用被测试的函数
+	err := dc.Record()
+	if err != nil {
+		fmt.Printf("record error: %s\n", err)
+		os.Exit(-1)
+	}
+}

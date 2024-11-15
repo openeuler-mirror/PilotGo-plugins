@@ -151,3 +151,19 @@ func TestUpdate(t *testing.T) {
 		os.Exit(-1)
 	}
 }
+
+func TestConfigInstanceTypeDNS_Add(t *testing.T) {
+	ci := &ConfigInstance{
+		UUID:        uuid.New().String(),
+		Type:        global.DNS,
+		Description: "test-DNS-description",
+		BatchIds:    []int{7},
+		DepartIds:   []int{70},
+		Nodes:       []string{"77777777-5f8e-42df-b2d0-49bf55cfeb56"},
+	}
+	err := ci.Add()
+	if err != nil {
+		fmt.Printf("Add() error = %v, want nil", err)
+		os.Exit(-1)
+	}
+}
