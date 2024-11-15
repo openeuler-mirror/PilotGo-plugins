@@ -58,3 +58,9 @@ func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
 	err := db.MySQL().Model(&DNSFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
 	return file, err
 }
+
+func GetDNSFileByUUID(uuid string) (DNSFile, error) {
+	var file DNSFile
+	err := db.MySQL().Model(&DNSFile{}).Where("uuid=?", uuid).Find(&file).Error
+	return file, err
+}

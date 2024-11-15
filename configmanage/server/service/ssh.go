@@ -85,7 +85,7 @@ func (sc *SSHConfig) Load() error {
 
 func (sc *SSHConfig) Apply() ([]NodeResult, error) {
 	// 从数据库获取下发的信息
-	sf, err := internal.GetHostFileByUUID(sc.UUID)
+	sf, err := internal.GetSSHFileByUUID(sc.UUID)
 	if err != nil {
 		return nil, err
 	}
