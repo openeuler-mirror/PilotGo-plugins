@@ -195,6 +195,17 @@ func ConfigHistoryHandler(c *gin.Context) {
 		logger.Debug("load sysctlconfig success")
 		response.Success(c, sysctlfiles, "load sysctlconfig success")
 
+	case global.DNS:
+		// 获取有关本台机器配置的所有文件信息
+		dnsconfig, err := service.GetDNSFilesByNode(query.UUID)
+		if err != nil {
+			logger.Error("failed to get dnsconfig files: %s", err.Error())
+			response.Fail(c, "failed to get dnsconfig files", err.Error())
+			return
+		}
+		logger.Debug("load dnsconfig success")
+		response.Success(c, dnsconfig, "load dnsconfig success")
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
