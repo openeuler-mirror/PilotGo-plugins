@@ -49,6 +49,7 @@ func (df *DNSFile) Add() error {
 		df.Hostuuid,
 	).Error
 }
+
 func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
 	var file DNSFile
 	if isindex != nil {

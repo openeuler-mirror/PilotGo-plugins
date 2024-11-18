@@ -68,3 +68,16 @@ func TestGetDNSFilesByConfigUUID(t *testing.T) {
 	}
 	fmt.Println(len(files))
 }
+
+func TestGetDNSFilesByNode(t *testing.T) {
+	// 设置测试数据
+	nodeid := "77777777-5f8e-42df-b2d0-49bf55cfeb56"
+
+	// 调用被测试的函数
+	dcs, err := GetDNSFilesByNode(nodeid)
+	if err != nil {
+		fmt.Printf("GetDNSFilesByNode error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Println(len(dcs))
+}
