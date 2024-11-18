@@ -826,6 +826,53 @@ func UpdateConfigHandler(c *gin.Context) {
 		logger.Debug("update sysctlconfig success")
 		response.Success(c, nil, "update sysctlconfig success")
 
+	case global.DNS:
+		// 解析参数
+		dnsconfig := &service.DNSConfig{}
+		if err := json.Unmarshal(query.Data, dnsconfig); err != nil {
+			logger.Error("failed to parse dnsconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse dnsconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(dnsconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		// 查询此配置的内容
+		df, err := service.GetDNSFileByInfoUUID(ci.UUID, nil)
+		if err != nil {
+			logger.Error("failed to get dnsconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to get dnsconfig parameter:", err.Error())
+			return
+		}
+
+		// 更新参数
+		dnsconfig.UUID = df.UUID
+		dnsconfig.ConfigInfoUUID = ci.UUID
+		dnsconfig.IsActive = false
+		dnsconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = dnsconfig.Record()
+		if err != nil {
+			logger.Error("failed to update dnsconfig: %s", err.Error())
+			response.Fail(c, "failed to update dnsconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("update dnsconfig success")
+		response.Success(c, nil, "update dnsconfig success")
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
