@@ -303,7 +303,13 @@ func AddConfigHandler(c *gin.Context) {
 			response.Fail(c, "failed to add dnsconfig:", err.Error())
 			return
 		}
-
+		// 收集机器的配置信息
+		result, err := dnsconfig.Collect()
+		if err != nil {
+			logger.Error("failed to collect dnsconfig: %s", err.Error())
+			response.Fail(c, result, err.Error())
+			return
+		}
 		logger.Debug("add dnsconfig success")
 		response.Success(c, nil, "Add dnsconfig success")
 
@@ -518,6 +524,19 @@ func ApplyConfigHandler(c *gin.Context) {
 			return
 		}
 		response.Success(c, nil, "apply sysctlconfig success")
+
+	case global.DNS:
+		dnsconfig := &service.DNSConfig{
+			UUID:           query.UUID,
+			ConfigInfoUUID: ci.UUID,
+		}
+		_, err := dnsconfig.Apply()
+		if err != nil {
+			logger.Error("failed to apply dnsconfig file: %s", err.Error())
+			response.Fail(c, "failed to apply dnsconfig:", err.Error())
+			return
+		}
+		response.Success(c, nil, "apply dnsconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
