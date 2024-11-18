@@ -410,6 +410,21 @@ func LoadConfigHandler(c *gin.Context) {
 		logger.Debug("load sysctlconfig success")
 		response.Success(c, ci, "load sysctlconfig success")
 
+	case global.DNS:
+		dnsconfig := &service.DNSConfig{
+			ConfigInfoUUID: ci.UUID,
+		}
+		// 加载正在使用的配置
+		err = dnsconfig.Load()
+		if err != nil {
+			logger.Error("failed to get dnsconfig file: %s", err.Error())
+			response.Fail(c, "failed to get dnsconfig file:", err.Error())
+			return
+		}
+		ci.Config = dnsconfig
+		logger.Debug("load dnsconfig success")
+		response.Success(c, ci, "load dnsconfig success")
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
