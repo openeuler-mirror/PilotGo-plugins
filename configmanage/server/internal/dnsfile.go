@@ -64,3 +64,13 @@ func GetDNSFileByUUID(uuid string) (DNSFile, error) {
 	err := db.MySQL().Model(&DNSFile{}).Where("uuid=?", uuid).Find(&file).Error
 	return file, err
 }
+
+func (df *DNSFile) UpdateByuuid() error {
+	// 将同类配置的所有标志修改为未使用
+	err := db.MySQL().Model(&DNSFile{}).Where("config_info_uuid=?", df.ConfigInfoUUID).Update("is_index", 0).Error
+	if err != nil {
+		return err
+	}
+	// 将成功下发的具体某一个配置状态修改为已使用
+	return db.MySQL().Model(&DNSFile{}).Where("uuid=?", df.UUID).Update("is_index", 1).Error
+}
