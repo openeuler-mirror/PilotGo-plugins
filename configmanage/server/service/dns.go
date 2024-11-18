@@ -4,8 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 	"time"
 
+	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
+	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
+	"openeuler.org/PilotGo/configmanage-plugin/global"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
@@ -76,9 +82,114 @@ func (dc *DNSConfig) Load() error {
 	return nil
 }
 
-// TODO:
-func (hc *DNSConfig) Apply() ([]NodeResult, error) {
+func (dc *DNSConfig) Apply() ([]NodeResult, error) {
+	// 从数据库获取下发的信息
+	df, err := internal.GetDNSFileByUUID(dc.UUID)
+	if err != nil {
+		return nil, err
+	}
+	if df.ConfigInfoUUID != dc.ConfigInfoUUID || df.UUID != dc.UUID {
+		return nil, errors.New("数据库不存在此配置")
+	}
+
+	batchids, err := internal.GetConfigBatchByUUID(dc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+	departids, err := internal.GetConfigDepartByUUID(dc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+	nodes, err := internal.GetConfigNodesByUUID(dc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 从hc中解析下发的文件内容，逐一进行下发
+	dnsfile := common.File{}
+	err = json.Unmarshal([]byte(df.Content), &dnsfile)
+	if err != nil {
+		return nil, err
+	}
 	results := []NodeResult{}
+	de := Deploy{
+		DeployBatch: common.Batch{
+			BatchIds:      batchids,
+			DepartmentIDs: departids,
+			MachineUUIDs:  nodes,
+		},
+		DeployPath:     dnsfile.Path,
+		DeployFileName: dnsfile.Name,
+		DeployText:     dnsfile.Content,
+	}
+	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: de,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if r.StatusCode != http.StatusOK {
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+	}
+
+	resp := &common.CommonResult{}
+	if err := json.Unmarshal(r.Body, resp); err != nil {
+		return nil, err
+	}
+	if resp.Code != http.StatusOK {
+		return nil, errors.New(resp.Message)
+	}
+
+	data := []common.NodeResult{}
+	if err := resp.ParseData(&data); err != nil {
+		return nil, err
+	}
+	// 将执行失败的文件、机器信息和原因添加到结果字符串中
+	for _, d := range data {
+		// 存储每一台机器的执行结果
+		dfNode := DNSFile{
+			UUID:           df.UUID,
+			ConfigInfoUUID: df.ConfigInfoUUID,
+			Path:           df.Path,
+			Name:           df.Name,
+			Content:        df.Content,
+			Version:        df.Version,
+			IsActive:       true,
+			IsFromHost:     false,
+			Hostuuid:       d.UUID,
+			CreatedAt:      time.Now(),
+		}
+
+		// 返回执行失败的机器详情
+		if d.Error != "" {
+			dfNode.IsActive = false
+			results = append(results, NodeResult{
+				Type:     global.DNS,
+				NodeUUID: d.UUID,
+				Detail:   dnsfile.Content,
+				Result:   false,
+				Err:      d.Error,
+			})
+		}
+		err = dfNode.Add()
+		if err != nil {
+			results = append(results, NodeResult{
+				Type:     global.DNS,
+				NodeUUID: d.UUID,
+				Detail:   "failed to collect dns config to db",
+				Result:   false,
+				Err:      err.Error(),
+			})
+		}
+	}
+
+	// 全部下发成功直接修改数据库是否激活字段
+	if results == nil {
+		//下发成功修改数据库应用版本
+		err = df.UpdateByuuid()
+		return nil, err
+	}
 	return results, errors.New("failed to apply dns config")
 }
 
