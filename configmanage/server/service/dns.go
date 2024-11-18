@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
+	"github.com/google/uuid"
 	"openeuler.org/PilotGo/configmanage-plugin/global"
 	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
@@ -193,11 +195,90 @@ func (dc *DNSConfig) Apply() ([]NodeResult, error) {
 	return results, errors.New("failed to apply dns config")
 }
 
-// TODO:
-func (hc *DNSConfig) Collect() ([]NodeResult, error) {
+func (dc *DNSConfig) Collect() ([]NodeResult, error) {
+	di, err := GetConfigByUUID(dc.ConfigInfoUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	//发请求获取配置详情
+	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/getnodefiles"
+	p := struct {
+		DeployBatch common.Batch `json:"deploybatch"`
+		Path        string       `json:"path"`
+		FileName    string       `json:"filename"`
+	}{
+		DeployBatch: common.Batch{
+			BatchIds:      di.BatchIds,
+			DepartmentIDs: di.DepartIds,
+			MachineUUIDs:  di.Nodes,
+		},
+		Path:     dc.Path,
+		FileName: dc.Name,
+	}
+	r, err := httputils.Post(url, &httputils.Params{
+		Body: p,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if r.StatusCode != http.StatusOK {
+		return nil, errors.New("server process error:" + strconv.Itoa(r.StatusCode))
+	}
+
+	resp := &common.CommonResult{}
+	if err := json.Unmarshal(r.Body, resp); err != nil {
+		return nil, err
+	}
+	if resp.Code != http.StatusOK {
+		return nil, errors.New(resp.Message)
+	}
+
+	data := []common.NodeResult{}
+	if err := resp.ParseData(&data); err != nil {
+		return nil, err
+	}
 	results := []NodeResult{}
-	return results, errors.New("failed to apply dns config")
+	for _, v := range data {
+		if v.Error == "" {
+			file, _ := json.Marshal(v.Data)
+			df := DNSFile{
+				UUID:           uuid.New().String(),
+				ConfigInfoUUID: dc.ConfigInfoUUID,
+				Path:           dc.Path,
+				Name:           dc.Name,
+				Content:        file,
+				Version:        fmt.Sprintf("v%s", time.Now().Format("2006-01-02-15-04-05")),
+				IsActive:       true,
+				IsFromHost:     true,
+				Hostuuid:       v.UUID,
+				CreatedAt:      time.Now(),
+			}
+			err = df.Add()
+			if err != nil {
+				logger.Error("failed to add dnsconfig: %s", err.Error())
+				results = append(results, NodeResult{
+					Type:     global.DNS,
+					NodeUUID: v.UUID,
+					Detail:   "failed to collect dns config to db",
+					Result:   false,
+					Err:      err.Error()})
+			}
+		} else {
+			results = append(results, NodeResult{
+				Type:     global.DNS,
+				NodeUUID: v.UUID,
+				Detail:   "failed to collect dns config:" + v.Data.(string),
+				Result:   false,
+				Err:      v.Error})
+		}
+	}
+	if results != nil {
+		return results, errors.New("failed to collect dns config")
+	}
+	return nil, nil
 }
+
 func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
 	return internal.GetDNSFileByInfoUUID(uuid, isindex)
 }
