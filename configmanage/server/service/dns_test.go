@@ -51,3 +51,20 @@ func TestGetDNSFileByUUID(t *testing.T) {
 	}
 	fmt.Printf("hc: %v\n", df)
 }
+
+func TestGetDNSFilesByConfigUUID(t *testing.T) {
+	// 设置测试数据
+	testUUID := "cd1574a4-cdad-4a55-9561-9ef371456b90"
+
+	// 调用被测试的函数
+	files, err := GetDNSFilesByConfigUUID(testUUID)
+	if err != nil {
+		fmt.Printf("load dnsfile error: %s\n", err)
+		os.Exit(-1)
+	}
+	if len(files) == 0 {
+		fmt.Printf("files is empty: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Println(len(files))
+}

@@ -66,3 +66,8 @@ func (dc *DNSConfig) Load() error {
 func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
 	return internal.GetDNSFileByInfoUUID(uuid, isindex)
 }
+
+// 根据配置uuid获取所有配置文件
+func GetDNSFilesByConfigUUID(uuid string) ([]DNSFile, error) {
+	return internal.GetDNSFilesByConfigUUID(uuid)
+}
