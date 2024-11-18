@@ -295,8 +295,8 @@ func GetSysctlFileByInfoUUID(uuid string, isindex interface{}) (SysctlFile, erro
 }
 
 // 根据配置uuid获取所有配置文件
-func GetSysctlFilesByCinfigUUID(uuid string) ([]SysctlFile, error) {
-	return internal.GetSysctlFilesByCinfigUUID(uuid)
+func GetSysctlFilesByConfigUUID(uuid string) ([]SysctlFile, error) {
+	return internal.GetSysctlFilesByConfigUUID(uuid)
 }
 
 // 查看某台机器某种类型的的历史配置信息

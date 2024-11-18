@@ -283,8 +283,8 @@ func GetSSHFileByInfoUUID(uuid string, isindex interface{}) (SSHFile, error) {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetSSHFilesByCinfigUUID(uuid string) ([]SSHFile, error) {
-	return internal.GetSSHFilesByCinfigUUID(uuid)
+func GetSSHFilesByConfigUUID(uuid string) ([]SSHFile, error) {
+	return internal.GetSSHFilesByConfigUUID(uuid)
 }
 
 // 查看某台机器某种类型的的历史配置信息

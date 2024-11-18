@@ -53,7 +53,7 @@ func (sf *SSHFile) UpdateByuuid() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetSSHFilesByCinfigUUID(uuid string) ([]SSHFile, error) {
+func GetSSHFilesByConfigUUID(uuid string) ([]SSHFile, error) {
 	var files []SSHFile
 	err := db.MySQL().Model(&SSHFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
 	return files, err

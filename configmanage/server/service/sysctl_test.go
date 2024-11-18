@@ -52,12 +52,12 @@ func TestGetSysctlFileByUUID(t *testing.T) {
 	fmt.Printf("SysctlFile: %v\n", sysf)
 }
 
-func TestGetSysctlFilesByCinfigUUID(t *testing.T) {
+func TestGetSysctlFilesByConfigUUID(t *testing.T) {
 	// 设置测试数据
 	sysdcUUID := "83a15f95-430c-4889-aa60-b27624a81703"
 
 	// 调用被测试的函数
-	files, err := GetSysctlFilesByCinfigUUID(sysdcUUID)
+	files, err := GetSysctlFilesByConfigUUID(sysdcUUID)
 	if err != nil {
 		fmt.Printf("load sysctl files error: %s\n", err)
 		os.Exit(-1)
