@@ -74,3 +74,10 @@ func (df *DNSFile) UpdateByuuid() error {
 	// 将成功下发的具体某一个配置状态修改为已使用
 	return db.MySQL().Model(&DNSFile{}).Where("uuid=?", df.UUID).Update("is_index", 1).Error
 }
+
+// 根据配置uuid获取所有配置文件
+func GetDNSFilesByConfigUUID(uuid string) ([]DNSFile, error) {
+	var files []DNSFile
+	err := db.MySQL().Model(&DNSFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
+	return files, err
+}
