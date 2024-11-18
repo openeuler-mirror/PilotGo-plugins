@@ -119,6 +119,17 @@ func ConfigInfoHandler(c *gin.Context) {
 		logger.Debug("load sysctlconfig success")
 		response.Success(c, sysctlfiles, "load sysctlconfig success")
 
+	case global.DNS:
+		// 获取有关配置的所有文件信息GetDNSFilesByConfigUUID
+		dnsfiles, err := service.GetDNSFilesByConfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get dnsfiles files: %s", err.Error())
+			response.Fail(c, "failed to get dnsfiles files", err.Error())
+			return
+		}
+		logger.Debug("load dnsfiles success")
+		response.Success(c, dnsfiles, "load dnsfiles success")
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
