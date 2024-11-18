@@ -43,6 +43,18 @@ func (dc *DNSConfig) toDNSFile() DNSFile {
 	}
 }
 
+func toDNSConfig(df *DNSFile) DNSConfig {
+	return DNSConfig{
+		UUID:           df.UUID,
+		ConfigInfoUUID: df.ConfigInfoUUID,
+		Path:           df.Path,
+		Name:           df.Name,
+		Content:        df.Content,
+		Version:        df.Version,
+		IsActive:       df.IsActive,
+	}
+}
+
 func (dc *DNSConfig) Record() error {
 	df := dc.toDNSFile()
 	return df.Add()
@@ -70,4 +82,23 @@ func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
 // 根据配置uuid获取所有配置文件
 func GetDNSFilesByConfigUUID(uuid string) ([]DNSFile, error) {
 	return internal.GetDNSFilesByConfigUUID(uuid)
+}
+
+// 查看某台机器某种类型的的历史配置信息
+func GetDNSFilesByNode(nodeid string) ([]DNSConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var dcs []DNSConfig
+	for _, v := range config_nodes {
+		df, err := internal.GetDNSFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		dc := toDNSConfig(&df)
+		dcs = append(dcs, dc)
+	}
+	return dcs, nil
 }
