@@ -52,7 +52,7 @@ func (sdf *SSHDFile) UpdateByuuid() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetSSHDFilesByCinfigUUID(uuid string) ([]SSHDFile, error) {
+func GetSSHDFilesByConfigUUID(uuid string) ([]SSHDFile, error) {
 	var files []SSHDFile
 	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
 	return files, err

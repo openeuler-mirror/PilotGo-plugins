@@ -53,7 +53,7 @@ func (sysf *SysctlFile) UpdateByuuid() error {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetSysctlFilesByCinfigUUID(uuid string) ([]SysctlFile, error) {
+func GetSysctlFilesByConfigUUID(uuid string) ([]SysctlFile, error) {
 	var files []SysctlFile
 	err := db.MySQL().Model(&SysctlFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
 	return files, err

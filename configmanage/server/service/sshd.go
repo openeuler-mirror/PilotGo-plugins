@@ -285,8 +285,8 @@ func GetSSHDFileByInfoUUID(uuid string, isindex interface{}) (SSHDFile, error) {
 }
 
 // 根据配置uuid获取所有配置文件
-func GetSSHDFilesByCinfigUUID(uuid string) ([]SSHDFile, error) {
-	return internal.GetSSHDFilesByCinfigUUID(uuid)
+func GetSSHDFilesByConfigUUID(uuid string) ([]SSHDFile, error) {
+	return internal.GetSSHDFilesByConfigUUID(uuid)
 }
 
 // 查看某台机器某种类型的的历史配置信息

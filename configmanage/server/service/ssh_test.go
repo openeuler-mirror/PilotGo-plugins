@@ -52,12 +52,12 @@ func TestGetSSHFileByUUID(t *testing.T) {
 	fmt.Printf("sshfile: %v\n", sf)
 }
 
-func TestGetSSHFilesByCinfigUUID(t *testing.T) {
+func TestGetSSHFilesByConfigUUID(t *testing.T) {
 	// 设置测试数据
 	scUUID := "5973e993-6236-4b53-9eb6-0cc23c652460"
 
 	// 调用被测试的函数
-	files, err := GetSSHFilesByCinfigUUID(scUUID)
+	files, err := GetSSHFilesByConfigUUID(scUUID)
 	if err != nil {
 		fmt.Printf("load sshfiles error: %s\n", err)
 		os.Exit(-1)
@@ -80,21 +80,4 @@ func TestGetSSHFilesByNode(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Println(len(scs))
-}
-
-func TestGetSSHDFilesByCinfigUUID(t *testing.T) {
-	// 设置测试数据
-	sdcUUID := "5973e993-6236-4b53-9eb6-0cc23c652460"
-
-	// 调用被测试的函数
-	files, err := GetSSHDFilesByCinfigUUID(sdcUUID)
-	if err != nil {
-		fmt.Printf("load sshdfiles error: %s\n", err)
-		os.Exit(-1)
-	}
-	if len(files) == 0 {
-		fmt.Printf("files is empty: %s\n", err)
-		os.Exit(-1)
-	}
-	fmt.Println(len(files))
 }

@@ -88,7 +88,7 @@ func ConfigInfoHandler(c *gin.Context) {
 
 	case global.SSH:
 		// 获取有关配置的所有文件信息
-		sshfiles, err := service.GetSSHFilesByCinfigUUID(ci.UUID)
+		sshfiles, err := service.GetSSHFilesByConfigUUID(ci.UUID)
 		if err != nil {
 			logger.Error("failed to get sshconfig files: %s", err.Error())
 			response.Fail(c, "failed to get sshconfig files", err.Error())
@@ -99,7 +99,7 @@ func ConfigInfoHandler(c *gin.Context) {
 
 	case global.SSHD:
 		// 获取有关配置的所有文件信息
-		sshdfiles, err := service.GetSSHFilesByCinfigUUID(ci.UUID)
+		sshdfiles, err := service.GetSSHDFilesByConfigUUID(ci.UUID)
 		if err != nil {
 			logger.Error("failed to get sshdconfig files: %s", err.Error())
 			response.Fail(c, "failed to get sshdconfig files", err.Error())
@@ -110,7 +110,7 @@ func ConfigInfoHandler(c *gin.Context) {
 
 	case global.Sysctl:
 		// 获取有关配置的所有文件信息
-		sysctlfiles, err := service.GetSysctlFilesByCinfigUUID(ci.UUID)
+		sysctlfiles, err := service.GetSysctlFilesByConfigUUID(ci.UUID)
 		if err != nil {
 			logger.Error("failed to get sysctlconfig files: %s", err.Error())
 			response.Fail(c, "failed to get sysctlconfig files", err.Error())
