@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -75,6 +76,17 @@ func (dc *DNSConfig) Load() error {
 	return nil
 }
 
+// TODO:
+func (hc *DNSConfig) Apply() ([]NodeResult, error) {
+	results := []NodeResult{}
+	return results, errors.New("failed to apply dns config")
+}
+
+// TODO:
+func (hc *DNSConfig) Collect() ([]NodeResult, error) {
+	results := []NodeResult{}
+	return results, errors.New("failed to apply dns config")
+}
 func GetDNSFileByInfoUUID(uuid string, isindex interface{}) (DNSFile, error) {
 	return internal.GetDNSFileByInfoUUID(uuid, isindex)
 }
