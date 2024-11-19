@@ -16,7 +16,7 @@ type SSHDFile struct {
 	Name           string          `json:"name"`
 	Content        json.RawMessage `gorm:"type:json" json:"content"`
 	Version        string          `gorm:"type:varchar(50)" json:"version"`
-	IsActive       bool            `json:"isactive"`
+	IsActive       bool            `gorm:"default:false" json:"isactive"`
 	IsFromHost     bool            `gorm:"default:false" json:"isfromhost"`
 	Hostuuid       string          `gorm:"type:varchar(50)" json:"hostuuid"`
 	CreatedAt      time.Time
@@ -25,13 +25,15 @@ type SSHDFile struct {
 func (sdf *SSHDFile) Add() error {
 	return db.MySQL().Save(&sdf).Error
 }
+
+// 根据配置uuid获取用户自己创建的配置信息
 func GetSSHDFileByInfoUUID(uuid string, isindex interface{}) (SSHDFile, error) {
 	var file SSHDFile
 	if isindex != nil {
-		err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=? && is_index = ?", uuid, isindex).Find(&file).Error
+		err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=? and is_from_host=0 and is_index = ?", uuid, isindex).Find(&file).Error
 		return file, err
 	}
-	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=?", uuid).Find(&file).Error
+	err := db.MySQL().Model(&SSHDFile{}).Where("config_info_uuid=? and is_from_host=0", uuid).Find(&file).Error
 	return file, err
 }
 
