@@ -17,7 +17,7 @@ type PaginationQ struct {
 }
 
 func ConfigTypeListHandler(c *gin.Context) {
-	result := []string{global.Repo, global.Host, global.SSH, global.SSHD, global.Sysctl}
+	result := []string{global.Repo, global.Host, global.SSH, global.SSHD, global.Sysctl, global.DNS}
 	response.Success(c, result, "get config type success")
 }
 
