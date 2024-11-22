@@ -1,56 +1,114 @@
 package sdk
 
-import "encoding/json"
+import "time"
 
-// event消息类型定义
+// event消息类型定义/msgTypeId
 const (
-	// 主机安装软件包
-	MsgPackageInstall = 0
-	// 主机升级软件包
-	MsgPackageUpdate = 1
-	// 主机卸载软件包
-	MsgPackageUninstall = 2
-	// 主机ip变更
-	MsgIPChange = 10
+	// 用户登录
+	MsgUserLogin = 0
+	// 用户退出
+	MsgUserLogout = 1
 
 	// 平台新增主机
-	MsgHostAdd = 20
+	MsgHostAdd = 10
 	// 平台移除主机
-	MsgHostRemove = 21
+	MsgHostRemove = 11
+	// 主机上线
+	MsgHostOnline = 12
+	// 平台离线
+	MsgHostOffline = 13
+
+	// 主机安装软件包
+	MsgPackageInstall = 20
+	// 主机升级软件包
+	MsgPackageUpdate = 21
+	// 主机卸载软件包
+	MsgPackageUninstall = 22
+	// 主机ip变更
+	MsgIPChange = 30
 
 	// 插件添加
-	MsgPluginAdd = 30
+	MsgPluginAdd = 40
 	// 插件卸载
-	MsgPluginRemove = 31
+	MsgPluginRemove = 41
+	// 插件上线
+	MsgPluginOnline = 42
+	// 插件离线
+	MsgPluginOffline = 43
 )
 
-// 将 MessageData json字符串转换成指定结构体的message消息数据
-func ToMessage(d string, s interface{}) error {
-	return json.Unmarshal([]byte(d), s)
+func GetMessageTypeString(msgType int) string {
+	switch msgType {
+	case MsgUserLogin:
+		return "用户登录"
+	case MsgUserLogout:
+		return "用户退出"
+	case MsgHostAdd:
+		return "平台新增主机"
+	case MsgHostRemove:
+		return "平台移除主机"
+	case MsgHostOnline:
+		return "主机上线"
+	case MsgHostOffline:
+		return "主机离线"
+	case MsgPackageInstall:
+		return "主机安装软件包"
+	case MsgPackageUpdate:
+		return "主机升级软件包"
+	case MsgPackageUninstall:
+		return "主机卸载软件包"
+	case MsgIPChange:
+		return "主机ip变更"
+	case MsgPluginAdd:
+		return "插件添加"
+	case MsgPluginRemove:
+		return "插件卸载"
+	case MsgPluginOnline:
+		return "插件上线"
+	case MsgPluginOffline:
+		return "插件离线"
+	default:
+		return "未知的消息类型"
+	}
 }
 
-type MDPackageInstall struct {
-	HostUUID string
-	Name     string
-	Version  string
-	Time     string
+type MessageData struct {
+	MsgType     int         `json:"msg_type_id"`
+	MessageType string      `json:"msg_type"`
+	TimeStamp   time.Time   `json:"timestamp"`
+	Data        interface{} `json:"data"`
 }
 
-type MDPackageUpdate struct {
-	HostUUID string
-	Name     string
-	Version  string
-	Time     string
+type MDUserSystemSession struct {
+	UserName string `json:"user_name"`
+	Email    string `json:"email"`
 }
 
-type MDPackageUninstall struct {
-	HostUUID string
-	Name     string
-	Version  string
-	Time     string
+type MDHostChange struct { // 主机新增、移除、上线、离线
+	HostUUID   string `json:"host_uuid"`
+	IP         string `json:"ip"`
+	OS         string `json:"os"`
+	OSVersion  string `json:"os_version"`
+	PrettyName string `json:"pretty_name"`
+	CPU        string `json:"cpu"`
+	Status     string `json:"status"` //在线状态
 }
 
-type MDIPChange struct {
-	HostUUID string
-	NewIP    string
+type MDHostPackageOpt struct {
+	HostUUID string `json:"host_uuid"`
+	Name     string `json:"name"`
+	Version  string `json:"version"`
+}
+
+type MDHostIPChange struct {
+	HostUUID string `json:"host_uuid"`
+	NewIP    string `json:"new_ip"`
+}
+
+type MDPluginChange struct { // 插件新增、移除、上线、离线
+	PluginName  string `json:"plugin_name"`
+	Version     string `json:"version"`
+	Url         string `json:"url"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }
