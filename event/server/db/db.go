@@ -2,9 +2,14 @@ package db
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"log"
 
+	"gitee.com/openeuler/PilotGo-plugins/event/sdk"
+	"gitee.com/openeuler/PilotGo/sdk/logger"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
+	"github.com/influxdata/influxdb-client-go/v2/api/write"
 	"openeuler.org/PilotGo/PilotGo-plugin-event/config"
 )
 
@@ -28,7 +33,10 @@ func InfluxdbInit(conf *config.Influxd) {
 
 func Query(measurement, start, end string) error {
 
-	query := fmt.Sprintf("from(bucket:%s)|> range(start: -1h) |> filter(fn: (r) => r._measurement == %s)", InfluxDB.Bucket, measurement)
+	query := fmt.Sprintf(`from(bucket:"%s")
+							|> range(start: -1h) 
+							|> filter(fn: (r) => r._measurement == "%s")`,
+		InfluxDB.Bucket, measurement)
 
 	queryAPI := InfluxDB.DBClient.QueryAPI(InfluxDB.Organization)
 
@@ -51,4 +59,32 @@ func Query(measurement, start, end string) error {
 	}
 
 	return nil
+}
+
+// TODO 完善write方法
+func WriteToDB(MessageData string) {
+	writeAPI := InfluxDB.DBClient.WriteAPIBlocking(InfluxDB.Organization, InfluxDB.Bucket)
+
+	var msg sdk.MessageData
+	// err := common.ToMessage(MessageData, &msg)
+	err := json.Unmarshal([]byte(MessageData), &msg)
+	if err != nil {
+		fmt.Println(msg)
+	} else {
+		fmt.Println("ToMessage error")
+	}
+	logger.Info("%v", msg)
+	tags := map[string]string{
+		"msg_type":  msg.MessageType,
+		"timestamp": msg.TimeStamp.String(),
+	}
+	fields := map[string]interface{}{
+		"metadata": msg.Data,
+	}
+	point := write.NewPoint("test_measurement", tags, fields, msg.TimeStamp)
+
+	if err := writeAPI.WritePoint(context.Background(), point); err != nil {
+		log.Fatal(err)
+	}
+
 }

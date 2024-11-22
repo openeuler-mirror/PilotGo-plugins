@@ -8,6 +8,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
+	"openeuler.org/PilotGo/PilotGo-plugin-event/db"
 )
 
 type Listener struct {
@@ -172,7 +173,15 @@ func (e *EventBus) Run() {
 			case <-e.stop:
 				e.wait.Done()
 			case m := <-e.event:
-				e.broadcast(m)
+				listeners, ok := eventTypeMap[m.MessageType]
+				if ok {
+					e.broadcast(listeners, m)
+					// TODO 存到数据库,处理一下m.MessageData
+					db.WriteToDB(m.MessageData)
+				} else {
+					// TODO 存到数据库
+					db.WriteToDB(m.MessageData)
+				}
 			}
 		}
 	}(e)
@@ -189,19 +198,16 @@ func (e *EventBus) publish(m *common.EventMessage) {
 	e.event <- m
 }
 
-func (e *EventBus) broadcast(msg *common.EventMessage) {
-	listeners, ok := eventTypeMap[msg.MessageType]
-	if ok {
-		for _, listener := range listeners {
-			r, err := httputils.Post(listener.URL+"/plugin_manage/api/v1/event", &httputils.Params{
-				Body: msg,
-			})
-			if err != nil {
-				logger.Error(listener.Name + "plugin process error:" + err.Error())
-			}
-			if r.StatusCode != http.StatusOK {
-				logger.Error(listener.Name + "plugin process error:" + strconv.Itoa(r.StatusCode))
-			}
+func (e *EventBus) broadcast(listeners []Listener, msg *common.EventMessage) {
+	for _, listener := range listeners {
+		r, err := httputils.Post(listener.URL+"/plugin_manage/api/v1/event", &httputils.Params{
+			Body: msg,
+		})
+		if err != nil {
+			logger.Error(listener.Name + "plugin process error:" + err.Error())
+		}
+		if r.StatusCode != http.StatusOK {
+			logger.Error(listener.Name + "plugin process error:" + strconv.Itoa(r.StatusCode))
 		}
 	}
 }
