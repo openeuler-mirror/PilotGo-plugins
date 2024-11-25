@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"gitee.com/openeuler/PilotGo-plugins/event/sdk"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -61,19 +60,17 @@ func Query(measurement, start, end string) error {
 	return nil
 }
 
-// TODO 完善write方法
-func WriteToDB(MessageData string) {
+func WriteToDB(MessageData string) error {
 	writeAPI := InfluxDB.DBClient.WriteAPIBlocking(InfluxDB.Organization, InfluxDB.Bucket)
 
 	var msg sdk.MessageData
 	// err := common.ToMessage(MessageData, &msg)
 	err := json.Unmarshal([]byte(MessageData), &msg)
 	if err != nil {
-		fmt.Println(msg)
-	} else {
-		fmt.Println("ToMessage error")
+		logger.Error("解析数据出错: %v", err.Error())
+		return err
 	}
-	logger.Info("%v", msg)
+
 	tags := map[string]string{
 		"msg_type":  msg.MessageType,
 		"timestamp": msg.TimeStamp.String(),
@@ -84,7 +81,8 @@ func WriteToDB(MessageData string) {
 	point := write.NewPoint("test_measurement", tags, fields, msg.TimeStamp)
 
 	if err := writeAPI.WritePoint(context.Background(), point); err != nil {
-		log.Fatal(err)
+		logger.Error("写入数据出错: %v", err.Error())
+		return err
 	}
-
+	return nil
 }

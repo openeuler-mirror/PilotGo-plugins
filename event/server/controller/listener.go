@@ -84,7 +84,7 @@ func UnPliginRegisterListenerHandler(c *gin.Context) {
 
 func PublishEventHandler(c *gin.Context) {
 	msg := &common.EventMessage{}
-	if err := c.ShouldBind(msg); err != nil {
+	if err := c.Bind(msg); err != nil {
 		response.Fail(c, gin.H{"status": false}, err.Error())
 		return
 	}

@@ -174,12 +174,10 @@ func (e *EventBus) Run() {
 				e.wait.Done()
 			case m := <-e.event:
 				listeners, ok := eventTypeMap[m.MessageType]
-				if ok {
+				if ok { //如果有插件订阅了此事件，将消息广播给订阅的各个插件
 					e.broadcast(listeners, m)
-					// TODO 存到数据库,处理一下m.MessageData
 					db.WriteToDB(m.MessageData)
 				} else {
-					// TODO 存到数据库
 					db.WriteToDB(m.MessageData)
 				}
 			}
