@@ -1,4 +1,4 @@
-plugin_client:
+plugin_event:
   url: "http://localhost:8809"
   plugin_type: "iframe"   # iframe   micro-app
 http_server:

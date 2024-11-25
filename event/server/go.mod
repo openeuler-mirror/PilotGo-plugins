@@ -3,7 +3,7 @@ module openeuler.org/PilotGo/PilotGo-plugin-event
 go 1.20
 
 require (
-	gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20240730120230-bb8de73ea049
+	gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20241122014720-df6a218375a4
 	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724025939-231bc58cf0e0
 )
 
