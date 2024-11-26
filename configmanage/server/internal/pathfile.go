@@ -49,3 +49,14 @@ func (pf *PathFile) Add() error {
 		pf.Hostuuid,
 	).Error
 }
+
+// 根据配置uuid获取用户自己创建的配置信息
+func GetPathFileByInfoUUID(uuid string, isindex interface{}) (PathFile, error) {
+	var file PathFile
+	if isindex != nil {
+		err := db.MySQL().Model(&PathFile{}).Where("config_info_uuid=? and is_from_host=0 and is_index = ?", uuid, isindex).Find(&file).Error
+		return file, err
+	}
+	err := db.MySQL().Model(&PathFile{}).Where("config_info_uuid=? and is_from_host=0 ", uuid).Find(&file).Error
+	return file, err
+}

@@ -42,7 +42,34 @@ func (pc *PathConfig) toPathFile() PathFile {
 	}
 }
 
+func toPathConfig(pf *PathFile) PathConfig {
+	return PathConfig{
+		UUID:           pf.UUID,
+		ConfigInfoUUID: pf.ConfigInfoUUID,
+		Path:           pf.Path,
+		Name:           pf.Name,
+		Content:        pf.Content,
+		Version:        pf.Version,
+		IsActive:       pf.IsActive,
+	}
+}
+
 func (pc *PathConfig) Record() error {
 	pf := pc.toPathFile()
 	return pf.Add()
+}
+
+func (pc *PathConfig) Load() error {
+	// 加载正在使用的某配置文件
+	pf, err := internal.GetPathFileByInfoUUID(pc.ConfigInfoUUID, true)
+	if err != nil {
+		return err
+	}
+	pc.UUID = pf.UUID
+	pc.Path = pf.Path
+	pc.Name = pf.Name
+	pc.Content = pf.Content
+	pc.Version = pf.Version
+	pc.IsActive = pf.IsActive
+	return nil
 }
