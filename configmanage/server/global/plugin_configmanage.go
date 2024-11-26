@@ -27,4 +27,5 @@ const (
 	SSHD   = "sshd"
 	Sysctl = "sysctl"
 	DNS    = "dns"
+	PATH   = "path"
 )
