@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"openeuler.org/PilotGo/configmanage-plugin/internal"
 )
 
 func TestPathConfig_Record(t *testing.T) {
@@ -39,6 +40,16 @@ func TestPathConfig_Load(t *testing.T) {
 		os.Exit(-1)
 	}
 	fmt.Printf("pc: %v\n", pc)
+}
+
+func TestGetPathFileByUUID(t *testing.T) {
+	uuid := "4254b485-8e8a-427c-bed1-5da05e363657"
+	hf, err := internal.GetPathFileByUUID(uuid)
+	if err != nil {
+		fmt.Printf("get pathfile error: %s\n", err)
+		os.Exit(-1)
+	}
+	fmt.Printf("hc: %v\n", hf)
 }
 
 func TestGetPathFilesByConfigUUID(t *testing.T) {

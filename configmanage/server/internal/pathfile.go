@@ -61,6 +61,22 @@ func GetPathFileByInfoUUID(uuid string, isindex interface{}) (PathFile, error) {
 	return file, err
 }
 
+func GetPathFileByUUID(uuid string) (PathFile, error) {
+	var file PathFile
+	err := db.MySQL().Model(&PathFile{}).Where("uuid=?", uuid).Find(&file).Error
+	return file, err
+}
+
+func (pf *PathFile) UpdateByuuid() error {
+	// 将同类配置的所有标志修改为未使用
+	err := db.MySQL().Model(&PathFile{}).Where("config_info_uuid=?", pf.ConfigInfoUUID).Update("is_index", 0).Error
+	if err != nil {
+		return err
+	}
+	// 将成功下发的具体某一个配置状态修改为已使用
+	return db.MySQL().Model(&PathFile{}).Where("uuid=?", pf.UUID).Update("is_index", 1).Error
+}
+
 // 根据配置uuid获取所有配置文件
 func GetPathFilesByConfigUUID(uuid string) ([]PathFile, error) {
 	var files []PathFile
