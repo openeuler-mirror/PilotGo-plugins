@@ -73,3 +73,27 @@ func (pc *PathConfig) Load() error {
 	pc.IsActive = pf.IsActive
 	return nil
 }
+
+// 根据配置uuid获取所有配置文件
+func GetPathFilesByConfigUUID(uuid string) ([]PathFile, error) {
+	return internal.GetPathFilesByConfigUUID(uuid)
+}
+
+// 查看某台机器某种类型的的历史配置信息
+func GetPathFilesByNode(nodeid string) ([]PathConfig, error) {
+	// 查找本台机器所属的配置uuid
+	config_nodes, err := internal.GetConfigNodesByNode(nodeid)
+	if err != nil {
+		return nil, err
+	}
+	var pcs []PathConfig
+	for _, v := range config_nodes {
+		pf, err := internal.GetPathFileByInfoUUID(v.ConfigInfoUUID, nil)
+		if err != nil {
+			return nil, err
+		}
+		pc := toPathConfig(&pf)
+		pcs = append(pcs, pc)
+	}
+	return pcs, nil
+}
