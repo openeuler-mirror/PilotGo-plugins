@@ -278,6 +278,10 @@ func (pc *PathConfig) Collect() ([]NodeResult, error) {
 	return nil, nil
 }
 
+func GetPathFileByInfoUUID(uuid string, isindex interface{}) (PathFile, error) {
+	return internal.GetPathFileByInfoUUID(uuid, isindex)
+}
+
 // 根据配置uuid获取所有配置文件
 func GetPathFilesByConfigUUID(uuid string) ([]PathFile, error) {
 	return internal.GetPathFilesByConfigUUID(uuid)
