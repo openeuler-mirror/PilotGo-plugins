@@ -60,3 +60,10 @@ func GetPathFileByInfoUUID(uuid string, isindex interface{}) (PathFile, error) {
 	err := db.MySQL().Model(&PathFile{}).Where("config_info_uuid=? and is_from_host=0 ", uuid).Find(&file).Error
 	return file, err
 }
+
+// 根据配置uuid获取所有配置文件
+func GetPathFilesByConfigUUID(uuid string) ([]PathFile, error) {
+	var files []PathFile
+	err := db.MySQL().Model(&PathFile{}).Where("config_info_uuid=?", uuid).Find(&files).Error
+	return files, err
+}

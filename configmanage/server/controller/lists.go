@@ -17,7 +17,7 @@ type PaginationQ struct {
 }
 
 func ConfigTypeListHandler(c *gin.Context) {
-	result := []string{global.Repo, global.Host, global.SSH, global.SSHD, global.Sysctl, global.DNS}
+	result := []string{global.Repo, global.Host, global.SSH, global.SSHD, global.Sysctl, global.DNS, global.PATH}
 	response.Success(c, result, "get config type success")
 }
 
@@ -130,6 +130,17 @@ func ConfigInfoHandler(c *gin.Context) {
 		logger.Debug("load dnsfiles success")
 		response.Success(c, dnsfiles, "load dnsfiles success")
 
+	case global.PATH:
+		// 获取有关配置的所有文件信息GetPathFilesByConfigUUID
+		pathfiles, err := service.GetPathFilesByConfigUUID(ci.UUID)
+		if err != nil {
+			logger.Error("failed to get pathfiles files: %s", err.Error())
+			response.Fail(c, "failed to get pathfiles files", err.Error())
+			return
+		}
+		logger.Debug("load pathfiles success")
+		response.Success(c, pathfiles, "load pathfiles success")
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
@@ -216,6 +227,17 @@ func ConfigHistoryHandler(c *gin.Context) {
 		}
 		logger.Debug("load dnsconfig success")
 		response.Success(c, dnsconfig, "load dnsconfig success")
+
+	case global.PATH:
+		// 获取有关本台机器配置的所有文件信息
+		pathconfig, err := service.GetPathFilesByNode(query.UUID)
+		if err != nil {
+			logger.Error("failed to get pathconfig files: %s", err.Error())
+			response.Fail(c, "failed to get pathconfig files", err.Error())
+			return
+		}
+		logger.Debug("load pathconfig success")
+		response.Success(c, pathconfig, "load pathconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
