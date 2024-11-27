@@ -313,6 +313,50 @@ func AddConfigHandler(c *gin.Context) {
 		logger.Debug("add dnsconfig success")
 		response.Success(c, nil, "Add dnsconfig success")
 
+	case global.PATH:
+		// 解析参数
+		pathconfig := &service.PathConfig{}
+		if err := json.Unmarshal(query.Data, pathconfig); err != nil {
+			logger.Error("failed to parse pathconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse pathconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(pathconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		pathconfig.UUID = uuid.New().String()
+		pathconfig.ConfigInfoUUID = ci.UUID
+		pathconfig.IsActive = false
+		pathconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = pathconfig.Record()
+		if err != nil {
+			logger.Error("failed to add pathconfig: %s", err.Error())
+			response.Fail(c, "failed to add pathconfig:", err.Error())
+			return
+		}
+		// 收集机器的配置信息
+		result, err := pathconfig.Collect()
+		if err != nil {
+			logger.Error("failed to collect pathconfig: %s", err.Error())
+			response.Fail(c, result, err.Error())
+			return
+		}
+		logger.Debug("add pathconfig success")
+		response.Success(c, nil, "Add pathconfig success")
+
 	default:
 		response.Fail(c, nil, "Unknown type:"+query.Type)
 	}
@@ -431,6 +475,21 @@ func LoadConfigHandler(c *gin.Context) {
 		logger.Debug("load dnsconfig success")
 		response.Success(c, ci, "load dnsconfig success")
 
+	case global.PATH:
+		pathconfig := &service.PathConfig{
+			ConfigInfoUUID: ci.UUID,
+		}
+		// 加载正在使用的配置
+		err = pathconfig.Load()
+		if err != nil {
+			logger.Error("failed to get pathconfig file: %s", err.Error())
+			response.Fail(c, "failed to get pathconfig file:", err.Error())
+			return
+		}
+		ci.Config = pathconfig
+		logger.Debug("load pathconfig success")
+		response.Success(c, ci, "load pathconfig success")
+
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
 	}
@@ -537,6 +596,19 @@ func ApplyConfigHandler(c *gin.Context) {
 			return
 		}
 		response.Success(c, nil, "apply dnsconfig success")
+
+	case global.PATH:
+		pathconfig := &service.PathConfig{
+			UUID:           query.UUID,
+			ConfigInfoUUID: ci.UUID,
+		}
+		_, err := pathconfig.Apply()
+		if err != nil {
+			logger.Error("failed to apply pathconfig file: %s", err.Error())
+			response.Fail(c, "failed to apply pathconfig:", err.Error())
+			return
+		}
+		response.Success(c, nil, "apply pathconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
@@ -872,6 +944,53 @@ func UpdateConfigHandler(c *gin.Context) {
 
 		logger.Debug("update dnsconfig success")
 		response.Success(c, nil, "update dnsconfig success")
+
+	case global.PATH:
+		// 解析参数
+		pathconfig := &service.PathConfig{}
+		if err := json.Unmarshal(query.Data, pathconfig); err != nil {
+			logger.Error("failed to parse pathconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to parse pathconfig parameter:", err.Error())
+			return
+		}
+
+		file := common.File{}
+		if err := json.Unmarshal([]byte(pathconfig.Content), &file); err != nil {
+			logger.Error("failed to parse file parameter: %s", err.Error())
+			response.Fail(c, "failed to parse file parameter:", err.Error())
+			return
+		}
+		file.Content = base64.StdEncoding.EncodeToString([]byte(file.Content))
+
+		// 查询此配置的内容
+		df, err := service.GetPathFileByInfoUUID(ci.UUID, nil)
+		if err != nil {
+			logger.Error("failed to get pathconfig parameter: %s", err.Error())
+			response.Fail(c, "failed to get pathconfig parameter:", err.Error())
+			return
+		}
+
+		// 更新参数
+		pathconfig.UUID = df.UUID
+		pathconfig.ConfigInfoUUID = ci.UUID
+		pathconfig.IsActive = false
+		pathconfig.Content, err = json.Marshal(file)
+		if err != nil {
+			logger.Error("Error encoding JSON:: %s", err.Error())
+			response.Fail(c, "Error encoding JSON:", err.Error())
+			return
+		}
+
+		// 将参数添加到数据库
+		err = pathconfig.Record()
+		if err != nil {
+			logger.Error("failed to update pathconfig: %s", err.Error())
+			response.Fail(c, "failed to update pathconfig:", err.Error())
+			return
+		}
+
+		logger.Debug("update pathconfig success")
+		response.Success(c, nil, "update pathconfig success")
 
 	default:
 		response.Fail(c, nil, "Unknown type of configinfo:"+query.UUID)
