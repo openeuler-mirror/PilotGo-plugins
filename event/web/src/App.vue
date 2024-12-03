@@ -7,20 +7,21 @@
   -->
   <my-table ref="tableRef" row-key="date" :getData="getData" style="width: 100%">
     <template #listName>事件列表</template>
-      <template #button_bar>
-        <el-button>btn</el-button>
+    <template #button_bar>
+      <el-input v-model="input" style="width: 240px" placeholder="请输入关键字进行搜索..." @change="handleSearch"/>&nbsp;
+      <el-button>搜索</el-button>
+    </template>
+    <!-- <el-table-column type="selection" width="55" /> -->
+    <el-table-column prop="id" label="编号" width="80" />
+    <el-table-column prop="event_name" label="事件名称" />
+    <el-table-column prop="create_time" label="创建时间" />
+    <el-table-column prop="update_time" label="更新时间" />
+    <el-table-column prop="description" label="描述" />
+    <el-table-column label="操作" width="240">
+      <template #default="{ row }">
+        <el-button round size="small">btn</el-button>
       </template>
-      <!-- <el-table-column type="selection" width="55" /> -->
-      <el-table-column prop="id" label="编号" width="80" />
-      <el-table-column prop="event_name" label="事件名称" />
-      <el-table-column prop="create_time" label="创建时间" />
-      <el-table-column prop="update_time" label="更新时间" />
-      <el-table-column prop="description" label="描述" />
-      <el-table-column label="操作" width="240">
-        <template #default="{ row }">
-          <el-button round size="small">btn</el-button>
-        </template>
-      </el-table-column>
+    </el-table-column>
   </my-table>
 </el-config-provider>
 </template>
@@ -34,6 +35,12 @@ import MyTable from './components/MyTable.vue';
 const zhCn = ref(locale); 
 
 const tableRef = ref<TableInstance>()
+
+// 输入框搜索方法
+const input = ref('');
+const handleSearch = () => {
+  if(!input.value) return;
+}
 
 const getData = () => {
 

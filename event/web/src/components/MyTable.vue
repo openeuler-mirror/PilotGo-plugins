@@ -12,7 +12,8 @@
       <!-- 列表 -->
       <div class="my_table_content" ref="tableBox">
         <el-table ref="myTableRef" :data="tableData" class="table" @select="handleRowSelectionChange"
-          @selection-change="handleSelectinChange" v-loading="loading">
+          @selection-change="handleSelectinChange">
+          <!-- @selection-change="handleSelectinChange" v-loading="loading"> -->
           <slot></slot>
           <template #append>
             <slot name="append"></slot>
@@ -158,25 +159,6 @@
   
       &_title {
         font-size: 16px;
-      }
-  
-      &_operation {
-        flex: 2;
-        display: flex;
-        justify-content: flex-start;
-  
-        .operation {
-          &-select {
-            &-spanText {
-              font-size: 12px;
-              padding-left: 4px;
-            }
-  
-            &-input {
-              margin-left: 10px;
-            }
-          }
-        }
       }
   
       &_button {
