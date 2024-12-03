@@ -1,5 +1,11 @@
+# * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+# * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+# * See LICENSE file for more details.
+# * Author: zhanghan2021 <zhanghan@kylinos.cn> 
+# * Date: Thu Nov 7 15:01:23 2024 +0800 
 from flask import Flask
 from config.config import init_config
+from llmops.router.log_analysis_router import log_analysis_router
 from utils.logger import setup_logger
 from router.task import task_blueprint
 
@@ -19,6 +25,7 @@ def create_app() -> Flask:
 
     # 注册蓝图
     app.register_blueprint(task_blueprint, url_prefix="/task")
+    app.register_blueprint(log_analysis_router)
     return app
 
 

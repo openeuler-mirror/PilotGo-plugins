@@ -1,3 +1,8 @@
+# * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+# * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+# * See LICENSE file for more details.
+# * Author: zhanghan2021 <zhanghan@kylinos.cn> 
+# * Date: Thu Nov 7 16:30:24 2024 +0800 
 from flask import request
 from utils.response import success, fail, not_found
 from service.task import create_new_task, get_task_status, confirm_task_option
