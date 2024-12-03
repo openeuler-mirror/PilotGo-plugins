@@ -1,3 +1,10 @@
+<!--
+ * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
+ * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+ * See LICENSE file for more details.
+ * Author: 赵振芳 <zhaozhenfang@kylinos.cn>
+ * Date: Tue Nov 26 11:20:26 2024 +0800
+-->
 <template>
     <div class="my_table">
       <!-- table工具条 -->
