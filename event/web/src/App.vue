@@ -8,6 +8,18 @@
   <my-table ref="tableRef" row-key="date" :getData="getData" style="width: 100%">
     <template #listName>事件列表</template>
     <template #button_bar>
+    <div class="date_div">
+    <span class="demonstration">时间选择：</span>
+    <el-date-picker
+      v-model="dateRange"
+      type="datetimerange"
+      :shortcuts="shortcuts"
+      range-separator="-"
+      start-placeholder="开始时间"
+      end-placeholder="结束时间"
+      @change="handleDate"
+    />
+  </div>&emsp;
       <el-input v-model="input" style="width: 240px" placeholder="请输入关键字进行搜索..." @change="handleSearch"/>&nbsp;
       <el-button>搜索</el-button>
     </template>
@@ -35,6 +47,42 @@ import MyTable from './components/MyTable.vue';
 const zhCn = ref(locale); 
 
 const tableRef = ref<TableInstance>()
+
+const dateRange = ref('')
+
+const shortcuts = [
+  {
+    text: '前1个周',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setDate(start.getDate() - 7)
+      return [start, end]
+    },
+  },
+  {
+    text: '前1个月',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setMonth(start.getMonth() - 1)
+      return [start, end]
+    },
+  },
+  {
+    text: '前3个月',
+    value: () => {
+      const end = new Date()
+      const start = new Date()
+      start.setMonth(start.getMonth() - 3)
+      return [start, end]
+    },
+  },
+]
+// 时间范围筛选
+const handleDate = (value:[Date]) => {
+
+}
 
 // 输入框搜索方法
 const input = ref('');
