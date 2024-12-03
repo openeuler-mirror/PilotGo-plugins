@@ -6,6 +6,7 @@
 from flask import Flask
 from config.config import init_config
 from llmops.router.log_analysis_router import log_analysis_router
+from llmops.utils.agentfactoryUtils import agentfactory
 from utils.logger import setup_logger
 from router.task import task_blueprint
 
@@ -25,7 +26,13 @@ def create_app() -> Flask:
 
     # 注册蓝图
     app.register_blueprint(task_blueprint, url_prefix="/task")
-    app.register_blueprint(log_analysis_router)
+    app.register_blueprint(log_analysis_router, url_prefix="/log")
+
+    # agent对象存储在app.config内
+    factory = agentfactory(config)  # 初始化agentfactory工厂类
+    agent = factory.create_agent();  # 初始化agent
+    app.config["AGENT"] = agent
+
     return app
 
 

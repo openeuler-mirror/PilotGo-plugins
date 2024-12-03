@@ -7,16 +7,15 @@
 import os
 
 import Agently
+from Agently.Agent.Agent import Agent
 
 from llmops.config.config import init_config
 from llmops.llm_tools.log_analysis.agentfactory import agentfactory
 
 
-def logworkflow(user_input):
-    conf = init_config()  # 初始化配置
-    factory = agentfactory(conf)   # 初始化agentfactory工厂类
-    agent = factory.create_agent();   # 初始化agent
+def logworkflow(user_input,agent: Agent):
     main_workflow = Agently.Workflow()
+    log_agent = agent
 
     # @main_workflow.chunk("user_input")
     # def user_input(inputs, storage):
@@ -60,15 +59,15 @@ def logworkflow(user_input):
         # print("*" * 50)
         # return assistant_reason_reply.get("improvement")
         assistant_reason_reply = (
-            agent
+            log_agent
             .input(user_input)
             .info("用中文对系统日志进行解释，结果用字典形式例如：{reason:'解释'}")
             .instruct("目标语言：中文")
             .output({
                 "info_list": [
                     {
-                        "知识对象": ("str", "回答{input}问题时，需要了解相关知识的具体对象"),
-                        "关键知识点": ("str", "回答{input}问题时，需要了解的关键知识")
+                        "知识对象": ("str", "分析{input}问题时，需要了解相关知识的具体对象"),
+                        "关键知识点": ("str", "分析{input}问题时，需要了解的关键知识")
                     }
                 ],
                 "analyse": ("str", "根据{info_list}出现的问题进行解释和分析"),
@@ -84,7 +83,7 @@ def logworkflow(user_input):
         .connect_to("assistant_reply")
         .connect_to("END")
     )
-    print(main_workflow.draw())
+    # print(main_workflow.draw())
     result = main_workflow.start()
     return result
 

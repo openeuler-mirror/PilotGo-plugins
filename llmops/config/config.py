@@ -17,7 +17,7 @@ class AppConf:
 @dataclass
 class LlmConf:
     model: str
-    apikey: str
+    # apikey: str
     baseurl: str
     current_model: str
 
