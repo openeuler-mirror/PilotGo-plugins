@@ -12,5 +12,6 @@ log:
 influxd:
   url: http://localhost:8086
   token: ""
-  organization: ""
-  bucket: ""
+  organization: "kylin"
+  bucket: "test"
+  measurement: "test_measurement"
