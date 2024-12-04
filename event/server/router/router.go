@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Wed Jul 24 09:17:31 2024 +0800
@@ -60,6 +60,11 @@ func registerAPIs(router *gin.Engine) {
 		listener.PUT("register", controller.RegisterListenerHandler)
 		listener.DELETE("unregister", controller.UnregisterListenerHandler)
 		listener.DELETE("unpluginRegister", controller.UnPliginRegisterListenerHandler)
+	}
+
+	eventQuery := api.Group("")
+	{
+		eventQuery.GET("query", controller.EventsQueryHandler)
 	}
 }
 

@@ -86,7 +86,7 @@ type MessageData struct {
 	Data        interface{} `json:"data"`
 }
 
-type MDUserSystemSession struct {
+type MDUserSystemSession struct { //平台登录、退出
 	UserName string `json:"user_name"`
 	Email    string `json:"email"`
 }
@@ -101,13 +101,13 @@ type MDHostChange struct { // 主机新增、移除、上线、离线
 	Status     string `json:"status"` //在线状态
 }
 
-type MDHostPackageOpt struct {
+type MDHostPackageOpt struct { //软件包安装、升级、卸载
 	HostUUID string `json:"host_uuid"`
 	Name     string `json:"name"`
 	Version  string `json:"version"`
 }
 
-type MDHostIPChange struct {
+type MDHostIPChange struct { //主机ip变更
 	HostUUID string `json:"host_uuid"`
 	NewIP    string `json:"new_ip"`
 }
@@ -117,5 +117,5 @@ type MDPluginChange struct { // 插件新增、移除、上线、离线
 	Version     string `json:"version"`
 	Url         string `json:"url"`
 	Description string `json:"description"`
-	Status      string `json:"status"`
+	Status      bool   `json:"status"`
 }
