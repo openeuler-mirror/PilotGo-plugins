@@ -121,13 +121,9 @@ func WriteToDB(MessageData string) error {
 
 func processValue(v interface{}) interface{} {
 	value := v.(string)
-	re := regexp.MustCompile(`(\w+):([^\s\]]+)`)
+	re := regexp.MustCompile(`(\w+):([^\]]+)`)
 	matches := re.FindAllStringSubmatch(value, -1)
 
-	result := make(map[string]string)
-	for _, match := range matches {
-		result[match[1]] = match[2]
-	}
 	if len(matches) > 0 {
 		result := make(map[string]string)
 		for _, match := range matches {

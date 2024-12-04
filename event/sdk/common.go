@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugins licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: zhanghan2021 <zhanghan@kylinos.cn>
  * Date: Wed Jul 24 10:02:04 2024 +0800
@@ -92,7 +92,6 @@ type MDUserSystemSession struct { //平台登录、退出
 }
 
 type MDHostChange struct { // 主机新增、移除、上线、离线
-	HostUUID   string `json:"host_uuid"`
 	IP         string `json:"ip"`
 	OS         string `json:"os"`
 	OSVersion  string `json:"os_version"`
@@ -102,14 +101,15 @@ type MDHostChange struct { // 主机新增、移除、上线、离线
 }
 
 type MDHostPackageOpt struct { //软件包安装、升级、卸载
-	HostUUID string `json:"host_uuid"`
-	Name     string `json:"name"`
-	Version  string `json:"version"`
+	HostIP  string `json:"hostIp"`
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
 type MDHostIPChange struct { //主机ip变更
 	HostUUID string `json:"host_uuid"`
 	NewIP    string `json:"new_ip"`
+	OldIP    string `json:"old_ip"`
 }
 
 type MDPluginChange struct { // 插件新增、移除、上线、离线
