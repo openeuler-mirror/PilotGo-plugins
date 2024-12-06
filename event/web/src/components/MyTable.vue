@@ -33,7 +33,7 @@
       <!-- 分页 -->
       <div class="my_table_page">
         <el-pagination v-model:current-page="page.currentPage" v-model:page-size="page.pageSize"
-          :page-sizes="[20, 25, 50, 75, 100]" :small="page.small" :background="page.background"
+          :page-sizes="[20, 25, 50, 75, 100]" size="small" :background="page.background"
           layout="total, sizes, prev, pager, next, jumper" :total="page.total" @size-change="getTableData"
           @current-change="getTableData" />
       </div>
@@ -52,6 +52,10 @@
       type: Function,
       required: false,
     },
+    params:{
+      type:Object,
+      default:{}
+    }
   });
   const emit = defineEmits(["handleSelect", "handleRowclick"]);
   const loading = ref(false);
@@ -73,7 +77,7 @@
   // 获取表格数据
   const getTableData = () => {
     loading.value = true;
-    props.getData!({ page: page.currentPage, size: page.pageSize }).then(
+    props.getData!({ page: page.currentPage, size: page.pageSize,...props.params }).then(
       (res: { data: any }) => {
         let result: any = res.data;
         if (result && result.code === 200) {
