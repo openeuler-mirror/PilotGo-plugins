@@ -42,7 +42,13 @@ func InfluxdbInit(conf *config.Influxd) {
 	}
 }
 
-func Query(start, stop string, filterTagKey string) (interface{}, error) {
+type MsgResult struct {
+	MsgBody    interface{} `json:"value"`
+	MsgType    string      `json:"msg_type"`
+	UpdateTime string      `json:"time"`
+}
+
+func Query(start, stop string, filterTagKey string) ([]MsgResult, error) {
 	query := fmt.Sprintf(`
 	from(bucket:"%s")
 	|> range(start: %s, stop: %s)
@@ -55,11 +61,11 @@ func Query(start, stop string, filterTagKey string) (interface{}, error) {
 	queryAPI := InfluxDB.DBClient.QueryAPI(InfluxDB.Organization)
 	result, err := queryAPI.Query(context.Background(), query)
 	if err != nil {
-		return result, err
+		return []MsgResult{}, err
 	}
 	defer result.Close()
 
-	var queryResults []map[string]interface{}
+	var queryResults []MsgResult
 	for result.Next() {
 		tags := make(map[string]string)
 		for k, v := range result.Record().Values() {
@@ -69,17 +75,17 @@ func Query(start, stop string, filterTagKey string) (interface{}, error) {
 				}
 			}
 		}
-		queryResults = append(queryResults, map[string]interface{}{
-			"value":    processValue(result.Record().Value()),
-			"msg_type": tags["msg_type"],
-			"time":     tags["timestamp"],
+		queryResults = append(queryResults, MsgResult{
+			MsgBody:    processValue(result.Record().Value()),
+			MsgType:    tags["msg_type"],
+			UpdateTime: tags["timestamp"],
 		})
 	}
 
 	sort.Slice(queryResults, func(i, j int) bool {
 		timeFormat := "2006-01-02 15:04:05.999999999 -0700 MST"
-		time1, err1 := time.Parse(timeFormat, queryResults[i]["time"].(string))
-		time2, err2 := time.Parse(timeFormat, queryResults[j]["time"].(string))
+		time1, err1 := time.Parse(timeFormat, queryResults[i].UpdateTime)
+		time2, err2 := time.Parse(timeFormat, queryResults[j].UpdateTime)
 
 		if err1 != nil || err2 != nil {
 
