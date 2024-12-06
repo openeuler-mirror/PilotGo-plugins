@@ -7,97 +7,94 @@
 -->
 <template>
   <el-config-provider :locale="zhCn">
-  <!-- 
-    1.input 筛选类型，模糊搜索 
-    2.time select 带快速选选择
-    3.标题：跟pilotGo插件保持一致
-  -->
-  <my-table ref="tableRef" row-key="date" :getData="getData" style="width: 100%">
+  <my-table ref="tableRef" row-key="date" :getData="getEventList" :params="params" style="width: 100%">
     <template #listName>事件列表</template>
     <template #button_bar>
-    <div class="date_div">
-    <span class="demonstration">时间选择：</span>
-    <el-date-picker
-      v-model="dateRange"
-      type="datetimerange"
-      :shortcuts="shortcuts"
-      range-separator="-"
-      start-placeholder="开始时间"
-      end-placeholder="结束时间"
-      @change="handleDate"
-    />
-  </div>&emsp;
-      <el-input v-model="input" style="width: 240px" placeholder="请输入关键字进行搜索..." @change="handleSearch"/>&nbsp;
-      <el-button>搜索</el-button>
+      <div class="date_div">
+        <span>时间选择：</span>
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          :shortcuts="shortcuts"
+          range-separator="-"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          @change="handleDate"
+        />
+      </div>&emsp;
+      <span>类型搜索：</span>
+      <el-select
+      v-model="type"
+      placeholder="请选择类型"
+      clearable
+      style="width: 240px"
+      @change="handleSelect"
+    >
+      <el-option
+        v-for="item in types"
+        :key="item"
+        :label="item"
+        :value="item"
+      />
+    </el-select>
+      &emsp;
+      <el-button @click="handleSearch">搜索</el-button>
     </template>
-    <!-- <el-table-column type="selection" width="55" /> -->
-    <el-table-column prop="id" label="编号" width="80" />
-    <el-table-column prop="event_name" label="事件名称" />
-    <el-table-column prop="create_time" label="创建时间" />
-    <el-table-column prop="update_time" label="更新时间" />
-    <el-table-column prop="description" label="描述" />
-    <el-table-column label="操作" width="240">
-      <template #default="{ row }">
-        <el-button round size="small">btn</el-button>
-      </template>
+    <el-table-column label="编号" type="index" width="80"/>
+    <el-table-column prop="msg_type" label="类型" width="160"/>
+    <el-table-column  label="时间" width="240">
+    <template #default={row}>
+    {{ row.time.split('.')[0] }}
+    </template>
     </el-table-column>
+    <el-table-column prop="value" label="消息内容" />
   </my-table>
 </el-config-provider>
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import type { TableInstance } from 'element-plus'
+import { onMounted, ref } from 'vue'
 import locale from 'element-plus/es/locale/lang/zh-cn';
 import MyTable from './components/MyTable.vue';
 
+import { getEventList } from './apis/event';
+import { shortcuts } from './utils';
+
 const zhCn = ref(locale); 
+const tableRef = ref()
+const dateRange = ref([new Date(new Date().setDate(new Date().getDate() - 1)),new Date()])
+const type = ref('');
+const types=ref([] as string[]);
+onMounted(() => {
+  // 设置类型搜索下拉框内容
+  getEventList(params.value).then(res => {
+    if(res.data.code === 200) {
+      types.value = res.data.msgType;
+    }
+  })
+})
 
-const tableRef = ref<TableInstance>()
-
-const dateRange = ref('')
-
-const shortcuts = [
-  {
-    text: '前1个周',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setDate(start.getDate() - 7)
-      return [start, end]
-    },
-  },
-  {
-    text: '前1个月',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setMonth(start.getMonth() - 1)
-      return [start, end]
-    },
-  },
-  {
-    text: '前3个月',
-    value: () => {
-      const end = new Date()
-      const start = new Date()
-      start.setMonth(start.getMonth() - 3)
-      return [start, end]
-    },
-  },
-]
+const params = ref({
+  start:new Date(new Date().setDate(new Date().getDate() - 1)),
+  stop:new Date(),
+  search:''
+})
 // 时间范围筛选
-const handleDate = (value:[Date]) => {
-
+const handleDate = (value:any) => {
+  let c_start = new Date(value[0]);
+  let c_stop = new Date(value[1]);
+  let c_stopPlusday1 = new Date(c_stop.setDate(c_stop.getDate() + 1));
+  params.value.start = new Date(c_start);
+  params.value.stop = new Date(c_stopPlusday1);
 }
 
-// 输入框搜索方法
-const input = ref('');
+// 选择类型方法
+const handleSelect = () => {
+  params.value.search=type.value;
+}
+
+// 搜索
 const handleSearch = () => {
-  if(!input.value) return;
-}
-
-const getData = () => {
-
+  tableRef.value?.getTableData();
 }
 </script>
