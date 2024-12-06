@@ -22,7 +22,7 @@ export interface RespInterface {
 
 // 创建实例
 const instance = axios.create({
-  baseURL: '/', 
+  baseURL: '', 
   timeout: 10000, 
 });
 
@@ -39,7 +39,7 @@ instance.interceptors.request.use(
 // 响应拦截器
 instance.interceptors.response.use(
   (response) => {
-    return response.data; 
+    return response; 
   },
   (error) => {
     return error
