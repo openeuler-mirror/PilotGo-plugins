@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	gitee.com/openeuler/PilotGo-plugins/event/sdk v0.0.0-20241122014720-df6a218375a4
-	gitee.com/openeuler/PilotGo/sdk v0.0.0-20240724025939-231bc58cf0e0
+	gitee.com/openeuler/PilotGo/sdk v0.0.0-20241205080625-a9ececee1e6a
 )
 
 require (
