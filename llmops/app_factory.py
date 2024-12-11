@@ -5,15 +5,16 @@
 # * Date: Thu Nov 7 15:01:23 2024 +0800 
 from flask import Flask
 from config.config import init_config
-from llmops.router.log_analysis_router import log_analysis_router
-from llmops.utils.agentfactoryUtils import agentfactory
+from router.log_analysis_router import log_analysis_router
+from utils.agentfactoryUtils import agentfactory
 from utils.logger import setup_logger
 from router.task import task_blueprint
-
+from flask_cors import CORS
 
 def create_app() -> Flask:
     app = Flask(__name__)
-
+    # 跨域设置
+    CORS(app)
     # 初始化http服务
     config = init_config()
     app.config["SERVER"] = config.app_conf.server
@@ -26,13 +27,12 @@ def create_app() -> Flask:
 
     # 注册蓝图
     app.register_blueprint(task_blueprint, url_prefix="/task")
-    app.register_blueprint(log_analysis_router, url_prefix="/log")
+    app.register_blueprint(log_analysis_router)
 
-    # agent对象存储在app.config内
     factory = agentfactory(config)  # 初始化agentfactory工厂类
     agent = factory.create_agent();  # 初始化agent
-    app.config["AGENT"] = agent
 
+    app.config["AGENT"] = agent
     return app
 
 
@@ -41,7 +41,7 @@ def run_app():
     try:
         app.run(
             host=app.config["SERVER"],
-            port=int(app.config["PORT"]),
+            port=int(app.config["PORT"]),  # 确保 PORT 是一个整数
             debug=app.config["DEBUG"],
         )
     except ValueError as e:
