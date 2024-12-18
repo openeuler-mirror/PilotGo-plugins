@@ -1,4 +1,12 @@
 app:
   server: localhost
   port: 5000
-  debug: true
+  debug:
+  tool_baseurl:
+
+
+llm:
+  model:
+# apikey:
+  baseurl:
+  current_model:
