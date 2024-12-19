@@ -13,6 +13,7 @@ class AppConf:
     server: str
     port: str
     debug: bool
+    tool_baseurl: str
 
 @dataclass
 class LlmConf:
