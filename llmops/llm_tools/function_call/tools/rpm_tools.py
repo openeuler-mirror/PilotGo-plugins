@@ -6,3 +6,7 @@ class RpmFunctionTools:
     BASE_URL = config.app_conf.tool_baseurl
 
 
+rpm_tools_info = {
+
+}
+
