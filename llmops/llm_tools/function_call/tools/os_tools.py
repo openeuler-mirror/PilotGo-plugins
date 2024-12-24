@@ -106,9 +106,10 @@ class OsFunctionTools:
             print(f"Failed to get cpu info. Status code: {response.status_code}")
             return None
 
+
     @staticmethod
-    def memory_info(UUID: str):
-        url = f"{OsFunctionTools.BASE_URL}/api/v1/api/memory_info"
+    def disk_use(UUID: str):
+        url = f"{OsFunctionTools.BASE_URL}/api/v1/disk_use"
         params = {
             "uuid": UUID
         }
@@ -117,8 +118,24 @@ class OsFunctionTools:
             data = response.json()
             return data
         else:
-            print(f"Failed to get memory info. Status code: {response.status_code}")
+            print(f"Failed to get disk use. Status code: {response.status_code}")
             return None
+
+    # @staticmethod
+    # def disk_info(UUID: str):
+    #     url = f"{OsFunctionTools.BASE_URL}/api/v1/disk_info"
+    #     params = {
+    #         "uuid": UUID
+    #     }
+    #     response = requests.get(url, params=params)
+    #     if response.status_code == 200:
+    #         data = response.json()
+    #         return data
+    #     else:
+    #         print(f"Failed to get disk info. Status code: {response.status_code}")
+    #         return None
+
+
     # @staticmethod 可以用一个方法调用以上方法，但未知是否需要处理不同接口返回的数据
     # def fetch_data(endpoint: str, params=None):
     #     # 定义目标URL
@@ -236,6 +253,27 @@ os_tools_info = {
             )
         },
         "func": OsFunctionTools.memory_info
+    },
+    "DiskUse": {
+        "tool_name": "getDiskUse",
+        "desc": (
+            "此方法用于获取指定 UUID 客户端的磁盘使用情况。\n"
+            "返回的数据包含多个磁盘分区的使用情况，每个分区的信息包含以下字段：\n"
+            "1. device：设备名称，例如 '/dev/dm-0'。\n"
+            "2. path：挂载路径，例如 '/'。\n"
+            "3. fstype：文件系统类型，例如 'ext2/ext3'。\n"
+            "4. total：磁盘总容量，例如 '33G'。\n"
+            "5. used：已使用的磁盘空间，例如 '8G'。\n"
+            "6. usedPercent：已使用空间的百分比，例如 '26%'。\n"
+            "如果方法调用失败，请告知用户错误原因。"
+        ),
+        "args": {
+            "UUID": (
+                "str",
+                "[*Required] UUID string identifies the client whose disk usage information is being queried."
+            )
+        },
+        "func": OsFunctionTools.disk_use
     }
 
 }
