@@ -48,7 +48,7 @@ func registerAPIs(router *gin.Engine) {
 	logger.Debug("router register")
 	plugin_manage.EventClient.RegisterHandlers(router)
 	sdk.RegisterEventHandlers(router, plugin_manage.EventClient)
-	api := router.Group("/plugin/" + plugin_manage.EventClient.PluginInfo.Name)
+	api := router.Group("/plugin/event")
 
 	eventpublish := api.Group("")
 	{
