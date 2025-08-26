@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gopkg.in/yaml.v3"
@@ -19,11 +20,19 @@ type MysqlConf struct {
 	Password string `yaml:"password"`
 	Database string `yaml:"database"`
 }
-
+type Etcd struct {
+	Endpoints   []string      `yaml:"endpoints"`
+	ServiveName string        `yaml:"service_name"`
+	Version     string        `yaml:"version"`
+	DialTimeout time.Duration `yaml:"dialTimeout"`
+	MenuName    string        `yaml:"menu_name"`
+	Icon        string        `yaml:"icon"`
+}
 type ServerConfig struct {
 	Http    *HttpConf       `yaml:"http"`
 	Mysql   *MysqlConf      `yaml:"mysql"`
 	Logopts *logger.LogOpts `yaml:"log"`
+	Etcd    *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 
 const config_file = "./config.yml"
