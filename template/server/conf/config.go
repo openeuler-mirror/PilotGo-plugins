@@ -19,8 +19,8 @@ var config_dir string
 
 type ServerConfig struct {
 	Template *TemplateConf
-	PilotGo  *PilotGoConf
 	Logopts  *logger.LogOpts `yaml:"log"`
+	Etcd     *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 
 func ConfigFile() string {
