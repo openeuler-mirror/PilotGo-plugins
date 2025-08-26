@@ -4,25 +4,16 @@ import (
 	"fmt"
 	"os"
 
+	"gitee.com/openeuler/PilotGo/sdk/go-micro/registry"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-event/service"
+	cli "openeuler.org/PilotGo/container-plugin/client"
 	"openeuler.org/PilotGo/container-plugin/config"
 	"openeuler.org/PilotGo/container-plugin/database"
 	"openeuler.org/PilotGo/container-plugin/httphandler"
 )
-
-const Version = "0.0.1"
-
-var PluginInfo = &client.PluginInfo{
-	Name:        "container",
-	Version:     Version,
-	Description: "Container management plugin",
-	Author:      "wangjunqi",
-	Email:       "wangjunqi@kylinos.cn",
-	Url:         "http://192.168.75.100:9998/plugin/container",
-	// ReverseDest: "",
-}
 
 func main() {
 	fmt.Println("hello gala-ops")
@@ -36,8 +27,30 @@ func main() {
 
 	server := gin.Default()
 
-	GlobalClient := client.DefaultClient(PluginInfo)
-	GlobalClient.RegisterHandlers(server)
+	sr, err := registry.NewServiceRegistrar(&registry.Options{
+		Endpoints:   config.Config().Etcd.Endpoints,
+		ServiceAddr: config.Config().Http.Addr,
+		ServiceName: config.Config().Etcd.ServiveName,
+		Version:     config.Config().Etcd.Version,
+		MenuName:    config.Config().Etcd.MenuName,
+		Icon:        config.Config().Etcd.Icon,
+		DialTimeout: config.Config().Etcd.DialTimeout,
+		Extentions:  service.GetExtentions(),
+		Permissions: service.GetPermissions(),
+	})
+	if err != nil {
+		logger.Error("failed to initialize registry: %s", err)
+		os.Exit(-1)
+	}
+
+	client, err := client.NewClient(config.Config().Etcd.ServiveName, sr.Registry)
+	if err != nil {
+		logger.Error("failed to create plugin client: %s", err)
+		os.Exit(-1)
+	}
+
+	cli.ContainerClient = client
+	cli.ContainerClient.RegisterHandlers(server)
 	InitRouter(server)
 
 	if err := server.Run(config.Config().Http.Addr); err != nil {
