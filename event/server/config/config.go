@@ -15,11 +15,6 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/utils/config"
 )
 
-type PluginEvent struct {
-	URL        string `yaml:"url"`
-	PluginType string `yaml:"plugin_type"`
-}
-
 type HttpServer struct {
 	Addr string `yaml:"addr"`
 }
@@ -40,11 +35,10 @@ type Etcd struct {
 	Icon        string        `yaml:"icon"`
 }
 type ServerConfig struct {
-	PluginEvent *PluginEvent    `yaml:"plugin_event"`
-	HttpServer  *HttpServer     `yaml:"http_server"`
-	Logopts     *logger.LogOpts `yaml:"log"`
-	Influxd     *Influxd        `yaml:"influxd"`
-	Etcd        *Etcd           `yaml:"etcd" mapstructure:"etcd"`
+	HttpServer *HttpServer     `yaml:"http_server"`
+	Logopts    *logger.LogOpts `yaml:"log"`
+	Influxd    *Influxd        `yaml:"influxd"`
+	Etcd       *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 
 var config_file string

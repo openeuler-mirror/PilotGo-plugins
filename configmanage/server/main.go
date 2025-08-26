@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: wubijie <wubijie@kylinos.cn>
  * Date: Wed Nov 15 15:28:38 2023 +0800
@@ -14,6 +14,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"gitee.com/openeuler/PilotGo/sdk/go-micro/registry"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"openeuler.org/PilotGo/configmanage-plugin/config"
@@ -56,11 +57,30 @@ func main() {
 		os.Exit(-1)
 	}
 
-	global.GlobalClient = client.DefaultClient(global.Init(config.Config().ConfigPlugin))
-	service.GetTags()
-	service.AddExtentions()
-	service.AddPermission()
+	sr, err := registry.NewServiceRegistrar(&registry.Options{
+		Endpoints:   config.Config().Etcd.Endpoints,
+		ServiceAddr: config.Config().HttpServer.Addr,
+		ServiceName: config.Config().Etcd.ServiveName,
+		Version:     config.Config().Etcd.Version,
+		MenuName:    config.Config().Etcd.MenuName,
+		Icon:        config.Config().Etcd.Icon,
+		DialTimeout: config.Config().Etcd.DialTimeout,
+		Extentions:  service.GetExtentions(),
+		Permissions: service.GetPermission(),
+	})
+	if err != nil {
+		logger.Error("failed to initialize registry: %s", err)
+		os.Exit(-1)
+	}
 
+	client, err := client.NewClient(config.Config().Etcd.ServiveName, sr.Registry)
+	if err != nil {
+		logger.Error("failed to create plugin client: %s", err)
+		os.Exit(-1)
+	}
+
+	global.GlobalClient = client
+	service.GetTags()
 	// 初始化路由信息
 	server := router.InitRouter()
 	go router.RegisterAPIs(server)

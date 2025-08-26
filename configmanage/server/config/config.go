@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: wubijie <wubijie@kylinos.cn>
  * Date: Wed Nov 15 14:46:48 2023 +0800
@@ -10,14 +10,11 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"gopkg.in/yaml.v2"
 )
-
-type ConfigPlugin struct {
-	URL string `yaml:"url"`
-}
 
 type HttpServer struct {
 	Addr string `yaml:"addr"`
@@ -30,12 +27,19 @@ type MysqlDBInfo struct {
 	Password string `yaml:"password"`
 	DataBase string `yaml:"database"`
 }
-
+type Etcd struct {
+	Endpoints   []string      `yaml:"endpoints"`
+	ServiveName string        `yaml:"service_name"`
+	Version     string        `yaml:"version"`
+	DialTimeout time.Duration `yaml:"dialTimeout"`
+	MenuName    string        `yaml:"menu_name"`
+	Icon        string        `yaml:"icon"`
+}
 type ServerConfig struct {
-	ConfigPlugin *ConfigPlugin   `yaml:"config_plugin"`
-	HttpServer   *HttpServer     `yaml:"http_server"`
-	Logopts      *logger.LogOpts `yaml:"log"`
-	Mysql        *MysqlDBInfo    `yaml:"mysql"`
+	HttpServer *HttpServer     `yaml:"http_server"`
+	Logopts    *logger.LogOpts `yaml:"log"`
+	Mysql      *MysqlDBInfo    `yaml:"mysql"`
+	Etcd       *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 
 var global_config ServerConfig
