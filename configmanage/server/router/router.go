@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: wubijie <wubijie@kylinos.cn>
  * Date: Fri Dec 1 16:30:26 2023 +0800
@@ -24,7 +24,7 @@ func InitRouter() *gin.Engine {
 func RegisterAPIs(router *gin.Engine) {
 	//输出插件初始化的信息
 	global.GlobalClient.RegisterHandlers(router)
-	api := router.Group("/plugin/" + global.GlobalClient.PluginInfo.Name)
+	api := router.Group("/plugin/configmanage")
 	{
 		list := api.Group("/list")
 		{

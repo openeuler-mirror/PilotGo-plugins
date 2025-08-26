@@ -1,6 +1,6 @@
 /*
  * Copyright (c) KylinSoft  Co., Ltd. 2024.All rights reserved.
- * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2. 
+ * PilotGo-plugin licensed under the Mulan Permissive Software License, Version 2.
  * See LICENSE file for more details.
  * Author: wubijie <wubijie@kylinos.cn>
  * Date: Fri Nov 15 15:59:30 2024 +0800
@@ -17,7 +17,6 @@ import (
 
 	"gitee.com/openeuler/PilotGo/sdk/common"
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	"gitee.com/openeuler/PilotGo/sdk/utils/httputils"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/configmanage-plugin/global"
@@ -131,7 +130,12 @@ func (dc *DNSConfig) Apply() ([]NodeResult, error) {
 		DeployFileName: dnsfile.Name,
 		DeployText:     dnsfile.Content,
 	}
-	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/file_deploy"
+
+	serverInfo, err := global.GlobalClient.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
+	}
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/file_deploy", serverInfo.Address, serverInfo.Port)
 	r, err := httputils.Post(url, &httputils.Params{
 		Body: de,
 	})
@@ -209,7 +213,11 @@ func (dc *DNSConfig) Collect() ([]NodeResult, error) {
 	}
 
 	//发请求获取配置详情
-	url := "http://" + client.GetClient().Server() + "/api/v1/pluginapi/getnodefiles"
+	serverInfo, err := global.GlobalClient.Registry.Get("pilotgo-server")
+	if err != nil {
+		return nil, err
+	}
+	url := fmt.Sprintf("http://%s:%s/api/v1/pluginapi/getnodefiles", serverInfo.Address, serverInfo.Port)
 	p := struct {
 		DeployBatch common.Batch `json:"deploybatch"`
 		Path        string       `json:"path"`
