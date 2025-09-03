@@ -3,6 +3,7 @@ go 1.23.0
 toolchain go1.23.7
 
 use (
+	./automation/server
 	./configmanage/server
 	./container/server
 	./event/sdk
