@@ -1,0 +1,15 @@
+[Unit]
+Description=PilotGo plugin automation server
+
+[Service]
+Type=simple
+Restart=on-failure      
+RestartSec=5s           
+StartLimitInterval=30s  
+StartLimitBurst=3
+
+WorkingDirectory=/opt/PilotGo/plugin/automation/server
+ExecStart=/opt/PilotGo/plugin/automation/server/PilotGo-plugin-automation
+
+[Install]
+WantedBy=multi-user.target
