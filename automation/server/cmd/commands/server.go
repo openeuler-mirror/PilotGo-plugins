@@ -1,9 +1,10 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service/app"
 )
 
 func NewServerCommand() *cobra.Command {
@@ -24,6 +25,19 @@ func NewServerCommand() *cobra.Command {
 	return cmd
 }
 func Run() error {
-	fmt.Println("jinlaile")
+	opt, err := options.NewOptions().TryLoadFromDisk()
+	if err != nil {
+		return err
+	}
+
+	manager := service.NewServiceManager(
+		&app.LoggerService{Conf: opt.Config.Logopts},
+		&app.MySQLService{Conf: opt.Config.Mysql},
+	)
+	if err := manager.InitAll(); err != nil {
+		return err
+	}
+	defer manager.CloseAll()
+
 	return nil
 }
