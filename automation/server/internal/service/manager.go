@@ -4,14 +4,16 @@ import (
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
+	"gitee.com/openeuler/PilotGo/sdk/plugin/client"
 	clientv3 "go.etcd.io/etcd/client/v3"
 	"gorm.io/gorm"
 )
 
 type AppContext struct {
-	MySQL *gorm.DB
-	Redis Redis
-	Etcd  *clientv3.Client
+	MySQL  *gorm.DB
+	Redis  Redis
+	Etcd   *clientv3.Client
+	Client *client.Client
 }
 
 var App = &AppContext{}

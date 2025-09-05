@@ -33,6 +33,7 @@ func Run() error {
 		&service.LoggerService{Conf: opt.Config.Logopts},
 		&service.MySQLService{Conf: opt.Config.Mysql},
 		&service.RedisService{Conf: opt.Config.Redis},
+		&service.EtcdService{Conf: opt.Config.Etcd, ServerConf: opt.Config.HttpServer},
 	)
 	if err := manager.InitAll(); err != nil {
 		return err
