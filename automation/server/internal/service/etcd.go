@@ -73,3 +73,11 @@ func getPermissions() []common.Permission {
 	var pe []common.Permission
 	return pe
 }
+
+func GetTags() {
+	tag_cb := func(uuids []string) []common.Tag {
+		var tags []common.Tag
+		return tags
+	}
+	App.Client.OnGetTags(tag_cb)
+}

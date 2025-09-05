@@ -10,10 +10,11 @@ import (
 )
 
 type AppContext struct {
-	MySQL  *gorm.DB
-	Redis  Redis
-	Etcd   *clientv3.Client
-	Client *client.Client
+	HttpAddr string
+	MySQL    *gorm.DB
+	Redis    Redis
+	Etcd     *clientv3.Client
+	Client   *client.Client
 }
 
 var App = &AppContext{}
@@ -45,5 +46,6 @@ func (sm *ServiceManager) InitAll() error {
 func (sm *ServiceManager) CloseAll() {
 	for _, svc := range sm.services {
 		_ = svc.Close()
+		logger.Debug("Service %s closed", svc.Name())
 	}
 }

@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/router"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
 )
 
@@ -40,5 +41,8 @@ func Run() error {
 	}
 	defer manager.CloseAll()
 
+	if err := router.HttpServerInit(opt.Config.HttpServer.Addr).Run(opt.Config.HttpServer.Addr); err != nil {
+		return err
+	}
 	return nil
 }
