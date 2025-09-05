@@ -23,7 +23,7 @@ type MysqlDBInfo struct {
 
 type Etcd struct {
 	Endpoints   []string      `yaml:"endpoints"`
-	ServiveName string        `yaml:"service_name"`
+	ServiceName string        `yaml:"service_name"`
 	Version     string        `yaml:"version"`
 	DialTimeout time.Duration `yaml:"dialTimeout"`
 	MenuName    string        `yaml:"menu_name"`
@@ -37,7 +37,7 @@ type ServerConfig struct {
 	Etcd       *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 
-const config_file = "./automation.yml"
+const config_file = "./automation.yaml"
 
 type Options struct {
 	ConfigFile string
