@@ -40,6 +40,6 @@ func templateRun() error {
 		return err
 	}
 
-	fmt.Println("create automation.yaml file success,please search it in current directory.")
+	fmt.Println("create automation.yaml file success, please search it in current directory.")
 	return nil
 }

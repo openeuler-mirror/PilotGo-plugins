@@ -13,6 +13,17 @@ mysql:
     user: root
     password: Qwer!234578
     database: PluginAutomation
+redis:
+    # 分为单机模式和哨兵模式, 可选值: standalone和sentinel
+    deploy_mode: standalone
+    host: 127.0.0.1:6379
+    sentinel_hosts: 1.1.1.1:26379,1.1.1.2:26379,1.1.1.3:26379
+    master_name: mymaster
+    password: Qwer!234578
+    default_db: 0
+    dial_timeout: 5s
+    enable_redis: true
+    use_tls: false
 etcd:
     endpoints:
         - localhost:2379
