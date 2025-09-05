@@ -32,6 +32,20 @@ func NewMysqlDBInfoOptions() *options.MysqlDBInfo {
 	}
 }
 
+func NewRedisDBInfoOptions() *options.RedisDBInfo {
+	return &options.RedisDBInfo{
+		Mode:          "standalone",
+		Host:          "127.0.0.1:6379",
+		SentinelHosts: "1.1.1.1:26379,1.1.1.2:26379,1.1.1.3:26379",
+		MasterName:    "mymaster",
+		Password:      "Qwer!234578",
+		DefaultDB:     0,
+		DialTimeout:   5 * time.Second,
+		EnableRedis:   true,
+		UseTLS:        false,
+	}
+}
+
 func NewEtcdOptions() *options.Etcd {
 	return &options.Etcd{
 		Endpoints:   []string{"localhost:2379"},
@@ -47,5 +61,6 @@ var DefaultConfigTemplate = options.ServerConfig{
 	HttpServer: NewHttpServerOptions(),
 	Logopts:    NewLogOptions(),
 	Mysql:      NewMysqlDBInfoOptions(),
+	Redis:      NewRedisDBInfoOptions(),
 	Etcd:       NewEtcdOptions(),
 }

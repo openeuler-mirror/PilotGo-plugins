@@ -21,6 +21,18 @@ type MysqlDBInfo struct {
 	DataBase string `yaml:"database"`
 }
 
+type RedisDBInfo struct {
+	Mode          string        `yaml:"deploy_mode" comment:"分为单机模式和哨兵模式, 可选值: standalone和sentinel"`
+	Host          string        `yaml:"host"`
+	SentinelHosts string        `yaml:"sentinel_hosts"`
+	MasterName    string        `yaml:"master_name"`
+	Password      string        `yaml:"password"`
+	DefaultDB     int           `yaml:"default_db"`
+	DialTimeout   time.Duration `yaml:"dial_timeout"`
+	EnableRedis   bool          `yaml:"enable_redis"`
+	UseTLS        bool          `yaml:"use_tls"`
+}
+
 type Etcd struct {
 	Endpoints   []string      `yaml:"endpoints"`
 	ServiceName string        `yaml:"service_name"`
@@ -34,6 +46,7 @@ type ServerConfig struct {
 	HttpServer *HttpServer     `yaml:"http_server"`
 	Logopts    *logger.LogOpts `yaml:"log"`
 	Mysql      *MysqlDBInfo    `yaml:"mysql"`
+	Redis      *RedisDBInfo    `yaml:"redis"`
 	Etcd       *Etcd           `yaml:"etcd" mapstructure:"etcd"`
 }
 

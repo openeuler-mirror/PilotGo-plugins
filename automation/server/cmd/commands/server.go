@@ -33,6 +33,7 @@ func Run() error {
 	manager := service.NewServiceManager(
 		&app.LoggerService{Conf: opt.Config.Logopts},
 		&app.MySQLService{Conf: opt.Config.Mysql},
+		&app.RedisService{Conf: opt.Config.Redis},
 	)
 	if err := manager.InitAll(); err != nil {
 		return err
