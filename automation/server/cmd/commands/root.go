@@ -29,4 +29,5 @@ func Execute() {
 
 func init() {
 	rootCmd.AddCommand(NewServerCommand())
+	rootCmd.AddCommand(NewTemplateCommand())
 }
