@@ -1,8 +1,7 @@
-package app
+package service
 
 import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 )
 
 type LoggerService struct {
@@ -12,7 +11,7 @@ type LoggerService struct {
 func (m *LoggerService) Name() string {
 	return "Logger"
 }
-func (m *LoggerService) Init(ctx *global.AppContext) error {
+func (m *LoggerService) Init(ctx *AppContext) error {
 	if err := logger.Init(m.Conf); err != nil {
 		return err
 	}
