@@ -1,4 +1,4 @@
-package app
+package service
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 )
 
 type MySQLService struct {
@@ -18,7 +17,7 @@ func (m *MySQLService) Name() string {
 	return "MySQL"
 }
 
-func (m *MySQLService) Init(ctx *global.AppContext) error {
+func (m *MySQLService) Init(ctx *AppContext) error {
 	err := ensureDatabase(m.Conf)
 	if err != nil {
 		return err
@@ -45,10 +44,10 @@ func (m *MySQLService) Init(ctx *global.AppContext) error {
 }
 
 func (m *MySQLService) Close() error {
-	if global.App.MySQL == nil {
+	if App.MySQL == nil {
 		return nil
 	}
-	sqlDB, err := global.App.MySQL.DB()
+	sqlDB, err := App.MySQL.DB()
 	if err != nil {
 		return err
 	}

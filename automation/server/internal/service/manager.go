@@ -4,8 +4,23 @@ import (
 	"fmt"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
+	clientv3 "go.etcd.io/etcd/client/v3"
+	"gorm.io/gorm"
 )
+
+type AppContext struct {
+	MySQL *gorm.DB
+	Redis Redis
+	Etcd  *clientv3.Client
+}
+
+var App = &AppContext{}
+
+type AppService interface {
+	Name() string
+	Init(ctx *AppContext) error
+	Close() error
+}
 
 type ServiceManager struct {
 	services []AppService
@@ -17,7 +32,7 @@ func NewServiceManager(svcs ...AppService) *ServiceManager {
 
 func (sm *ServiceManager) InitAll() error {
 	for _, svc := range sm.services {
-		if err := svc.Init(global.App); err != nil {
+		if err := svc.Init(App); err != nil {
 			return fmt.Errorf("failed to init %s: %w", svc.Name(), err)
 		}
 		logger.Debug("Service %s initialized successfully", svc.Name())

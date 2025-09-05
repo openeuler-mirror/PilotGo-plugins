@@ -4,7 +4,6 @@ import (
 	"github.com/spf13/cobra"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service/app"
 )
 
 func NewServerCommand() *cobra.Command {
@@ -31,9 +30,9 @@ func Run() error {
 	}
 
 	manager := service.NewServiceManager(
-		&app.LoggerService{Conf: opt.Config.Logopts},
-		&app.MySQLService{Conf: opt.Config.Mysql},
-		&app.RedisService{Conf: opt.Config.Redis},
+		&service.LoggerService{Conf: opt.Config.Logopts},
+		&service.MySQLService{Conf: opt.Config.Mysql},
+		&service.RedisService{Conf: opt.Config.Redis},
 	)
 	if err := manager.InitAll(); err != nil {
 		return err
