@@ -1,10 +1,15 @@
 package commands
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/router"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/utils"
 )
 
 func NewServerCommand() *cobra.Command {
@@ -30,18 +35,25 @@ func Run() error {
 		return err
 	}
 
+	ips, err := utils.GetAllHostIPs()
+	if err != nil {
+		return fmt.Errorf("获取本机ip地址失败: %v", err)
+	} else {
+		global.App.HttpAddr = ips[0].IP + opt.Config.HttpServer.Addr[strings.LastIndex(opt.Config.HttpServer.Addr, ":"):]
+	}
+
 	manager := service.NewServiceManager(
 		&service.LoggerService{Conf: opt.Config.Logopts},
 		&service.MySQLService{Conf: opt.Config.Mysql},
 		&service.RedisService{Conf: opt.Config.Redis},
-		&service.EtcdService{Conf: opt.Config.Etcd, ServerConf: opt.Config.HttpServer},
+		&service.EtcdService{Conf: opt.Config.Etcd, ServerConf: global.App.HttpAddr},
 	)
 	if err := manager.InitAll(); err != nil {
 		return err
 	}
 	defer manager.CloseAll()
 
-	if err := router.HttpServerInit(opt.Config.HttpServer.Addr).Run(opt.Config.HttpServer.Addr); err != nil {
+	if err := router.HttpServerInit().Run(global.App.HttpAddr); err != nil {
 		return err
 	}
 	return nil

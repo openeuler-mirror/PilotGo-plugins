@@ -10,7 +10,7 @@ import (
 )
 
 type EtcdService struct {
-	ServerConf *options.HttpServer
+	ServerConf string
 	Conf       *options.Etcd
 }
 
@@ -21,7 +21,7 @@ func (e *EtcdService) Name() string {
 func (e *EtcdService) Init(ctx *AppContext) error {
 	sr, err := registry.NewServiceRegistrar(&registry.Options{
 		Endpoints:   e.Conf.Endpoints,
-		ServiceAddr: e.ServerConf.Addr,
+		ServiceAddr: e.ServerConf,
 		ServiceName: e.Conf.ServiceName,
 		Version:     e.Conf.Version,
 		MenuName:    e.Conf.MenuName,
