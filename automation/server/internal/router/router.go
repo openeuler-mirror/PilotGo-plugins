@@ -10,10 +10,16 @@ import (
 	customscripts "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/custom_scripts"
 	scriptlibrary "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/utils"
 )
 
 func HttpServerInit(addr string) *gin.Engine {
-	global.App.HttpAddr = addr
+	ips, err := utils.GetAllHostIPs()
+	if err != nil {
+		logger.Error("获取本机ip地址失败: %v", err)
+	} else {
+		global.App.HttpAddr = ips[0].IP + addr[strings.LastIndex(addr, ":"):]
+	}
 
 	server := initRouters()
 	frontendStaticRouter(server)
