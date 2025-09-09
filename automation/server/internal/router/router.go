@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	customscripts "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/custom_scripts"
+	dangerousrule "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule"
 	scriptlibrary "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
 )
@@ -32,6 +33,7 @@ func initRouters() *gin.Engine {
 	api := Router.Group("/plugin/automation")
 	customscripts.CustomScriptsHandler(api)
 	scriptlibrary.ScriptLibraryHandler(api)
+	dangerousrule.DangerousRuleHandler(api)
 	return Router
 }
 
