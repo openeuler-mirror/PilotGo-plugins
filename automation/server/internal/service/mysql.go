@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
+	dangerousRule "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
 )
 
 type MySQLService struct {
@@ -38,6 +39,8 @@ func (m *MySQLService) Init(ctx *AppContext) error {
 	if err != nil {
 		return err
 	}
+
+	db.AutoMigrate(&dangerousRule.DangerousRule{})
 
 	ctx.MySQL = db
 	return nil
