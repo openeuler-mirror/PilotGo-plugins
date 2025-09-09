@@ -11,7 +11,7 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 	if err := dao.AddDangerousRule(&model.DangerousRule{
 		Expression:  rule.Expression,
 		Description: rule.Description,
-		ScriptType:  rule.ScriptType,
+		ScriptTypes: rule.ScriptTypes,
 		Severity:    rule.Severity,
 		Creator:     rule.Creator,
 		CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),

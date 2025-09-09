@@ -9,18 +9,15 @@ const (
 	SeverityWarning Severity = 2
 )
 
-var SeverityMap = enum.MapWrapper{
+var SeverityMap = enum.EnumMap{
 	int(SeverityBlock):   "拦截",
 	int(SeverityWarning): "警告",
 }
 
 func (s Severity) String() string {
-	switch s {
-	case SeverityBlock:
-		return "拦截"
-	case SeverityWarning:
-		return "警告"
-	default:
-		return "未定义"
-	}
+	return SeverityMap.String(int(s))
+}
+
+func GetSeverities() []enum.Item {
+	return SeverityMap.ToItems()
 }
