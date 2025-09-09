@@ -15,7 +15,7 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 		Expression:  rule.Expression,
 		Description: rule.Description,
 		ScriptTypes: rule.ScriptTypes,
-		Severity:    rule.Severity,
+		Action:      rule.Action,
 		Creator:     rule.Creator,
 		CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),
 		UpdatedAt:   time.Now().Format("2006-01-02 15:04:05"),
@@ -41,7 +41,7 @@ func UpdateDangerousRule(rule *model.DangerousRule) error {
 		Expression:  rule.Expression,
 		Description: rule.Description,
 		ScriptTypes: rule.ScriptTypes,
-		Severity:    rule.Severity,
+		Action:      rule.Action,
 		UpdatedAt:   time.Now().Format("2006-01-02 15:04:05"),
 		Status:      rule.Status,
 	}); err != nil {
