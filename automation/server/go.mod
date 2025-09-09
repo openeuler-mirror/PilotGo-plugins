@@ -8,6 +8,7 @@ require (
 	gitee.com/openeuler/PilotGo/sdk v0.0.0-20250903062443-96565885a85b
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/go-sql-driver/mysql v1.8.1
 	github.com/spf13/cobra v1.10.1
 	go.etcd.io/etcd/client/v3 v3.6.4
 	gopkg.in/yaml.v2 v2.4.0
@@ -30,7 +31,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.1 // indirect
-	github.com/go-sql-driver/mysql v1.8.1 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
