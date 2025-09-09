@@ -22,3 +22,16 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 	}
 	return nil
 }
+
+func GetDangerousRules() ([]model.DangerousRule, error) {
+	return dao.GetDangerousRules()
+}
+
+func UpdateDangerousRule(rule *model.DangerousRule) error {
+	rule.UpdatedAt = time.Now().Format("2006-01-02 15:04:05")
+	return dao.UpdateDangerousRule(rule)
+}
+
+func DeleteDangerousRule(id []int) error {
+	return dao.DeleteDangerousRule(id)
+}
