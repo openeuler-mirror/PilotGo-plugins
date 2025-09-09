@@ -22,6 +22,10 @@ var ScriptTypeMap = enum.EnumMap{
 	int(SQL):    "SQL",
 }
 
+func GetScriptType() []enum.Item {
+	return ScriptTypeMap.ToItems()
+}
+
 type ScriptTypeArr []ScriptType
 
 func (a ScriptTypeArr) Strings() []string {

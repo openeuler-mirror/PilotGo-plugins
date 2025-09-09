@@ -14,4 +14,10 @@ func DangerousRuleHandler(router *gin.RouterGroup) {
 		api.PUT("/changeStatus", controller.ChangeDangerousRuleStatusHandler)
 		api.DELETE("/delete", controller.DeleteDangerousRuleHandler)
 	}
+
+	enumApi := router.Group("/enum")
+	{
+		enumApi.GET("/scriptType", controller.ScriptTypeListHandler)
+		enumApi.GET("/action", controller.ActionListHandler)
+	}
 }
