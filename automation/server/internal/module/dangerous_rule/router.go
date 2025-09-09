@@ -9,8 +9,9 @@ func DangerousRuleHandler(router *gin.RouterGroup) {
 	api := router.Group("/dangerousRule")
 	{
 		api.POST("/add", controller.AddDangerousRuleHandler)
-		api.PUT("/update", controller.UpdateDangerousRuleHandler)
-		api.DELETE("/delete", controller.DeleteDangerousRuleHandler)
 		api.GET("/list", controller.GetDangerousRulesHandler)
+		api.PUT("/update", controller.UpdateDangerousRuleHandler)
+		api.PUT("/changeStatus", controller.ChangeDangerousRuleStatusHandler)
+		api.DELETE("/delete", controller.DeleteDangerousRuleHandler)
 	}
 }

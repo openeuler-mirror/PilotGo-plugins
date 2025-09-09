@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/service"
@@ -9,36 +10,60 @@ import (
 func AddDangerousRuleHandler(c *gin.Context) {
 	var rule model.DangerousRule
 	if err := c.ShouldBindJSON(&rule); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	if err := service.AddDangerousRule(&rule); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	c.JSON(200, gin.H{"message": "success"})
+	response.Success(c, nil, "success")
 }
 
 func GetDangerousRulesHandler(c *gin.Context) {
-	rules, err := service.GetDangerousRules()
-	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+	query := &response.PaginationQ{}
+	if err := c.ShouldBindQuery(query); err != nil {
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	c.JSON(200, gin.H{"data": rules})
+
+	rules, total, err := service.GetDangerousRules(query)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	response.DataPagination(c, rules, total, query)
+
 }
 
 func UpdateDangerousRuleHandler(c *gin.Context) {
 	var rule model.DangerousRule
 	if err := c.ShouldBindJSON(&rule); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	if err := service.UpdateDangerousRule(&rule); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	c.JSON(200, gin.H{"message": "success"})
+	response.Success(c, nil, "success")
+}
+func ChangeDangerousRuleStatusHandler(c *gin.Context) {
+	var rule struct {
+		ID     int  `json:"id"`
+		Status bool `json:"status"`
+	}
+	if err := c.ShouldBindJSON(&rule); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	if err := service.ChangeDangerousRuleStatus(rule.ID, rule.Status); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
 }
 
 func DeleteDangerousRuleHandler(c *gin.Context) {
@@ -46,12 +71,12 @@ func DeleteDangerousRuleHandler(c *gin.Context) {
 		ID []int `json:"id"`
 	}
 	if err := c.ShouldBindJSON(&ids); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
 	if err := service.DeleteDangerousRule(ids.ID); err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		response.Fail(c, nil, err.Error())
 		return
 	}
-	c.JSON(200, gin.H{"message": "success"})
+	response.Success(c, nil, "success")
 }
