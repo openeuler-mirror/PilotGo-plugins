@@ -31,3 +31,22 @@ func (r DangerousRule) MarshalJSON() ([]byte, error) {
 		Alias:       (Alias)(r),
 	})
 }
+
+func (r *DangerousRule) UnmarshalJSON(data []byte) error {
+	type Alias DangerousRule
+	aux := &struct {
+		Action      string   `json:"action"`
+		ScriptTypes []string `json:"script_types"`
+		*Alias
+	}{
+		Alias: (*Alias)(r),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	r.Action = rule.ParseActionType(aux.Action)
+	r.ScriptTypes = script.NewScriptTypeArr(aux.ScriptTypes)
+	return nil
+}

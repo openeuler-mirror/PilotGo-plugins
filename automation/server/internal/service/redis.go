@@ -101,6 +101,7 @@ func (r *RedisService) Close() error {
 
 // ===============================Redis API=============================================
 type Redis interface {
+	Set(key string, value interface{}, expiration time.Duration) error
 	SetNX(key string, value interface{}, expiration time.Duration) error
 	Get(key string, out interface{}) error
 	Delete(keys ...string) error
@@ -114,6 +115,14 @@ type Redis interface {
 }
 
 // =============================Redis manager============================================
+func (r *RedisService) Set(key string, value interface{}, expiration time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return err
+	}
+	return r.client.Set(r.ctx, key, data, expiration).Err()
+}
+
 func (r *RedisService) SetNX(key string, value interface{}, expiration time.Duration) error {
 	data, err := json.Marshal(value)
 	if err != nil {

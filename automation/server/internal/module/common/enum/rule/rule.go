@@ -18,6 +18,15 @@ func (s ActionType) String() string {
 	return ActionMap.String(int(s))
 }
 
+func ParseActionType(s string) ActionType {
+	for k, v := range ActionMap {
+		if v == s {
+			return ActionType(k)
+		}
+	}
+	return 0
+}
+
 func GetActions() []enum.Item {
 	return ActionMap.ToItems()
 }

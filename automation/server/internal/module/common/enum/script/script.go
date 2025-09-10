@@ -22,6 +22,15 @@ var ScriptTypeMap = enum.EnumMap{
 	int(SQL):    "SQL",
 }
 
+func ParseScriptType(s string) ScriptType {
+	for k, v := range ScriptTypeMap {
+		if v == s {
+			return ScriptType(k)
+		}
+	}
+	return 0
+}
+
 func GetScriptType() []enum.Item {
 	return ScriptTypeMap.ToItems()
 }
@@ -54,4 +63,12 @@ func (a *ScriptTypeArr) Scan(value interface{}) error {
 		(*a)[i] = ScriptType(v)
 	}
 	return nil
+}
+
+func NewScriptTypeArr(strs []string) ScriptTypeArr {
+	res := make(ScriptTypeArr, 0, len(strs))
+	for _, s := range strs {
+		res = append(res, ParseScriptType(s))
+	}
+	return res
 }
