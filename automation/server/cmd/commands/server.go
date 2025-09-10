@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
+	dangerousRuleService "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/service"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/router"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/utils"
@@ -53,7 +54,18 @@ func Run() error {
 	}
 	defer manager.CloseAll()
 
+	if err := startService(); err != nil {
+		return err
+	}
+
 	if err := router.HttpServerInit().Run(global.App.HttpAddr); err != nil {
+		return err
+	}
+	return nil
+}
+
+func startService() error {
+	if err := dangerousRuleService.LoadFromDB(); err != nil {
 		return err
 	}
 	return nil
