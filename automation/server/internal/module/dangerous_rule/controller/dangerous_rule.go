@@ -3,6 +3,7 @@ package controller
 import (
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/service"
 )
@@ -79,4 +80,21 @@ func DeleteDangerousRuleHandler(c *gin.Context) {
 		return
 	}
 	response.Success(c, nil, "success")
+}
+
+func DetectRealtimelyHandler(c *gin.Context) {
+	var req struct {
+		Script     string `json:"script"`
+		ScriptType int    `json:"script_type"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	rules, err := service.DetectRealtimely(req.Script, script.ScriptType(req.ScriptType))
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, rules, "success")
 }

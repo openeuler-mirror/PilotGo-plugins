@@ -30,12 +30,20 @@ type Finding struct {
 	Match       string          `json:"match"`   // 匹配到的文本
 }
 
-type detectRule struct {
-	ID          int
-	Description string
-	Action      rule.ActionType
-	Regex       *regexp.Regexp
-	Keywords    []string
+type DetectRule struct {
+	ID          int             `json:"id"`
+	Description string          `json:"description"`
+	Action      rule.ActionType `json:"action"`
+	Regex       *regexp.Regexp  `json:"regex"`
+	Keywords    []string        `json:"keywords"`
+}
+
+func DetectRealtimely(script string, scriptType script.ScriptType) ([]DetectRule, error) {
+	rules, err := detectRules(scriptType)
+	if err != nil {
+		return nil, err
+	}
+	return rules, nil
 }
 
 // Detect 脚本检测主方法
@@ -50,20 +58,12 @@ func DetectWithVars(script string, scriptType script.ScriptType, params map[stri
 }
 
 func detectInternal(script string, scriptType script.ScriptType) ([]Finding, error) {
-	// 1. 从 Redis 获取高危规则
-	dangerousRules, err := getetRulesFromRedis()
+	rules, err := detectRules(scriptType)
 	if err != nil {
-		return nil, fmt.Errorf("获取高危命令失败: %w", err)
+		return nil, err
 	}
-
-	// 2. 转换为可检测规则（Regex 或 Keywords）
-	var rules []detectRule
-	for _, r := range dangerousRules {
-		// 如果脚本类型不在规则的 ScriptTypes 中，跳过
-		if !containsScriptType(r.ScriptTypes, scriptType) {
-			continue
-		}
-		rules = append(rules, toDetectRule(r))
+	if len(rules) == 0 {
+		return nil, nil
 	}
 
 	lines := splitLines(script)
@@ -122,6 +122,24 @@ func detectInternal(script string, scriptType script.ScriptType) ([]Finding, err
 
 	return findings, nil
 }
+func detectRules(scriptType script.ScriptType) ([]DetectRule, error) {
+	// 1. 从 Redis 获取高危规则
+	dangerousRules, err := getetRulesFromRedis()
+	if err != nil {
+		return nil, fmt.Errorf("获取高危命令失败: %w", err)
+	}
+
+	// 2. 转换为可检测规则（Regex 或 Keywords）
+	var rules []DetectRule
+	for _, r := range dangerousRules {
+		// 如果脚本类型不在规则的 ScriptTypes 中，跳过
+		if !containsScriptType(r.ScriptTypes, scriptType) {
+			continue
+		}
+		rules = append(rules, toDetectRule(r))
+	}
+	return rules, nil
+}
 
 // 判断 ScriptTypes 是否包含某个类型
 func containsScriptType(arr script.ScriptTypeArr, t script.ScriptType) bool {
@@ -133,9 +151,9 @@ func containsScriptType(arr script.ScriptTypeArr, t script.ScriptType) bool {
 	return false
 }
 
-// 将 DangerousRule 转换为 detectRule
-func toDetectRule(r model.DangerousRule) detectRule {
-	dr := detectRule{
+// 将 DangerousRule 转换为 DetectRule
+func toDetectRule(r model.DangerousRule) DetectRule {
+	dr := DetectRule{
 		ID:          r.ID,
 		Description: r.Description,
 		Action:      r.Action,
