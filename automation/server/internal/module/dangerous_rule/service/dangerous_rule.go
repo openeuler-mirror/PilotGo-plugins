@@ -6,6 +6,7 @@ import (
 
 	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/go-sql-driver/mysql"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/dao"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
 )
@@ -28,7 +29,7 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 		}
 		return err
 	}
-	return nil
+	return LoadFromDB()
 }
 
 func GetDangerousRules(query *response.PaginationQ) ([]model.DangerousRule, int, error) {
@@ -52,19 +53,38 @@ func UpdateDangerousRule(rule *model.DangerousRule) error {
 		}
 		return err
 	}
-	return nil
+	return LoadFromDB()
 }
 
 func ChangeDangerousRuleStatus(id int, status bool) error {
 	if id == 0 {
 		return fmt.Errorf("ID is required")
 	}
-	return dao.ChangeDangerousRuleStatus(id, map[string]interface{}{
+	err := dao.ChangeDangerousRuleStatus(id, map[string]interface{}{
 		"updated_at": time.Now().Format("2006-01-02 15:04:05"),
 		"status":     status,
 	})
+	if err != nil {
+		return err
+	}
+	return LoadFromDB()
 }
 
 func DeleteDangerousRule(id []int) error {
-	return dao.DeleteDangerousRule(id)
+	if err := dao.DeleteDangerousRule(id); err != nil {
+		return err
+	}
+	return LoadFromDB()
+}
+
+/******************************更新redis**************************************/
+const DangerousRuleKey = "dangerous_rules"
+
+func LoadFromDB() error {
+	var rules []model.DangerousRule
+	if err := global.App.MySQL.Where("status = ?", 1).Find(&rules).Error; err != nil {
+		return err
+	}
+
+	return global.App.Redis.Set(DangerousRuleKey, rules, 0)
 }
