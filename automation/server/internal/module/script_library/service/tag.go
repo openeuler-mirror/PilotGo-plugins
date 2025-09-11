@@ -21,3 +21,17 @@ func CreateTag(tag *model.Tag) error {
 		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
 	})
 }
+
+func UpdateTag(tag *model.Tag) error {
+	return dao.UpdateTag(&model.Tag{
+		ID:                  tag.ID,
+		Name:                tag.Name,
+		Description:         tag.Description,
+		LastModifyUser:      tag.LastModifyUser,
+		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+	})
+}
+
+func DeleteTag(id int) error {
+	return dao.DeleteTag(id)
+}

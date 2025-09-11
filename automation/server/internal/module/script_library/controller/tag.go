@@ -28,3 +28,31 @@ func CreateTagHandler(c *gin.Context) {
 	}
 	response.Success(c, nil, "success")
 }
+
+func UpdateTagHandler(c *gin.Context) {
+	var tag model.Tag
+	if err := c.ShouldBindJSON(&tag); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.UpdateTag(&tag); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}
+
+func DeleteTagHandler(c *gin.Context) {
+	var req struct {
+		ID int `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.DeleteTag(req.ID); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}

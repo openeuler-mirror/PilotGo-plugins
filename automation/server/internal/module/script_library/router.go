@@ -17,5 +17,7 @@ func ScriptLibraryHandler(router *gin.RouterGroup) {
 	{
 		tag.GET("/list", controller.GetTagsHandler)
 		tag.POST("/create", controller.CreateTagHandler)
+		tag.PUT("/update", controller.UpdateTagHandler)
+		tag.DELETE("/delete", controller.DeleteTagHandler)
 	}
 }
