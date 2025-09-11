@@ -17,7 +17,7 @@ func CreateTag(tag *model.Tag) error {
 		Description:         tag.Description,
 		Creator:             tag.Creator,
 		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      tag.Creator,
+		LastModifyUser:      tag.LastModifyUser,
 		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
 	})
 }
