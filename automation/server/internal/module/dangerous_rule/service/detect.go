@@ -8,7 +8,6 @@ import (
 
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/rule"
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
 )
 
@@ -38,7 +37,7 @@ type DetectRule struct {
 	Keywords    []string        `json:"keywords"`
 }
 
-func DetectRealtimely(script string, scriptType script.ScriptType) ([]DetectRule, error) {
+func DetectRealtimely(script string, scriptType string) ([]DetectRule, error) {
 	rules, err := detectRules(scriptType)
 	if err != nil {
 		return nil, err
@@ -47,17 +46,17 @@ func DetectRealtimely(script string, scriptType script.ScriptType) ([]DetectRule
 }
 
 // Detect 脚本检测主方法
-func Detect(script string, scriptType script.ScriptType) ([]Finding, error) {
+func Detect(script string, scriptType string) ([]Finding, error) {
 	return detectInternal(script, scriptType)
 }
 
 // DetectWithVars 支持变量替换
-func DetectWithVars(script string, scriptType script.ScriptType, params map[string]string) ([]Finding, error) {
+func DetectWithVars(script string, scriptType string, params map[string]string) ([]Finding, error) {
 	expanded := expandSimpleVars(script, params)
 	return detectInternal(expanded, scriptType)
 }
 
-func detectInternal(script string, scriptType script.ScriptType) ([]Finding, error) {
+func detectInternal(script string, scriptType string) ([]Finding, error) {
 	rules, err := detectRules(scriptType)
 	if err != nil {
 		return nil, err
@@ -117,12 +116,13 @@ func detectInternal(script string, scriptType script.ScriptType) ([]Finding, err
 		if findings[i].Action == findings[j].Action {
 			return findings[i].Line < findings[j].Line
 		}
-		return findings[i].Action == rule.Block
+		return findings[i].Action < findings[j].Action
 	})
 
 	return findings, nil
 }
-func detectRules(scriptType script.ScriptType) ([]DetectRule, error) {
+
+func detectRules(scriptType string) ([]DetectRule, error) {
 	// 1. 从 Redis 获取高危规则
 	dangerousRules, err := getetRulesFromRedis()
 	if err != nil {
@@ -142,7 +142,8 @@ func detectRules(scriptType script.ScriptType) ([]DetectRule, error) {
 }
 
 // 判断 ScriptTypes 是否包含某个类型
-func containsScriptType(arr script.ScriptTypeArr, t script.ScriptType) bool {
+func containsScriptType(scriptTypes string, t string) bool {
+	arr := strings.Split(scriptTypes, ",")
 	for _, v := range arr {
 		if v == t {
 			return true
@@ -156,8 +157,9 @@ func toDetectRule(r model.DangerousRule) DetectRule {
 	dr := DetectRule{
 		ID:          r.ID,
 		Description: r.Description,
-		Action:      r.Action,
 	}
+
+	dr.Action = rule.ParseActionType(r.Action)
 
 	if r.Expression != "" {
 		if re, err := regexp.Compile(r.Expression); err == nil {
