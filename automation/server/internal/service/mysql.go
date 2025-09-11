@@ -43,6 +43,8 @@ func (m *MySQLService) Init(ctx *AppContext) error {
 
 	db.AutoMigrate(&dangerousRule.DangerousRule{})
 	db.AutoMigrate(&scriptLibrary.Tag{})
+	db.AutoMigrate(&scriptLibrary.Script{})
+	db.AutoMigrate(&scriptLibrary.ScriptVersion{})
 
 	ctx.MySQL = db
 	return nil
