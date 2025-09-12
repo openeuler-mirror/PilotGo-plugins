@@ -11,11 +11,11 @@ import (
 
 func AddScript(script *model.Script, scriptVersion *model.ScriptVersion) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Save(script).Error; err != nil {
+		if err := tx.Create(script).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Save(scriptVersion).Error; err != nil {
+		if err := tx.Create(scriptVersion).Error; err != nil {
 			return err
 		}
 
@@ -69,8 +69,16 @@ func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, erro
 }
 
 func UpdateScript(id string, s *model.Script) error {
+	return global.App.MySQL.Model(&model.Script{}).Where("id = ?", id).Updates(s).Error
+}
+
+func DeleteScript(id string) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.Script{}).Where("id = ?", id).Updates(s).Error; err != nil {
+		if err := tx.Where("script_id = ?", id).Delete(&model.ScriptVersion{}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Where("id = ?", id).Delete(&model.Script{}).Error; err != nil {
 			return err
 		}
 		return nil
