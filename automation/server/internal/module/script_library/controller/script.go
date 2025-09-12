@@ -7,7 +7,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/service"
 )
 
-func AddScript(c *gin.Context) {
+func AddScriptHandler(c *gin.Context) {
 	var script model.ScriptWithVersion
 	if err := c.ShouldBindJSON(&script); err != nil {
 		response.Fail(c, nil, err.Error())
@@ -19,4 +19,18 @@ func AddScript(c *gin.Context) {
 		return
 	}
 	response.Success(c, nil, "success")
+}
+
+func ScriptListHandler(c *gin.Context) {
+	query := &response.PaginationQ{}
+	if err := c.ShouldBindQuery(query); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	scripts, total, err := service.GetScripts(query)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.DataPagination(c, scripts, total, query)
 }
