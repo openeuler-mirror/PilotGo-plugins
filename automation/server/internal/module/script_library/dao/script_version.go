@@ -93,3 +93,12 @@ func AddScriptVersion(sv *model.ScriptVersion) error {
 		return nil
 	})
 }
+
+func UpdateScriptVersion(id int, scriptId string, sv *model.ScriptVersion) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Updates(sv).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}

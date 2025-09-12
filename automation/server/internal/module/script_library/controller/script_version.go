@@ -31,3 +31,17 @@ func AddScriptVersionHandler(c *gin.Context) {
 	}
 	response.Success(c, nil, "success")
 }
+
+func UpdateScriptVersionHandler(c *gin.Context) {
+	var scriptVersion model.ScriptVersion
+	if err := c.ShouldBindJSON(&scriptVersion); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	if err := service.UpdateScriptVersion(&scriptVersion); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}
