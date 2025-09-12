@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
 )
@@ -52,7 +53,7 @@ SELECT
 FROM script s
 WHERE s.id = ?
 `
-	var row model.ScriptVersionRow
+	var row model.RawScriptVersion
 	if err := global.App.MySQL.Raw(sql, scriptId).Scan(&row).Error; err != nil {
 		return &model.ScriptVersionResponse{}, fmt.Errorf("查询脚本版本失败: %w", err)
 	}
@@ -82,4 +83,13 @@ WHERE s.id = ?
 	}
 
 	return resp, nil
+}
+
+func AddScriptVersion(sv *model.ScriptVersion) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(sv).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }

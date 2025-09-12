@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/dao"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/utils"
 )
 
 func generateScriptId() string {
@@ -17,10 +16,10 @@ func generateScriptId() string {
 func AddScript(s *model.ScriptWithVersion) error {
 	scriptId := generateScriptId()
 
-	decodedContent, err := utils.DecodeScriptContent(s.Content)
-	if err != nil {
-		return err
-	}
+	// decodedContent, err := utils.DecodeScriptContent(s.Content)
+	// if err != nil {
+	// 	return err
+	// }
 
 	script := &model.Script{
 		ID:                  scriptId,
@@ -37,8 +36,8 @@ func AddScript(s *model.ScriptWithVersion) error {
 
 	scriptVersion := &model.ScriptVersion{
 		ScriptID: scriptId,
-		Content:  decodedContent,
-		// Content:             s.Content,
+		// Content:  decodedContent,
+		Content:             s.Content,
 		Version:             s.Version,
 		VersionDesc:         s.VersionDesc,
 		Creator:             s.Creator,
