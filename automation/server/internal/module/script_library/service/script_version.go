@@ -24,3 +24,14 @@ func AddScriptVersion(sv *model.ScriptVersion) error {
 	}
 	return dao.AddScriptVersion(scriptVersion)
 }
+
+func UpdateScriptVersion(sv *model.ScriptVersion) error {
+	scriptVersion := &model.ScriptVersion{
+		Content:             sv.Content,
+		Version:             sv.Version,
+		VersionDesc:         sv.VersionDesc,
+		LastModifyUser:      sv.LastModifyUser,
+		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+	}
+	return dao.UpdateScriptVersion(sv.ID, sv.ScriptID, scriptVersion)
+}

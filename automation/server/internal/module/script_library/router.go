@@ -15,6 +15,7 @@ func ScriptLibraryHandler(router *gin.RouterGroup) {
 		{
 			versionGroup.GET("/list", controller.GetScriptVersionsHandler)
 			versionGroup.POST("/add", controller.AddScriptVersionHandler)
+			versionGroup.PUT("/update", controller.UpdateScriptVersionHandler)
 		}
 	}
 
