@@ -2,7 +2,7 @@ package model
 
 type Script struct {
 	ID                  string `json:"id" gorm:"primaryKey;type:varchar(36);not null;comment:'脚本ID'"`
-	Name                string `json:"name" gorm:"type:varchar(255);not null;unique;comment:'脚本名称'"`
+	Name                string `json:"name" gorm:"type:varchar(255);not null;uniqueIndex:uniq_script_name;comment:'脚本名称'"`
 	ScriptType          string `json:"script_type" gorm:"type:varchar(100);not null;comment:'脚本类型'"`
 	Description         string `json:"description" gorm:"type:varchar(500);comment:'脚本描述'"`
 	Tags                string `json:"tags" gorm:"comment:'场景标签'"`

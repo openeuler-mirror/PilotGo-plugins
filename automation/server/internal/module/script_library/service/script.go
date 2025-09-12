@@ -52,3 +52,14 @@ func AddScript(s *model.ScriptWithVersion) error {
 func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, error) {
 	return dao.GetScripts(query)
 }
+
+func UpdateScript(s *model.Script) error {
+	script := &model.Script{
+		Name:                s.Name,
+		Description:         s.Description,
+		Tags:                s.Tags,
+		LastModifyUser:      s.LastModifyUser,
+		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+	}
+	return dao.UpdateScript(s.ID, script)
+}
