@@ -67,3 +67,12 @@ func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, erro
 
 	return scriptResponses, int(total), nil
 }
+
+func UpdateScript(id string, s *model.Script) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.Script{}).Where("id = ?", id).Updates(s).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+}
