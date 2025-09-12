@@ -13,7 +13,8 @@ func ScriptLibraryHandler(router *gin.RouterGroup) {
 
 		versionGroup := api.Group("/:script_id/scriptVersion")
 		{
-			versionGroup.GET("/list", controller.GetScriptVersions)
+			versionGroup.GET("/list", controller.GetScriptVersionsHandler)
+			versionGroup.POST("/add", controller.AddScriptVersionHandler)
 		}
 	}
 
