@@ -8,7 +8,9 @@ import (
 func ScriptLibraryHandler(router *gin.RouterGroup) {
 	api := router.Group("/scriptlibrary")
 	{
-		api.POST("/add", controller.AddScript)
+		api.POST("/add", controller.AddScriptHandler)
+		api.GET("/list", controller.ScriptListHandler)
+
 	}
 
 	tag := router.Group("/tag")
