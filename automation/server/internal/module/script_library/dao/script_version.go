@@ -97,3 +97,24 @@ func AddScriptVersion(sv *model.ScriptVersion) error {
 func UpdateScriptVersion(id int, scriptId string, sv *model.ScriptVersion) error {
 	return global.App.MySQL.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Updates(sv).Error
 }
+
+func DeleteScriptVersion(id int, scriptId string) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("id = ? AND script_id = ?", id, scriptId).Delete(&model.ScriptVersion{}).Error; err != nil {
+			return err
+		}
+
+		var count int64
+		if err := tx.Model(&model.ScriptVersion{}).Where("script_id = ?", scriptId).Count(&count).Error; err != nil {
+			return err
+		}
+
+		if count == 0 {
+			if err := tx.Where("id = ?", scriptId).Delete(&model.Script{}).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
