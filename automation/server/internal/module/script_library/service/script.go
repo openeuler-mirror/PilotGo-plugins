@@ -63,3 +63,7 @@ func UpdateScript(s *model.Script) error {
 	}
 	return dao.UpdateScript(s.ID, script)
 }
+
+func DeleteScript(id string) error {
+	return dao.DeleteScript(id)
+}

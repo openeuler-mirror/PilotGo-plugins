@@ -87,7 +87,7 @@ WHERE s.id = ?
 
 func AddScriptVersion(sv *model.ScriptVersion) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Save(sv).Error; err != nil {
+		if err := tx.Create(sv).Error; err != nil {
 			return err
 		}
 		return nil
@@ -95,10 +95,5 @@ func AddScriptVersion(sv *model.ScriptVersion) error {
 }
 
 func UpdateScriptVersion(id int, scriptId string, sv *model.ScriptVersion) error {
-	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Updates(sv).Error; err != nil {
-			return err
-		}
-		return nil
-	})
+	return global.App.MySQL.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Updates(sv).Error
 }

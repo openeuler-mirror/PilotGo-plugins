@@ -11,6 +11,7 @@ func ScriptLibraryHandler(router *gin.RouterGroup) {
 		api.POST("/add", controller.AddScriptHandler)
 		api.GET("/list", controller.ScriptListHandler)
 		api.PUT("/update", controller.UpdateScriptHandler)
+		api.DELETE("delete", controller.DeleteScriptHandler)
 
 		versionGroup := api.Group("/:script_id/scriptVersion")
 		{

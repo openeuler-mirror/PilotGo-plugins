@@ -48,3 +48,18 @@ func UpdateScriptHandler(c *gin.Context) {
 	}
 	response.Success(c, nil, "success")
 }
+
+func DeleteScriptHandler(c *gin.Context) {
+	var id struct {
+		ID string `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&id); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.DeleteScript(id.ID); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}
