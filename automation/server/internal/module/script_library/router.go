@@ -29,4 +29,9 @@ func ScriptLibraryHandler(router *gin.RouterGroup) {
 		tag.PUT("/update", controller.UpdateTagHandler)
 		tag.DELETE("/delete", controller.DeleteTagHandler)
 	}
+
+	exec := router.Group("/exec")
+	{
+		exec.POST("/script", controller.ExecScriptHandler)
+	}
 }
