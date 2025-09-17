@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.23.7
 
 require (
-	gitee.com/openeuler/PilotGo/sdk v0.0.0-20250916064441-cba49a792605
+	gitee.com/openeuler/PilotGo/sdk v0.0.0-20250916121620-f7402a7f9376
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.8.1
