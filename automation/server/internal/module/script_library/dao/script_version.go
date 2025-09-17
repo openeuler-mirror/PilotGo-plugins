@@ -23,6 +23,7 @@ SELECT
                 'id', sv.id,
                 'script_id', sv.script_id,
                 'content', sv.content,
+                'params', sv.params,
                 'version', sv.version,
                 'version_desc', sv.version_desc,
                 'status', sv.status = 1,
