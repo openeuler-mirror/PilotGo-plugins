@@ -15,6 +15,7 @@ func AddScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 	scriptVersion := &model.ScriptVersion{
 		ScriptID:            scriptId,
 		Content:             sv.Content,
+		Params:              sv.Params,
 		Version:             sv.Version,
 		VersionDesc:         sv.VersionDesc,
 		Creator:             sv.Creator,
@@ -28,6 +29,7 @@ func AddScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 func UpdateScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 	scriptVersion := &model.ScriptVersion{
 		Content:             sv.Content,
+		Params:              sv.Params,
 		Version:             sv.Version,
 		VersionDesc:         sv.VersionDesc,
 		LastModifyUser:      sv.LastModifyUser,

@@ -38,6 +38,7 @@ func AddScript(s *model.ScriptWithVersion) error {
 		ScriptID: scriptId,
 		// Content:  decodedContent,
 		Content:             s.Content,
+		Params:              s.Params,
 		Version:             s.Version,
 		VersionDesc:         s.VersionDesc,
 		Creator:             s.Creator,
