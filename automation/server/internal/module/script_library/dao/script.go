@@ -3,10 +3,10 @@ package dao
 import (
 	"strings"
 
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func AddScript(script *model.Script, scriptVersion *model.ScriptVersion) error {
