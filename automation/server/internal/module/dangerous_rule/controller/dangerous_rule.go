@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/service"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func AddDangerousRuleHandler(c *gin.Context) {

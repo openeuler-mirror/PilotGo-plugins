@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/go-sql-driver/mysql"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/dao"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func AddDangerousRule(rule *model.DangerousRule) error {

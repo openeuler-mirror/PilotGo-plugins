@@ -1,9 +1,9 @@
 package dao
 
 import (
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func AddDangerousRule(rule *model.DangerousRule) error {

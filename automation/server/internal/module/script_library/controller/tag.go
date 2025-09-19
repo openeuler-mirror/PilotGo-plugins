@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/service"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func GetTagsHandler(c *gin.Context) {

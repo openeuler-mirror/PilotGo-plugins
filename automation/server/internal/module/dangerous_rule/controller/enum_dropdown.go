@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/rule"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func ScriptTypeListHandler(c *gin.Context) {

@@ -19,7 +19,7 @@ type ScriptVersion struct {
 	Content             string          `json:"content" gorm:"type:text;not null;comment:脚本内容"`
 	Version             string          `json:"version" gorm:"type:varchar(50);not null;uniqueIndex:uniq_script_version;comment:脚本版本号"`
 	VersionDesc         string          `json:"version_desc" gorm:"type:varchar(500);uniqueIndex:uniq_script_version;comment:脚本版本描述"`
-	Status              bool            `json:"status" gorm:"type:boolean;not null;default:false;comment:脚本版本状态,true表示上线,false表示禁用"`
+	Status              bool            `json:"status" gorm:"type:boolean;not null;default:false;comment:脚本版本状态,true表示已发布,false表示开发中"`
 	Creator             string          `json:"creator" gorm:"type:varchar(100);not null;comment:创建者"`
 	CreatedAt           string          `json:"created_at" gorm:"comment:创建时间"`
 	LastModifyUser      string          `json:"last_modify_user" gorm:"type:varchar(100);not null;comment:最后修改者"`

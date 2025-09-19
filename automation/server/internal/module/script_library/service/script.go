@@ -3,10 +3,10 @@ package service
 import (
 	"time"
 
-	"gitee.com/openeuler/PilotGo/sdk/response"
 	"github.com/google/uuid"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/dao"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func generateScriptId() string {

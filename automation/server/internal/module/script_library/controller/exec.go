@@ -20,7 +20,7 @@ func ExecScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	hosts, err := global.App.Client.MachineList()
+	_, err := global.App.Client.MachineList()
 	if err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -30,8 +30,5 @@ func ExecScriptHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.Success(c, gin.H{
-		"hosts":  hosts,
-		"result": result,
-	}, "success")
+	response.Success(c, result, "success")
 }
