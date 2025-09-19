@@ -24,6 +24,7 @@ func AddScript(s *model.ScriptWithVersion) error {
 	script := &model.Script{
 		ID:                  scriptId,
 		Name:                s.Name,
+		ScriptName:          s.ScriptName,
 		ScriptType:          s.ScriptType,
 		Description:         s.Description,
 		Tags:                s.Tags,
@@ -56,7 +57,6 @@ func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, erro
 
 func UpdateScript(s *model.Script) error {
 	script := &model.Script{
-		Name:                s.Name,
 		Description:         s.Description,
 		Tags:                s.Tags,
 		LastModifyUser:      s.LastModifyUser,

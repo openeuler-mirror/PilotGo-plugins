@@ -18,6 +18,7 @@ type Script struct {
 
 type ScriptWithVersion struct {
 	Name           string          `json:"name"`
+	ScriptName     string          `json:"script_name"`
 	ScriptType     string          `json:"script_type"`
 	Description    string          `json:"description"`
 	Tags           string          `json:"tags"`
@@ -33,6 +34,7 @@ type ScriptWithVersion struct {
 type ScriptResponse struct {
 	ID                  string `json:"id"`
 	Name                string `json:"name"`
+	ScriptName          string `json:"script_name"`
 	ScriptType          string `json:"script_type"`
 	Description         string `json:"description"`
 	Tags                []Tag  `json:"tags"`

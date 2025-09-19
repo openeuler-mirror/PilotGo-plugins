@@ -37,6 +37,7 @@ func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, erro
 		sr := &model.ScriptResponse{
 			ID:                  s.ID,
 			Name:                s.Name,
+			ScriptName:          s.ScriptName,
 			ScriptType:          s.ScriptType,
 			Description:         s.Description,
 			IsPublic:            s.IsPublic,
