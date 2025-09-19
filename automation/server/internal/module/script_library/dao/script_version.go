@@ -14,6 +14,7 @@ func GetScriptVersions(scriptId string) (*model.ScriptVersionResponse, error) {
 SELECT
     s.id AS script_id,
     s.name AS name,
+    s.script_name AS script_name,
     s.script_type AS script_type,
     s.description AS description,
     s.is_public AS is_public,
@@ -76,6 +77,7 @@ WHERE s.id = ?
 	resp := &model.ScriptVersionResponse{
 		ID:             row.ScriptID,
 		Name:           row.Name,
+		ScriptName:     row.ScriptName,
 		ScriptType:     row.ScriptType,
 		Description:    row.Description,
 		IsPublic:       row.IsPublic,

@@ -29,6 +29,7 @@ type ScriptVersion struct {
 type ScriptVersionResponse struct {
 	ID             string          `json:"id"`
 	Name           string          `json:"name"`
+	ScriptName     string          `json:"script_name"`
 	ScriptType     string          `json:"script_type"`
 	Description    string          `json:"description"`
 	Tags           []Tag           `json:"tags"`
@@ -40,6 +41,7 @@ type RawScriptVersion struct {
 	// Script 字段
 	ScriptID    string `json:"script_id"`
 	Name        string `json:"name"`
+	ScriptName  string `json:"script_name"`
 	ScriptType  string `json:"script_type"`
 	Description string `json:"description"`
 	IsPublic    bool   `json:"is_public"`
