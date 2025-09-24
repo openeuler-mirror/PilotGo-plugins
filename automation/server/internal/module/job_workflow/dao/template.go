@@ -9,22 +9,6 @@ import (
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/job_workflow/model"
 )
 
-func GetTemplateByID(id int) (*model.TaskTemplate, error) {
-	var template model.TaskTemplate
-	if err := global.App.MySQL.First(&template, id).Error; err != nil {
-		return nil, err
-	}
-	return &template, nil
-}
-
-func GetAllTemplates() ([]*model.TaskTemplate, error) {
-	var templates []*model.TaskTemplate
-	if err := global.App.MySQL.Find(&templates).Error; err != nil {
-		return nil, err
-	}
-	return templates, nil
-}
-
 func CreateTemplate(dto *model.TaskTemplateDTO) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
 		// 1. 插入模板
@@ -70,6 +54,19 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 			}
 
 			if err := tx.Create(&dto.Steps).Error; err != nil {
+				return err
+			}
+
+			// 3.2 设置模板的首尾步骤
+			template.FirstStepId = dto.Steps[0].StepId
+			template.LastStepId = dto.Steps[len(dto.Steps)-1].StepId
+			// 3.4 回写模板首尾步骤
+			if err := tx.Model(&model.TaskTemplate{}).
+				Where("id = ?", templateId).
+				Updates(map[string]interface{}{
+					"first_step_id": template.FirstStepId,
+					"last_step_id":  template.LastStepId,
+				}).Error; err != nil {
 				return err
 			}
 		}

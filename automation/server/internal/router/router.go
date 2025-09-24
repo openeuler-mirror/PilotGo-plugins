@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	dangerousrule "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule"
+	jobworkflow "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/job_workflow"
 	scriptlibrary "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/service"
 )
@@ -32,6 +33,7 @@ func initRouters() *gin.Engine {
 	api := Router.Group("/plugin/automation")
 	scriptlibrary.ScriptLibraryHandler(api)
 	dangerousrule.DangerousRuleHandler(api)
+	jobworkflow.WorkflowHandler(api)
 	return Router
 }
 
