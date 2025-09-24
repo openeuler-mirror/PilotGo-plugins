@@ -14,18 +14,14 @@ type TaskTemplate struct {
 }
 
 type TaskTemplateVariable struct {
-	ID                  int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	TemplateId          int    `json:"template_id" gorm:"comment:作业编排Id"`
-	Name                string `json:"name" gorm:"type:varchar(255);comment:变量名称"`
-	Type                string `json:"type" gorm:"comment:变量类型(字符串、命名空间、数组等)"`
-	DefaultVaue         string `json:"default_value" gorm:"comment:变量默认值"`
-	Description         string `json:"description" gorm:"comment:变量描述"`
-	IsChangeable        bool   `json:"is_changeable" gorm:"comment:赋值可变"`
-	IsRequired          string `json:"is_required" gorm:"comment:是否必需"`
-	Creator             string `json:"creator" gorm:"comment:创建人"`
-	CreatedAt           string `json:"created_at" gorm:"comment:创建时间"`
-	LastModifyUser      string `json:"last_modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
-	LastModifyUpdatedAt string `json:"last_modify_updated_at" gorm:"comment:'最后修改时间'"`
+	ID           int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId   int    `json:"template_id" gorm:"comment:作业编排Id"`
+	Name         string `json:"name" gorm:"type:varchar(255);comment:变量名称"`
+	Type         string `json:"type" gorm:"comment:变量类型(字符串、命名空间、数组等)"`
+	DefaultVaue  string `json:"default_value" gorm:"comment:变量默认值"`
+	Description  string `json:"description" gorm:"comment:变量描述"`
+	IsChangeable bool   `json:"is_changeable" gorm:"comment:赋值可变"`
+	IsRequired   string `json:"is_required" gorm:"comment:是否必需"`
 }
 
 type TaskTemplateStep struct {
@@ -49,4 +45,11 @@ type TaskTemplateStepScript struct {
 	ScriptParam         string `json:"script_param"  gorm:"comment:脚本执行参数"`
 	ScriptTimeout       string `json:"script_timeout"  gorm:"comment:脚本超时"`
 	DestinationHostList string `json:"destination_host_list" gorm:"comment:远程执行主机列表"`
+}
+
+type TaskTemplateDTO struct {
+	Template  TaskTemplate             `json:"template"`
+	Variables []TaskTemplateVariable   `json:"variables"`
+	Steps     []TaskTemplateStep       `json:"steps"`
+	Scripts   []TaskTemplateStepScript `json:"scripts"`
 }
