@@ -8,7 +8,7 @@ import (
 )
 
 func AddScriptHandler(c *gin.Context) {
-	var script model.ScriptWithVersion
+	var script model.AddScriptDTO
 	if err := c.ShouldBindJSON(&script); err != nil {
 		response.Fail(c, nil, err.Error())
 		return

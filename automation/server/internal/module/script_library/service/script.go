@@ -13,7 +13,7 @@ func generateScriptId() string {
 	return uuid.NewString()
 }
 
-func AddScript(s *model.ScriptWithVersion) error {
+func AddScript(s *model.AddScriptDTO) error {
 	scriptId := generateScriptId()
 
 	// decodedContent, err := utils.DecodeScriptContent(s.Content)
@@ -23,28 +23,28 @@ func AddScript(s *model.ScriptWithVersion) error {
 
 	script := &model.Script{
 		ID:                  scriptId,
-		Name:                s.Name,
-		ScriptName:          s.ScriptName,
-		ScriptType:          s.ScriptType,
-		Description:         s.Description,
-		Tags:                s.Tags,
-		IsPublic:            s.IsPublic,
-		Creator:             s.Creator,
+		Name:                s.Script.Name,
+		ScriptName:          s.Script.ScriptName,
+		ScriptType:          s.Script.ScriptType,
+		Description:         s.Script.Description,
+		Tags:                s.Script.Tags,
+		IsPublic:            s.Script.IsPublic,
+		Creator:             s.Script.Creator,
 		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      s.Creator,
+		LastModifyUser:      s.Script.Creator,
 		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
 	}
 
 	scriptVersion := &model.ScriptVersion{
 		ScriptID: scriptId,
 		// Content:  decodedContent,
-		Content:             s.Content,
-		Params:              s.Params,
-		Version:             s.Version,
-		VersionDesc:         s.VersionDesc,
-		Creator:             s.Creator,
+		Content:             s.FirstVersion.Content,
+		Params:              s.FirstVersion.Params,
+		Version:             s.FirstVersion.Version,
+		VersionDesc:         s.FirstVersion.VersionDesc,
+		Creator:             s.Script.Creator,
 		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      s.Creator,
+		LastModifyUser:      s.Script.Creator,
 		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
 	}
 

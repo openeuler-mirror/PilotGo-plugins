@@ -1,5 +1,7 @@
 package model
 
+import "encoding/json"
+
 type TaskTemplate struct {
 	ID                  int    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
 	Name                string `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
@@ -14,14 +16,14 @@ type TaskTemplate struct {
 }
 
 type TaskTemplateVariable struct {
-	ID           int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	TemplateId   int    `json:"template_id" gorm:"comment:作业编排Id"`
-	Name         string `json:"name" gorm:"type:varchar(255);comment:变量名称"`
-	Type         string `json:"type" gorm:"comment:变量类型(字符串、命名空间、数组等)"`
-	DefaultVaue  string `json:"default_value" gorm:"comment:变量默认值"`
-	Description  string `json:"description" gorm:"comment:变量描述"`
-	IsChangeable bool   `json:"is_changeable" gorm:"comment:赋值可变"`
-	IsRequired   string `json:"is_required" gorm:"comment:是否必需"`
+	ID           int             `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId   int             `json:"template_id" gorm:"comment:作业编排Id"`
+	Name         string          `json:"name" gorm:"type:varchar(255);comment:变量名称"`
+	Type         string          `json:"type" gorm:"comment:变量类型(字符串、命名空间、数组等)"`
+	DefaultVaue  json.RawMessage `json:"default_value" gorm:"comment:变量默认值"`
+	Description  string          `json:"description" gorm:"comment:变量描述"`
+	IsChangeable bool            `json:"is_changeable" gorm:"comment:赋值可变"`
+	IsRequired   bool            `json:"is_required" gorm:"comment:是否必需"`
 }
 
 type TaskTemplateStep struct {
@@ -35,16 +37,16 @@ type TaskTemplateStep struct {
 }
 
 type TaskTemplateStepScript struct {
-	ID                  int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	TemplateId          int    `json:"template_id" gorm:"comment:作业编排Id"`
-	StepId              int    `json:"step_id" gorm:"comment:作业编排步骤Id"`
-	ScriptType          string `json:"script_type"  gorm:"comment:脚本类型"`
-	ScriptId            string `json:"script_id"  gorm:"comment:引用脚本Id"`
-	ScriptVersionId     string `json:"script_version_id"  gorm:"comment:引用脚本版本Id"`
-	ScriptContent       string `json:"script_content"  gorm:"comment:脚本内容"`
-	ScriptParam         string `json:"script_param"  gorm:"comment:脚本执行参数"`
-	ScriptTimeout       string `json:"script_timeout"  gorm:"comment:脚本超时"`
-	DestinationHostList string `json:"destination_host_list" gorm:"comment:远程执行主机列表"`
+	ID                  int             `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId          int             `json:"template_id" gorm:"comment:作业编排Id"`
+	StepId              int             `json:"step_id" gorm:"comment:作业编排步骤Id"`
+	ScriptType          string          `json:"script_type"  gorm:"comment:脚本类型"`
+	ScriptId            string          `json:"script_id"  gorm:"comment:引用脚本Id"`
+	ScriptVersionId     string          `json:"script_version_id"  gorm:"comment:引用脚本版本Id"`
+	ScriptContent       string          `json:"script_content"  gorm:"comment:脚本内容"`
+	ScriptParam         string          `json:"script_param"  gorm:"comment:脚本执行参数"`
+	ScriptTimeout       int             `json:"script_timeout"  gorm:"comment:脚本超时"`
+	DestinationHostList json.RawMessage `json:"destination_host_list" gorm:"comment:远程执行主机列表"`
 }
 
 type TaskTemplateDTO struct {
