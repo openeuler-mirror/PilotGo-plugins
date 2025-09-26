@@ -14,10 +14,9 @@ func GetScriptVersions(scriptId string) (*model.ScriptVersionResponse, error) {
 SELECT
     s.id AS script_id,
     s.name AS name,
-    s.script_name AS script_name,
+    s.usage_type AS usage_type,
     s.script_type AS script_type,
     s.description AS description,
-    s.is_public AS is_public,
     CAST((
         SELECT COALESCE(JSON_ARRAYAGG(
             JSON_OBJECT(
@@ -28,10 +27,8 @@ SELECT
                 'version', sv.version,
                 'version_desc', sv.version_desc,
                 'status', sv.status = 1,
-                'creator', sv.creator,
-                'created_at', sv.created_at,
-                'last_modify_user', sv.last_modify_user,
-                'last_modify_updated_at', sv.last_modify_updated_at
+                'modify_user', sv.modify_user,
+                'modify_time', sv.modify_time
             )
         ), JSON_ARRAY())
         FROM script_version sv
@@ -43,10 +40,8 @@ SELECT
                 'id', t.id,
                 'name', t.name,
                 'description', t.description,
-                'creator', t.creator,
-                'created_at', t.created_at,
-                'last_modify_user', t.last_modify_user,
-                'last_modify_updated_at', t.last_modify_updated_at
+                'modify_user', t.modify_user,
+                'modify_time', t.modify_time
             )
         ), JSON_ARRAY())
         FROM tag t
@@ -77,10 +72,8 @@ WHERE s.id = ?
 	resp := &model.ScriptVersionResponse{
 		ID:             row.ScriptID,
 		Name:           row.Name,
-		ScriptName:     row.ScriptName,
 		ScriptType:     row.ScriptType,
 		Description:    row.Description,
-		IsPublic:       row.IsPublic,
 		Tags:           tags,
 		ScriptVersions: scriptVersions,
 	}

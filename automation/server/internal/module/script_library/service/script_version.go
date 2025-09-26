@@ -13,27 +13,25 @@ func GetScriptVersions(scriptId string) (*model.ScriptVersionResponse, error) {
 
 func AddScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 	scriptVersion := &model.ScriptVersion{
-		ScriptID:            scriptId,
-		Content:             sv.Content,
-		Params:              sv.Params,
-		Version:             sv.Version,
-		VersionDesc:         sv.VersionDesc,
-		Creator:             sv.Creator,
-		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      sv.Creator,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		ScriptID:    scriptId,
+		Content:     sv.Content,
+		Params:      sv.Params,
+		Version:     sv.Version,
+		VersionDesc: sv.VersionDesc,
+		ModifyUser:  sv.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}
 	return dao.AddScriptVersion(scriptVersion)
 }
 
 func UpdateScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 	scriptVersion := &model.ScriptVersion{
-		Content:             sv.Content,
-		Params:              sv.Params,
-		Version:             sv.Version,
-		VersionDesc:         sv.VersionDesc,
-		LastModifyUser:      sv.LastModifyUser,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		Content:     sv.Content,
+		Params:      sv.Params,
+		Version:     sv.Version,
+		VersionDesc: sv.VersionDesc,
+		ModifyUser:  sv.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}
 	return dao.UpdateScriptVersion(sv.ID, scriptId, scriptVersion)
 }

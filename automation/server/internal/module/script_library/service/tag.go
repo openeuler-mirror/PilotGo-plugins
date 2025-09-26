@@ -13,22 +13,20 @@ func GetTags() ([]model.Tag, error) {
 
 func CreateTag(tag *model.Tag) error {
 	return dao.CreateTag(&model.Tag{
-		Name:                tag.Name,
-		Description:         tag.Description,
-		Creator:             tag.Creator,
-		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      tag.LastModifyUser,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		Name:        tag.Name,
+		Description: tag.Description,
+		ModifyUser:  tag.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	})
 }
 
 func UpdateTag(tag *model.Tag) error {
 	return dao.UpdateTag(&model.Tag{
-		ID:                  tag.ID,
-		Name:                tag.Name,
-		Description:         tag.Description,
-		LastModifyUser:      tag.LastModifyUser,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		ID:          tag.ID,
+		Name:        tag.Name,
+		Description: tag.Description,
+		ModifyUser:  tag.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	})
 }
 
