@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm/schema"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/cmd/config/options"
 	dangerousRule "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule/model"
+	jobworkflow "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/job_workflow/model"
 	scriptLibrary "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
 )
 
@@ -45,6 +46,10 @@ func (m *MySQLService) Init(ctx *AppContext) error {
 	db.AutoMigrate(&scriptLibrary.Tag{})
 	db.AutoMigrate(&scriptLibrary.Script{})
 	db.AutoMigrate(&scriptLibrary.ScriptVersion{})
+	db.AutoMigrate(&jobworkflow.TaskTemplate{})
+	db.AutoMigrate(&jobworkflow.TaskTemplateVariable{})
+	db.AutoMigrate(&jobworkflow.TaskTemplateStep{})
+	db.AutoMigrate(&jobworkflow.TaskTemplateStepScript{})
 
 	ctx.MySQL = db
 	return nil

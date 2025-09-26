@@ -44,3 +44,8 @@ type ScriptResponse struct {
 	LastModifyUser      string `json:"last_modify_user"`
 	LastModifyUpdatedAt string `json:"last_modify_updated_at"`
 }
+
+type AddScriptDTO struct {
+	Script       Script        `json:"script"`
+	FirstVersion ScriptVersion `json:"first_version"`
+}
