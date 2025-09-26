@@ -22,45 +22,39 @@ func AddScript(s *model.AddScriptDTO) error {
 	// }
 
 	script := &model.Script{
-		ID:                  scriptId,
-		Name:                s.Script.Name,
-		ScriptName:          s.Script.ScriptName,
-		ScriptType:          s.Script.ScriptType,
-		Description:         s.Script.Description,
-		Tags:                s.Script.Tags,
-		IsPublic:            s.Script.IsPublic,
-		Creator:             s.Script.Creator,
-		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      s.Script.Creator,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		ID:          scriptId,
+		Name:        s.Script.Name,
+		ScriptType:  s.Script.ScriptType,
+		Description: s.Script.Description,
+		Tags:        s.Script.Tags,
+		ModifyUser:  s.Script.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}
 
 	scriptVersion := &model.ScriptVersion{
 		ScriptID: scriptId,
 		// Content:  decodedContent,
-		Content:             s.FirstVersion.Content,
-		Params:              s.FirstVersion.Params,
-		Version:             s.FirstVersion.Version,
-		VersionDesc:         s.FirstVersion.VersionDesc,
-		Creator:             s.Script.Creator,
-		CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-		LastModifyUser:      s.Script.Creator,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		Content:     s.FirstVersion.Content,
+		Params:      s.FirstVersion.Params,
+		Version:     s.FirstVersion.Version,
+		VersionDesc: s.FirstVersion.VersionDesc,
+		ModifyUser:  s.Script.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}
 
 	return dao.AddScript(script, scriptVersion)
 }
 
-func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, error) {
+func GetScripts(query *response.PagedQuery) ([]*model.ScriptResponse, int, error) {
 	return dao.GetScripts(query)
 }
 
 func UpdateScript(s *model.Script) error {
 	script := &model.Script{
-		Description:         s.Description,
-		Tags:                s.Tags,
-		LastModifyUser:      s.LastModifyUser,
-		LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+		Description: s.Description,
+		Tags:        s.Tags,
+		ModifyUser:  s.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}
 	return dao.UpdateScript(s.ID, script)
 }

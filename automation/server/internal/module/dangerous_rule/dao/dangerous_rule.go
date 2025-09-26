@@ -10,11 +10,11 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 	return global.App.MySQL.Save(rule).Error
 }
 
-func GetDangerousRules(query *response.PaginationQ) ([]model.DangerousRule, int, error) {
+func GetDangerousRules(query *response.PagedQuery) ([]model.DangerousRule, int, error) {
 	var rules []model.DangerousRule
 	var total int64
 
-	q := global.App.MySQL.Model(&model.DangerousRule{}).Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize)
+	q := global.App.MySQL.Model(&model.DangerousRule{}).Limit(query.PageSize).Offset((query.CurrentPage - 1) * query.PageSize)
 	qc := global.App.MySQL.Model(&model.DangerousRule{})
 
 	if err := q.Order("id desc").Find(&rules).Error; err != nil {

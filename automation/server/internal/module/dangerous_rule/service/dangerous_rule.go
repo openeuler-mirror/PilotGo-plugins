@@ -32,7 +32,7 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 	return LoadFromDB()
 }
 
-func GetDangerousRules(query *response.PaginationQ) ([]model.DangerousRule, int, error) {
+func GetDangerousRules(query *response.PagedQuery) ([]model.DangerousRule, int, error) {
 	return dao.GetDangerousRules(query)
 }
 

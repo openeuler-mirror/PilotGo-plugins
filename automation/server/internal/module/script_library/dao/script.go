@@ -23,10 +23,10 @@ func AddScript(script *model.Script, scriptVersion *model.ScriptVersion) error {
 	})
 }
 
-func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, error) {
+func GetScripts(query *response.PagedQuery) ([]*model.ScriptResponse, int, error) {
 	// 查询数据
 	var scripts []*model.Script
-	q := global.App.MySQL.Model(&model.Script{}).Limit(query.PageSize).Offset((query.Page - 1) * query.PageSize)
+	q := global.App.MySQL.Model(&model.Script{}).Limit(query.PageSize).Offset((query.CurrentPage - 1) * query.PageSize)
 	if err := q.Order("created_at desc").Find(&scripts).Error; err != nil {
 		return nil, 0, err
 	}
@@ -35,16 +35,12 @@ func GetScripts(query *response.PaginationQ) ([]*model.ScriptResponse, int, erro
 	var scriptResponses []*model.ScriptResponse
 	for _, s := range scripts {
 		sr := &model.ScriptResponse{
-			ID:                  s.ID,
-			Name:                s.Name,
-			ScriptName:          s.ScriptName,
-			ScriptType:          s.ScriptType,
-			Description:         s.Description,
-			IsPublic:            s.IsPublic,
-			Creator:             s.Creator,
-			CreatedAt:           s.CreatedAt,
-			LastModifyUser:      s.LastModifyUser,
-			LastModifyUpdatedAt: s.LastModifyUpdatedAt,
+			ID:          s.ID,
+			Name:        s.Name,
+			ScriptType:  s.ScriptType,
+			Description: s.Description,
+			ModifyUser:  s.ModifyUser,
+			ModifyTime:  s.ModifyTime,
 		}
 
 		tagNames := strings.Split(s.Tags, ",")

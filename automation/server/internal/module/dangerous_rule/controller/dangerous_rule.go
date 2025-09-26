@@ -21,7 +21,7 @@ func AddDangerousRuleHandler(c *gin.Context) {
 }
 
 func GetDangerousRulesHandler(c *gin.Context) {
-	query := &response.PaginationQ{}
+	query := &response.PagedQuery{}
 	if err := c.ShouldBindQuery(query); err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -33,7 +33,7 @@ func GetDangerousRulesHandler(c *gin.Context) {
 		return
 	}
 
-	response.DataPagination(c, rules, total, query)
+	response.DataPaged(c, rules, total, query)
 
 }
 

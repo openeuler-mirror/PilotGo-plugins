@@ -21,38 +21,32 @@ func Success(c *gin.Context, data interface{}, msg string) {
 func Fail(c *gin.Context, data interface{}, msg string) {
 	result(c, http.StatusOK, http.StatusBadRequest, data, msg)
 }
-func Unavailable(c *gin.Context, data interface{}, msg string) {
-	result(c, http.StatusOK, http.StatusServiceUnavailable, data, msg)
-}
 
 // 拼装json 分页数据
-func DataPagination(c *gin.Context, list interface{}, total int, query *PaginationQ) {
+func DataPaged(c *gin.Context, list interface{}, total int, query *PagedQuery) {
 	c.JSON(http.StatusOK, gin.H{
-		"code":    http.StatusOK,
-		"ok":      true,
-		"results": list,
-		"total":   total,
-		"page":    query.Page,
-		"size":    query.PageSize})
+		"code":         http.StatusOK,
+		"data":         list,
+		"total":        total,
+		"current_page": query.CurrentPage,
+		"page_size":    query.PageSize})
 }
 
 func result(c *gin.Context, httpStatus int, code int, data interface{}, msg string) {
 	c.JSON(httpStatus, gin.H{
 		"code":    code,
-		"results": data,
-		"msg":     msg})
+		"data":    data,
+		"message": msg})
 }
 
-type PaginationQ struct {
-	Ok        bool        `json:"ok"`
-	PageSize  int         `form:"size" json:"size"`
-	Page      int         `form:"page" json:"page"`
-	Data      interface{} `json:"results" comment:"muster be a pointer of slice gorm.Model"`
-	TotalSize int         `json:"total"`
+type PagedQuery struct {
+	PageSize    int `form:"page_size" json:"page_size"`
+	CurrentPage int `form:"current_page" json:"current_page"`
+	Total       int `json:"total"`
 }
 
 // 结构体分页查询方法
-func DataPaging(p *PaginationQ, list interface{}, total int) (interface{}, error) {
+func StructDataPaged(p *PagedQuery, list interface{}, total int) (interface{}, error) {
 	data := make([]interface{}, 0)
 	if reflect.TypeOf(list).Kind() == reflect.Slice {
 		s := reflect.ValueOf(list)
@@ -64,26 +58,26 @@ func DataPaging(p *PaginationQ, list interface{}, total int) (interface{}, error
 	if p.PageSize < 1 {
 		p.PageSize = 10
 	}
-	if p.Page < 1 {
-		p.Page = 1
+	if p.CurrentPage < 1 {
+		p.CurrentPage = 1
 	}
 	if total == 0 {
-		p.TotalSize = 0
+		p.Total = 0
 	}
-	num := p.PageSize * (p.Page - 1)
+	num := p.PageSize * (p.CurrentPage - 1)
 	if num > total {
 		return nil, fmt.Errorf("页码超出")
 	}
-	if p.PageSize*p.Page > total {
+	if p.PageSize*p.CurrentPage > total {
 		return data[num:], nil
 	} else {
-		if p.PageSize*p.Page < num {
+		if p.PageSize*p.CurrentPage < num {
 			return nil, fmt.Errorf("读取错误")
 		}
-		if p.PageSize*p.Page == 0 {
+		if p.PageSize*p.CurrentPage == 0 {
 			return data, nil
 		} else {
-			return data[num : p.Page*p.PageSize], nil
+			return data[num : p.CurrentPage*p.PageSize], nil
 		}
 	}
 }

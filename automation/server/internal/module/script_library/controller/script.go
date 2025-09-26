@@ -22,7 +22,7 @@ func AddScriptHandler(c *gin.Context) {
 }
 
 func ScriptListHandler(c *gin.Context) {
-	query := &response.PaginationQ{}
+	query := &response.PagedQuery{}
 	if err := c.ShouldBindQuery(query); err != nil {
 		response.Fail(c, nil, err.Error())
 		return
@@ -32,7 +32,7 @@ func ScriptListHandler(c *gin.Context) {
 		response.Fail(c, nil, err.Error())
 		return
 	}
-	response.DataPagination(c, scripts, total, query)
+	response.DataPaged(c, scripts, total, query)
 }
 
 func UpdateScriptHandler(c *gin.Context) {

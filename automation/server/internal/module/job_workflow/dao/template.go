@@ -13,13 +13,11 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
 		// 1. 插入模板
 		template := &model.TaskTemplate{
-			Name:                dto.Template.Name,
-			Description:         dto.Template.Description,
-			Tags:                dto.Template.Tags,
-			Creator:             dto.Template.Creator,
-			CreatedAt:           time.Now().Format("2006-01-02 15:04:05"),
-			LastModifyUser:      dto.Template.Creator,
-			LastModifyUpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
+			Name:        dto.Template.Name,
+			Description: dto.Template.Description,
+			Tags:        dto.Template.Tags,
+			ModifyUser:  dto.Template.ModifyUser,
+			ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 		}
 		if err := tx.Create(template).Error; err != nil {
 			return err
@@ -38,18 +36,18 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 
 		// 3. 插入步骤 & 脚本
 		if len(dto.Steps) > 0 {
-			// 3.1 按 stepId 排序，补全链路
+			// 3.1 按 stepNum 排序，补全链路
 			sort.Slice(dto.Steps, func(i, j int) bool {
-				return dto.Steps[i].StepId < dto.Steps[j].StepId
+				return dto.Steps[i].StepNum < dto.Steps[j].StepNum
 			})
 
 			for i := range dto.Steps {
 				dto.Steps[i].TemplateId = templateId
 				if i > 0 {
-					dto.Steps[i].PreviousStepId = dto.Steps[i-1].StepId
+					dto.Steps[i].PreviousStepNum = dto.Steps[i-1].StepNum
 				}
 				if i < len(dto.Steps)-1 {
-					dto.Steps[i].NextStepId = dto.Steps[i+1].StepId
+					dto.Steps[i].NextStepNum = dto.Steps[i+1].StepNum
 				}
 			}
 
@@ -58,8 +56,8 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 			}
 
 			// 3.2 设置模板的首尾步骤
-			template.FirstStepId = dto.Steps[0].StepId
-			template.LastStepId = dto.Steps[len(dto.Steps)-1].StepId
+			template.FirstStepId = dto.Steps[0].StepNum
+			template.LastStepId = dto.Steps[len(dto.Steps)-1].StepNum
 			// 3.4 回写模板首尾步骤
 			if err := tx.Model(&model.TaskTemplate{}).
 				Where("id = ?", templateId).
