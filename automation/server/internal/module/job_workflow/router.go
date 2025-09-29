@@ -10,5 +10,6 @@ func WorkflowHandler(router *gin.RouterGroup) {
 	{
 		api.POST("/create", controller.CreateTemplate)
 		api.GET("/query", controller.QueryTemplate)
+		api.GET("/get", controller.GetTemplateById)
 	}
 }

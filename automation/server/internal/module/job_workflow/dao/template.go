@@ -96,3 +96,29 @@ func QueryTemplates(query *response.PagedQuery) ([]model.TaskTemplate, int, erro
 	}
 	return templates, int(total), nil
 }
+
+func GetTemplateById(id string) (interface{}, error) {
+	var template model.TaskTemplate
+	// 1. 查询模板基本信息
+	if err := global.App.MySQL.Model(&model.TaskTemplate{}).Where("id = ?", id).First(&template).Error; err != nil {
+		return nil, err
+	}
+	// 2. 查询变量
+	var variables []model.TaskTemplateVariable
+	if err := global.App.MySQL.Model(&model.TaskTemplateVariable{}).Where("template_id = ?", id).Find(&variables).Error; err != nil {
+		return nil, err
+	}
+	// 3. 查询步骤
+	var steps []model.TaskTemplateStep
+	if err := global.App.MySQL.Model(&model.TaskTemplateStep{}).Where("template_id = ?", id).Find(&steps).Error; err != nil {
+		return nil, err
+	}
+	var data = map[string]interface{}{}
+	data["id"] = template.ID
+	data["name"] = template.Name
+	data["description"] = template.Description
+	data["tags"] = template.Tags
+	data["variableList"] = variables
+	data["stepList"] = steps
+	return data, nil
+}

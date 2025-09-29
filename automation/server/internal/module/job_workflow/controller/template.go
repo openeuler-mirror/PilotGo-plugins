@@ -34,3 +34,13 @@ func QueryTemplate(c *gin.Context) {
 	}
 	response.DataPaged(c, templates, total, query)
 }
+
+func GetTemplateById(c *gin.Context) {
+	templateId := c.Query("id")
+	info, err := service.GetTemplateById(templateId)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, info, "success")
+}

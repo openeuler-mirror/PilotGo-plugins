@@ -20,3 +20,11 @@ func QueryTemplate(query *response.PagedQuery) ([]model.TaskTemplate, int, error
 	}
 	return templates, total, nil
 }
+
+func GetTemplateById(id string) (interface{}, error) {
+	info, err := dao.GetTemplateById(id)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}
