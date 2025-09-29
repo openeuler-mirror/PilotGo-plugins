@@ -9,5 +9,6 @@ func WorkflowHandler(router *gin.RouterGroup) {
 	api := router.Group("/workflows")
 	{
 		api.POST("/create", controller.CreateTemplate)
+		api.GET("/query", controller.QueryTemplate)
 	}
 }
