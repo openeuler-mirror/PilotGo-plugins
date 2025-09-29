@@ -3,14 +3,14 @@ package model
 import "encoding/json"
 
 type TaskTemplate struct {
-	ID          int    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
-	Name        string `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
-	Description string `json:"description" gorm:"type:varchar(255);comment:作业描述"`
-	Tags        string `json:"tags" gorm:"comment:场景标签"`
-	FirstStepId int    `json:"first_step_num"`
-	LastStepId  int    `json:"last_step_num"`
-	ModifyUser  string `json:"modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
-	ModifyTime  string `json:"modify_time" gorm:"comment:'最后修改时间'"`
+	ID           int    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
+	Name         string `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
+	Description  string `json:"description" gorm:"type:varchar(255);comment:作业描述"`
+	Tags         string `json:"tags" gorm:"comment:场景标签"`
+	FirstStepNum int    `json:"first_step_num"`
+	LastStepNum  int    `json:"last_step_num"`
+	ModifyUser   string `json:"modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
+	ModifyTime   string `json:"modify_time" gorm:"comment:'最后修改时间'"`
 }
 
 type TaskTemplateVariable struct {

@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/job_workflow/model"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 func CreateTemplate(dto *model.TaskTemplateDTO) error {
@@ -56,14 +57,14 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 			}
 
 			// 3.2 设置模板的首尾步骤
-			template.FirstStepId = dto.Steps[0].StepNum
-			template.LastStepId = dto.Steps[len(dto.Steps)-1].StepNum
+			template.FirstStepNum = dto.Steps[0].StepNum
+			template.LastStepNum = dto.Steps[len(dto.Steps)-1].StepNum
 			// 3.4 回写模板首尾步骤
 			if err := tx.Model(&model.TaskTemplate{}).
 				Where("id = ?", templateId).
 				Updates(map[string]interface{}{
-					"first_step_id": template.FirstStepId,
-					"last_step_id":  template.LastStepId,
+					"first_step_num": template.FirstStepNum,
+					"last_step_num":  template.LastStepNum,
 				}).Error; err != nil {
 				return err
 			}
@@ -80,4 +81,18 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 
 		return nil
 	})
+}
+
+func QueryTemplates(query *response.PagedQuery) ([]model.TaskTemplate, int, error) {
+	var templates []model.TaskTemplate
+	q := global.App.MySQL.Model(&model.TaskTemplate{}).Limit(query.PageSize).Offset((query.CurrentPage - 1) * query.PageSize)
+	if err := q.Find(&templates).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var total int64
+	if err := global.App.MySQL.Model(&model.TaskTemplate{}).Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+	return templates, int(total), nil
 }

@@ -19,3 +19,18 @@ func CreateTemplate(c *gin.Context) {
 	}
 	response.Success(c, nil, "success")
 }
+
+func QueryTemplate(c *gin.Context) {
+	query := &response.PagedQuery{}
+	if err := c.ShouldBindQuery(query); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+
+	templates, total, err := service.QueryTemplate(query)
+	if err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.DataPaged(c, templates, total, query)
+}
