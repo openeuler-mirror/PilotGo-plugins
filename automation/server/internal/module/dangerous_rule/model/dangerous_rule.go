@@ -6,8 +6,7 @@ type DangerousRule struct {
 	Description string `json:"description" gorm:"type:varchar(255);comment:规则描述"`
 	ScriptTypes string `json:"script_types" gorm:"comment:脚本类型"`
 	Action      string `json:"action" gorm:"comment:执行动作： 拦截（脚本不可保存、带参数时是否可执行）, 警告（用户二次确认）"`
-	Creator     string `json:"creator" gorm:"comment:创建人"`
-	CreatedAt   string `json:"created_at" gorm:"comment:创建时间"`
-	UpdatedAt   string `json:"updated_at" gorm:"comment:更新时间"`
+	ModifyUser  string `json:"modify_user" gorm:"type:varchar(100);not null;comment:最后修改者"`
+	ModifyTime  string `json:"modify_time" gorm:"comment:最后修改时间"`
 	Status      bool   `json:"status" gorm:"comment:规则启用、禁用"`
 }

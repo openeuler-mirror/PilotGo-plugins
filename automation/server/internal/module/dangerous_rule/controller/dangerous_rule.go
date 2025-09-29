@@ -51,15 +51,16 @@ func UpdateDangerousRuleHandler(c *gin.Context) {
 }
 func ChangeDangerousRuleStatusHandler(c *gin.Context) {
 	var rule struct {
-		ID     int  `json:"id"`
-		Status bool `json:"status"`
+		ID     int    `json:"id"`
+		User   string `json:"modify_user"`
+		Status bool   `json:"status"`
 	}
 	if err := c.ShouldBindJSON(&rule); err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}
 
-	if err := service.ChangeDangerousRuleStatus(rule.ID, rule.Status); err != nil {
+	if err := service.ChangeDangerousRuleStatus(rule.ID, rule.User, rule.Status); err != nil {
 		response.Fail(c, nil, err.Error())
 		return
 	}

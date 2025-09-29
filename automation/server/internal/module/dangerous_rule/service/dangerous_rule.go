@@ -17,9 +17,8 @@ func AddDangerousRule(rule *model.DangerousRule) error {
 		Description: rule.Description,
 		ScriptTypes: rule.ScriptTypes,
 		Action:      rule.Action,
-		Creator:     rule.Creator,
-		CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),
-		UpdatedAt:   time.Now().Format("2006-01-02 15:04:05"),
+		ModifyUser:  rule.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 		Status:      rule.Status,
 	}); err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
@@ -43,7 +42,8 @@ func UpdateDangerousRule(rule *model.DangerousRule) error {
 		Description: rule.Description,
 		ScriptTypes: rule.ScriptTypes,
 		Action:      rule.Action,
-		UpdatedAt:   time.Now().Format("2006-01-02 15:04:05"),
+		ModifyUser:  rule.ModifyUser,
+		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 		Status:      rule.Status,
 	}); err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
@@ -56,13 +56,14 @@ func UpdateDangerousRule(rule *model.DangerousRule) error {
 	return LoadFromDB()
 }
 
-func ChangeDangerousRuleStatus(id int, status bool) error {
+func ChangeDangerousRuleStatus(id int, modify_user string, status bool) error {
 	if id == 0 {
 		return fmt.Errorf("ID is required")
 	}
 	err := dao.ChangeDangerousRuleStatus(id, map[string]interface{}{
-		"updated_at": time.Now().Format("2006-01-02 15:04:05"),
-		"status":     status,
+		"modify_user": modify_user,
+		"modify_time": time.Now().Format("2006-01-02 15:04:05"),
+		"status":      status,
 	})
 	if err != nil {
 		return err
