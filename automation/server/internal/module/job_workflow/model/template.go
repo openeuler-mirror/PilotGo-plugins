@@ -3,31 +3,39 @@ package model
 import "encoding/json"
 
 type TaskTemplate struct {
-	ID           int    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
-	Name         string `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
-	Description  string `json:"description" gorm:"type:varchar(255);comment:作业描述"`
-	Tags         string `json:"tags" gorm:"comment:场景标签"`
-	FirstStepNum int    `json:"first_step_num"`
-	LastStepNum  int    `json:"last_step_num"`
-	ModifyUser   string `json:"modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
-	ModifyTime   string `json:"modify_time" gorm:"comment:'最后修改时间'"`
+	ID            int    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
+	Name          string `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
+	Description   string `json:"description" gorm:"type:varchar(255);comment:作业描述"`
+	Tags          string `json:"tags" gorm:"comment:场景标签"`
+	PublishStatus string `json:"publish_status" gorm:"comment:发布状态"`
+	FirstStepNum  int    `json:"first_step_num"`
+	LastStepNum   int    `json:"last_step_num"`
+	ModifyUser    string `json:"modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
+	ModifyTime    string `json:"modify_time" gorm:"comment:'最后修改时间'"`
 }
 
-type TaskTemplateVariable struct {
-	ID           int             `json:"id" gorm:"primaryKey;autoIncrement"`
-	TemplateId   int             `json:"template_id" gorm:"comment:作业编排Id"`
-	Name         string          `json:"name" gorm:"type:varchar(255);comment:变量名称"`
-	Type         string          `json:"type" gorm:"comment:变量类型(字符串、命名空间、数组等)"`
-	DefaultVaue  json.RawMessage `json:"default_value" gorm:"comment:变量默认值"`
-	Description  string          `json:"description" gorm:"comment:变量描述"`
-	IsChangeable bool            `json:"is_changeable" gorm:"comment:赋值可变"`
-	IsRequired   bool            `json:"is_required" gorm:"comment:是否必需"`
+type TaskTemplateParams struct {
+	ID          int             `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId  int             `json:"template_id" gorm:"comment:作业编排Id"`
+	Name        string          `json:"name" gorm:"type:varchar(255);comment:输入参数名称"`
+	Type        string          `json:"type" gorm:"comment:参数类型(string、number、host、json等)"`
+	DefaultVaue json.RawMessage `json:"default_value" gorm:"comment:参数默认值"`
+	Description string          `json:"description" gorm:"comment:输入参数描述"`
+	IsRequired  bool            `json:"is_required" gorm:"comment:是否必需"`
+}
+
+type TaskTemplateOutputParams struct {
+	ID          int    `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId  int    `json:"template_id" gorm:"comment:作业编排Id"`
+	Name        string `json:"name" gorm:"type:varchar(255);comment:输出参数名称"`
+	Type        string `json:"type" gorm:"comment:参数类型string"`
+	Description string `json:"description" gorm:"comment:输出参数描述"`
 }
 
 type TaskTemplateStep struct {
 	ID              int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	TemplateId      int    `json:"template_id" gorm:"comment:作业编排Id"`
-	StepType        string `json:"step_type" gorm:"comment:编排步骤类型(开始、脚本、人工干预、结束等)"`
+	StepType        string `json:"step_type" gorm:"comment:编排步骤类型(任务、人工处理、控制)"`
 	Name            string `json:"name"  gorm:"comment:步骤名称"`
 	StepNum         int    `json:"step_num" gorm:"comment:作业编排步骤Id"`
 	PreviousStepNum int    `json:"previous_step_num" gorm:"comment:作业编排上一步骤Id"`
@@ -48,8 +56,9 @@ type TaskTemplateStepScript struct {
 }
 
 type TaskTemplateDTO struct {
-	Template  TaskTemplate             `json:"template"`
-	Variables []TaskTemplateVariable   `json:"variables"`
-	Steps     []TaskTemplateStep       `json:"steps"`
-	Scripts   []TaskTemplateStepScript `json:"scripts"`
+	Template     TaskTemplate               `json:"template"`
+	Params       []TaskTemplateParams       `json:"params"`
+	OutputParams []TaskTemplateOutputParams `json:"output_params"`
+	Steps        []TaskTemplateStep         `json:"steps"`
+	Scripts      []TaskTemplateStepScript   `json:"scripts"`
 }

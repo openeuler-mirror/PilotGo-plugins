@@ -47,7 +47,8 @@ func (m *MySQLService) Init(ctx *AppContext) error {
 	db.AutoMigrate(&scriptLibrary.Script{})
 	db.AutoMigrate(&scriptLibrary.ScriptVersion{})
 	db.AutoMigrate(&jobworkflow.TaskTemplate{})
-	db.AutoMigrate(&jobworkflow.TaskTemplateVariable{})
+	db.AutoMigrate(&jobworkflow.TaskTemplateParams{})
+	db.AutoMigrate(&jobworkflow.TaskTemplateOutputParams{})
 	db.AutoMigrate(&jobworkflow.TaskTemplateStep{})
 	db.AutoMigrate(&jobworkflow.TaskTemplateStepScript{})
 
