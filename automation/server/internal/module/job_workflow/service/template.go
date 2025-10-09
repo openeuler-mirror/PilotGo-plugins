@@ -12,6 +12,14 @@ func CreateTemplate(data *model.TaskTemplateDTO) error {
 	}
 	return nil
 }
+
+func DeleteTemplate(id []int) error {
+	if err := dao.DeleteTemplate(id); err != nil {
+		return err
+	}
+	return nil
+}
+
 func UpdateTemplate(data *model.TaskTemplateDTO) error {
 	if err := dao.UpdateTemplate(data); err != nil {
 		return err
