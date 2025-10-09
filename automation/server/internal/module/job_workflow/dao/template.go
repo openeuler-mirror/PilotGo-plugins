@@ -93,6 +93,37 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 	})
 }
 
+func DeleteTemplate(ids []int) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		// 1. 删除脚本表数据
+		if err := tx.Where("template_id IN ?", ids).Unscoped().Delete(&model.TaskTemplateStepScript{}).Error; err != nil {
+			return err
+		}
+
+		// 2. 删除步骤表数据
+		if err := tx.Where("template_id IN ?", ids).Unscoped().Delete(&model.TaskTemplateStep{}).Error; err != nil {
+			return err
+		}
+
+		// 3. 删除输出参数表数据
+		if err := tx.Where("template_id IN ?", ids).Unscoped().Delete(&model.TaskTemplateOutputParams{}).Error; err != nil {
+			return err
+		}
+
+		// 4. 删除输入参数表数据
+		if err := tx.Where("template_id IN ?", ids).Unscoped().Delete(&model.TaskTemplateParams{}).Error; err != nil {
+			return err
+		}
+
+		// 5. 最后删除模板表数据
+		if err := tx.Where("id IN ?", ids).Unscoped().Delete(&model.TaskTemplate{}).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
 func UpdateTemplate(dto *model.TaskTemplateDTO) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
 		templateId := dto.Template.ID

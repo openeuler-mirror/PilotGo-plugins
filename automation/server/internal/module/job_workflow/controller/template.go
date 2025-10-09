@@ -20,6 +20,21 @@ func CreateTemplate(c *gin.Context) {
 	response.Success(c, nil, "success")
 }
 
+func DeleteTemplate(c *gin.Context) {
+	var ids struct {
+		ID []int `json:"id"`
+	}
+	if err := c.ShouldBindJSON(&ids); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.DeleteTemplate(ids.ID); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}
+
 func UpdateTemplate(c *gin.Context) {
 	var template model.TaskTemplateDTO
 	if err := c.ShouldBindJSON(&template); err != nil {
