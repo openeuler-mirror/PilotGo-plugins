@@ -1,17 +1,21 @@
 package model
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/workflow"
+)
 
 type TaskTemplate struct {
-	ID            int    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
-	Name          string `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
-	Description   string `json:"description" gorm:"type:varchar(255);comment:作业描述"`
-	Tags          string `json:"tags" gorm:"comment:场景标签"`
-	PublishStatus string `json:"publish_status" gorm:"comment:发布状态"`
-	FirstStepNum  int    `json:"first_step_num"`
-	LastStepNum   int    `json:"last_step_num"`
-	ModifyUser    string `json:"modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
-	ModifyTime    string `json:"modify_time" gorm:"comment:'最后修改时间'"`
+	ID            int                    `json:"id" gorm:"primaryKey;autoIncrement;comment:作业编排Id"`
+	Name          string                 `json:"name" gorm:"type:varchar(255);comment:作业编排名称"`
+	Description   string                 `json:"description" gorm:"type:varchar(255);comment:作业描述"`
+	Tags          string                 `json:"tags" gorm:"comment:场景标签"`
+	PublishStatus workflow.PublishStatus `json:"publish_status" gorm:"comment:发布状态"`
+	FirstStepNum  int                    `json:"first_step_num"`
+	LastStepNum   int                    `json:"last_step_num"`
+	ModifyUser    string                 `json:"modify_user" gorm:"type:varchar(100);not null;comment:'最后修改者'"`
+	ModifyTime    string                 `json:"modify_time" gorm:"comment:'最后修改时间'"`
 }
 
 type TaskTemplateParams struct {
@@ -33,13 +37,13 @@ type TaskTemplateOutputParams struct {
 }
 
 type TaskTemplateStep struct {
-	ID              int    `json:"id" gorm:"primaryKey;autoIncrement"`
-	TemplateId      int    `json:"template_id" gorm:"comment:作业编排Id"`
-	StepType        string `json:"step_type" gorm:"comment:编排步骤类型(任务、人工处理、控制)"`
-	Name            string `json:"name"  gorm:"comment:步骤名称"`
-	StepNum         int    `json:"step_num" gorm:"comment:作业编排步骤Id"`
-	PreviousStepNum int    `json:"previous_step_num" gorm:"comment:作业编排上一步骤Id"`
-	NextStepNum     int    `json:"next_step_num" gorm:"comment:作业编排下一步骤Id"`
+	ID              int               `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId      int               `json:"template_id" gorm:"comment:作业编排Id"`
+	StepType        workflow.StepType `json:"step_type" gorm:"comment:编排步骤类型"`
+	Name            string            `json:"name"  gorm:"comment:步骤名称"`
+	StepNum         int               `json:"step_num" gorm:"comment:作业编排步骤Id"`
+	PreviousStepNum int               `json:"previous_step_num" gorm:"comment:作业编排上一步骤Id"`
+	NextStepNum     int               `json:"next_step_num" gorm:"comment:作业编排下一步骤Id"`
 }
 
 type TaskTemplateStepScript struct {

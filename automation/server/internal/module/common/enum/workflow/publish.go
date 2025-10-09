@@ -1,0 +1,67 @@
+package workflow
+
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
+
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
+)
+
+type PublishStatus int
+
+const (
+	Develop   PublishStatus = 1
+	Published PublishStatus = 2
+)
+
+var PublishStatusMap = enum.EnumMap{
+	int(Develop):   "开发中",
+	int(Published): "已发布",
+}
+
+func (p PublishStatus) String() string {
+	return PublishStatusMap.String(int(p))
+}
+func ParsePublishStatus(s string) PublishStatus {
+	for k, v := range PublishStatusMap {
+		if v == s {
+			return PublishStatus(k)
+		}
+	}
+	return 0
+}
+
+func (p PublishStatus) MarshalJSON() ([]byte, error) {
+	return json.Marshal(PublishStatusMap[int(p)])
+}
+
+func (p *PublishStatus) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+	for k, v := range PublishStatusMap {
+		if v == s {
+			*p = PublishStatus(k)
+			return nil
+		}
+	}
+	return fmt.Errorf("invalid PublishStatus: '%s', allowed: %v", s, PublishStatusMap)
+}
+
+func (p PublishStatus) Value() (driver.Value, error) {
+	return int64(p), nil
+}
+
+func (p *PublishStatus) Scan(value interface{}) error {
+	if value == nil {
+		*p = 0
+		return nil
+	}
+	if v, ok := value.(int64); ok {
+		*p = PublishStatus(int(v))
+		return nil
+	}
+	return nil
+}
