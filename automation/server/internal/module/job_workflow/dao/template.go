@@ -93,6 +93,101 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 	})
 }
 
+func UpdateTemplate(dto *model.TaskTemplateDTO) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		templateId := dto.Template.ID
+		// 1. 更新模板基本信息
+		template := &model.TaskTemplate{
+			Name:        dto.Template.Name,
+			Description: dto.Template.Description,
+			Tags:        dto.Template.Tags,
+			ModifyUser:  dto.Template.ModifyUser,
+			ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
+		}
+		if err := tx.Model(&model.TaskTemplate{}).Where("id = ?", templateId).Updates(template).Error; err != nil {
+			return err
+		}
+
+		// 2. 删除旧的输入参数，插入新的输入参数
+		if err := tx.Where("template_id = ?", templateId).Delete(&model.TaskTemplateParams{}).Error; err != nil {
+			return err
+		}
+		if len(dto.Params) > 0 {
+			for i := range dto.Params {
+				dto.Params[i].TemplateId = templateId
+			}
+			if err := tx.Create(&dto.Params).Error; err != nil {
+				return err
+			}
+		}
+		// 3. 删除旧的输出参数，插入新的输出参数
+		if err := tx.Where("template_id = ?", templateId).Delete(&model.TaskTemplateOutputParams{}).Error; err != nil {
+			return err
+		}
+		if len(dto.OutputParams) > 0 {
+			for i := range dto.OutputParams {
+				dto.OutputParams[i].TemplateId = templateId
+			}
+			if err := tx.Create(&dto.OutputParams).Error; err != nil {
+				return err
+			}
+		}
+
+		// 4. 删除旧的步骤，插入新的步骤 & 脚本
+		if err := tx.Where("template_id = ?", templateId).Delete(&model.TaskTemplateStep{}).Error; err != nil {
+			return err
+		}
+		if len(dto.Steps) > 0 {
+			// 4.1 按 stepNum 排序，补全链路
+			sort.Slice(dto.Steps, func(i, j int) bool {
+				return dto.Steps[i].StepNum < dto.Steps[j].StepNum
+			})
+
+			for i := range dto.Steps {
+				dto.Steps[i].TemplateId = templateId
+				if i > 0 {
+					dto.Steps[i].PreviousStepNum = dto.Steps[i-1].StepNum
+				}
+				if i < len(dto.Steps)-1 {
+					dto.Steps[i].NextStepNum = dto.Steps[i+1].StepNum
+				}
+			}
+
+			if err := tx.Create(&dto.Steps).Error; err != nil {
+				return err
+			}
+
+			// 4.2 设置模板的首尾步骤
+			template.FirstStepNum = dto.Steps[0].StepNum
+			template.LastStepNum = dto.Steps[len(dto.Steps)-1].StepNum
+			// 4.3 回写模板首尾步骤
+			if err := tx.Model(&model.TaskTemplate{}).
+				Where("id = ?", templateId).
+				Updates(map[string]interface{}{
+					"first_step_num": template.FirstStepNum,
+					"last_step_num":  template.LastStepNum,
+				}).Error; err != nil {
+				return err
+			}
+		}
+		// 5. 删除旧的脚本，插入新的脚本
+		if err := tx.Where("template_id = ?", templateId).Delete(&model.TaskTemplateStepScript{}).Error; err != nil {
+			return err
+		}
+
+		if len(dto.Scripts) > 0 {
+			for i := range dto.Scripts {
+				dto.Scripts[i].TemplateId = templateId
+			}
+			if err := tx.Create(&dto.Scripts).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
 func QueryTemplates(query *response.PagedQuery) ([]model.TaskTemplate, int, error) {
 	var templates []model.TaskTemplate
 	q := global.App.MySQL.Model(&model.TaskTemplate{}).Limit(query.PageSize).Offset((query.CurrentPage - 1) * query.PageSize)

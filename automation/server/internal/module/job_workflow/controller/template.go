@@ -20,6 +20,19 @@ func CreateTemplate(c *gin.Context) {
 	response.Success(c, nil, "success")
 }
 
+func UpdateTemplate(c *gin.Context) {
+	var template model.TaskTemplateDTO
+	if err := c.ShouldBindJSON(&template); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.UpdateTemplate(&template); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}
+
 func QueryTemplate(c *gin.Context) {
 	query := &response.PagedQuery{}
 	if err := c.ShouldBindQuery(query); err != nil {
