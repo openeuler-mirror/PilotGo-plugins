@@ -14,30 +14,40 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
 		// 1. 插入模板
 		template := &model.TaskTemplate{
-			Name:        dto.Template.Name,
-			Description: dto.Template.Description,
-			Tags:        dto.Template.Tags,
-			ModifyUser:  dto.Template.ModifyUser,
-			ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
+			Name:          dto.Template.Name,
+			Description:   dto.Template.Description,
+			Tags:          dto.Template.Tags,
+			PublishStatus: dto.Template.PublishStatus,
+			ModifyUser:    dto.Template.ModifyUser,
+			ModifyTime:    time.Now().Format("2006-01-02 15:04:05"),
 		}
 		if err := tx.Create(template).Error; err != nil {
 			return err
 		}
 		templateId := template.ID
 
-		// 2. 插入变量
-		if len(dto.Variables) > 0 {
-			for i := range dto.Variables {
-				dto.Variables[i].TemplateId = templateId
+		// 2. 插入输入参数
+		if len(dto.Params) > 0 {
+			for i := range dto.Params {
+				dto.Params[i].TemplateId = templateId
 			}
-			if err := tx.Create(&dto.Variables).Error; err != nil {
+			if err := tx.Create(&dto.Params).Error; err != nil {
+				return err
+			}
+		}
+		// 3. 插入输出参数
+		if len(dto.OutputParams) > 0 {
+			for i := range dto.OutputParams {
+				dto.OutputParams[i].TemplateId = templateId
+			}
+			if err := tx.Create(&dto.OutputParams).Error; err != nil {
 				return err
 			}
 		}
 
-		// 3. 插入步骤 & 脚本
+		// 4. 插入步骤 & 脚本
 		if len(dto.Steps) > 0 {
-			// 3.1 按 stepNum 排序，补全链路
+			// 4.1 按 stepNum 排序，补全链路
 			sort.Slice(dto.Steps, func(i, j int) bool {
 				return dto.Steps[i].StepNum < dto.Steps[j].StepNum
 			})
@@ -56,10 +66,10 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 				return err
 			}
 
-			// 3.2 设置模板的首尾步骤
+			// 4.2 设置模板的首尾步骤
 			template.FirstStepNum = dto.Steps[0].StepNum
 			template.LastStepNum = dto.Steps[len(dto.Steps)-1].StepNum
-			// 3.4 回写模板首尾步骤
+			// 4.3 回写模板首尾步骤
 			if err := tx.Model(&model.TaskTemplate{}).
 				Where("id = ?", templateId).
 				Updates(map[string]interface{}{
@@ -104,8 +114,12 @@ func GetTemplateById(id string) (interface{}, error) {
 		return nil, err
 	}
 	// 2. 查询变量
-	var variables []model.TaskTemplateVariable
-	if err := global.App.MySQL.Model(&model.TaskTemplateVariable{}).Where("template_id = ?", id).Find(&variables).Error; err != nil {
+	var params []model.TaskTemplateParams
+	if err := global.App.MySQL.Model(&model.TaskTemplateParams{}).Where("template_id = ?", id).Find(&params).Error; err != nil {
+		return nil, err
+	}
+	var output_params []model.TaskTemplateOutputParams
+	if err := global.App.MySQL.Model(&model.TaskTemplateOutputParams{}).Where("template_id = ?", id).Find(&output_params).Error; err != nil {
 		return nil, err
 	}
 	// 3. 查询步骤
@@ -118,7 +132,11 @@ func GetTemplateById(id string) (interface{}, error) {
 	data["name"] = template.Name
 	data["description"] = template.Description
 	data["tags"] = template.Tags
-	data["variableList"] = variables
-	data["stepList"] = steps
+	data["publish_status"] = template.PublishStatus
+	data["modify_user"] = template.ModifyUser
+	data["modify_time"] = template.ModifyTime
+	data["params"] = params
+	data["output_params"] = output_params
+	data["steps"] = steps
 	return data, nil
 }
