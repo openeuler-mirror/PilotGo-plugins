@@ -12,6 +12,12 @@ func CreateTemplate(data *model.TaskTemplateDTO) error {
 	}
 	return nil
 }
+func UpdateTemplate(data *model.TaskTemplateDTO) error {
+	if err := dao.UpdateTemplate(data); err != nil {
+		return err
+	}
+	return nil
+}
 
 func QueryTemplate(query *response.PagedQuery) ([]model.TaskTemplate, int, error) {
 	templates, total, err := dao.QueryTemplates(query)
