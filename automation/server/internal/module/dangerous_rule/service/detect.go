@@ -159,7 +159,7 @@ func toDetectRule(r model.DangerousRule) DetectRule {
 		Description: r.Description,
 	}
 
-	dr.Action = rule.ParseActionType(r.Action)
+	dr.Action = r.Action
 
 	if r.Expression != "" {
 		if re, err := regexp.Compile(r.Expression); err == nil {

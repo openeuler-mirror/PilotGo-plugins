@@ -16,7 +16,7 @@ func CreateTemplate(dto *model.TaskTemplateDTO) error {
 		template := &model.TaskTemplate{
 			Name:          dto.Template.Name,
 			Description:   dto.Template.Description,
-			Tags:          dto.Template.Tags,
+			Tag:           dto.Template.Tag,
 			PublishStatus: dto.Template.PublishStatus,
 			ModifyUser:    dto.Template.ModifyUser,
 			ModifyTime:    time.Now().Format("2006-01-02 15:04:05"),
@@ -131,7 +131,7 @@ func UpdateTemplate(dto *model.TaskTemplateDTO) error {
 		template := &model.TaskTemplate{
 			Name:        dto.Template.Name,
 			Description: dto.Template.Description,
-			Tags:        dto.Template.Tags,
+			Tag:         dto.Template.Tag,
 			ModifyUser:  dto.Template.ModifyUser,
 			ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 		}
@@ -257,7 +257,7 @@ func GetTemplateById(id string) (interface{}, error) {
 	data["id"] = template.ID
 	data["name"] = template.Name
 	data["description"] = template.Description
-	data["tags"] = template.Tags
+	data["tag"] = template.Tag
 	data["publish_status"] = template.PublishStatus
 	data["modify_user"] = template.ModifyUser
 	data["modify_time"] = template.ModifyTime
