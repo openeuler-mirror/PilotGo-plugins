@@ -26,7 +26,8 @@ func AddScript(s *model.AddScriptDTO) error {
 		Name:        s.Script.Name,
 		ScriptType:  s.Script.ScriptType,
 		Description: s.Script.Description,
-		Tags:        s.Script.Tags,
+		UsageType:   s.Script.UsageType,
+		Tag:         s.Script.Tag,
 		ModifyUser:  s.Script.ModifyUser,
 		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}
@@ -51,8 +52,10 @@ func GetScripts(query *response.PagedQuery) ([]*model.ScriptResponse, int, error
 
 func UpdateScript(s *model.Script) error {
 	script := &model.Script{
+		Name:        s.Name,
 		Description: s.Description,
-		Tags:        s.Tags,
+		Tag:         s.Tag,
+		UsageType:   s.UsageType,
 		ModifyUser:  s.ModifyUser,
 		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
 	}

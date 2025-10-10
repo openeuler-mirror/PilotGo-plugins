@@ -35,18 +35,16 @@ SELECT
         WHERE sv.script_id = s.id
     ) AS CHAR) AS versions,
     CAST((
-        SELECT COALESCE(JSON_ARRAYAGG(
-            JSON_OBJECT(
-                'id', t.id,
-                'name', t.name,
-                'description', t.description,
-                'modify_user', t.modify_user,
-                'modify_time', t.modify_time
-            )
-        ), JSON_ARRAY())
+        SELECT COALESCE(JSON_OBJECT(
+           'id', t.id,
+           'name', t.name,
+           'description', t.description,
+           'modify_user', t.modify_user,
+           'modify_time', t.modify_time
+        ), JSON_OBJECT())
         FROM tag t
-        WHERE FIND_IN_SET(t.name, s.tags)
-    ) AS CHAR) AS tags
+        WHERE FIND_IN_SET(t.name, s.tag)
+    ) AS CHAR) AS tag
 FROM script s
 WHERE s.id = ?
 `
@@ -55,10 +53,10 @@ WHERE s.id = ?
 		return &model.ScriptVersionResponse{}, fmt.Errorf("查询脚本版本失败: %w", err)
 	}
 
-	var tags []model.Tag
-	if row.Tags == "" {
-		tags = []model.Tag{}
-	} else if err := json.Unmarshal([]byte(row.Tags), &tags); err != nil {
+	var tag model.Tag
+	if row.Tag == "" {
+		tag = model.Tag{}
+	} else if err := json.Unmarshal([]byte(row.Tag), &tag); err != nil {
 		return &model.ScriptVersionResponse{}, fmt.Errorf("解析标签失败: %w", err)
 	}
 
@@ -74,7 +72,7 @@ WHERE s.id = ?
 		Name:           row.Name,
 		ScriptType:     row.ScriptType,
 		Description:    row.Description,
-		Tags:           tags,
+		Tag:            tag,
 		ScriptVersions: scriptVersions,
 	}
 

@@ -29,7 +29,7 @@ type ScriptVersionResponse struct {
 	Name           string          `json:"name"`
 	ScriptType     string          `json:"script_type"`
 	Description    string          `json:"description"`
-	Tags           []Tag           `json:"tags"`
+	Tag            Tag             `json:"tag"`
 	ScriptVersions []ScriptVersion `json:"script_versions"`
 }
 
@@ -43,6 +43,6 @@ type RawScriptVersion struct {
 	// JSON Script versions
 	Versions string `json:"versions"`
 
-	// JSON tags
-	Tags string `json:"tags"`
+	// JSON tag
+	Tag string `json:"tag"`
 }
