@@ -1,8 +1,6 @@
 package dao
 
 import (
-	"strings"
-
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
@@ -27,7 +25,7 @@ func GetScripts(query *response.PagedQuery) ([]*model.ScriptResponse, int, error
 	// 查询数据
 	var scripts []*model.Script
 	q := global.App.MySQL.Model(&model.Script{}).Limit(query.PageSize).Offset((query.CurrentPage - 1) * query.PageSize)
-	if err := q.Order("created_at desc").Find(&scripts).Error; err != nil {
+	if err := q.Order("modify_time desc").Find(&scripts).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -38,19 +36,19 @@ func GetScripts(query *response.PagedQuery) ([]*model.ScriptResponse, int, error
 			ID:          s.ID,
 			Name:        s.Name,
 			ScriptType:  s.ScriptType,
+			UsageType:   s.UsageType,
 			Description: s.Description,
 			ModifyUser:  s.ModifyUser,
 			ModifyTime:  s.ModifyTime,
 		}
 
-		tagNames := strings.Split(s.Tags, ",")
-		var tags []model.Tag
-		if len(tagNames) > 0 {
-			if err := global.App.MySQL.Model(&model.Tag{}).Where("name IN ?", tagNames).Find(&tags).Error; err != nil {
+		var tag model.Tag
+		if len(s.Tag) > 0 {
+			if err := global.App.MySQL.Model(&model.Tag{}).Where("name = ?", s.Tag).Find(&tag).Error; err != nil {
 				return nil, 0, err
 			}
 		}
-		sr.Tags = tags
+		sr.Tag = tag
 
 		scriptResponses = append(scriptResponses, sr)
 	}
