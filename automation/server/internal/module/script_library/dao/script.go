@@ -28,14 +28,13 @@ func GetScripts(query *response.PagedQuery) ([]*model.ScriptResponse, int, error
 	if err := q.Order("modify_time desc").Find(&scripts).Error; err != nil {
 		return nil, 0, err
 	}
-
 	// 组装 ScriptResponse
 	var scriptResponses []*model.ScriptResponse
 	for _, s := range scripts {
 		sr := &model.ScriptResponse{
 			ID:          s.ID,
 			Name:        s.Name,
-			ScriptType:  s.ScriptType,
+			ScriptType:  s.ScriptType.String(),
 			UsageType:   s.UsageType,
 			Description: s.Description,
 			ModifyUser:  s.ModifyUser,

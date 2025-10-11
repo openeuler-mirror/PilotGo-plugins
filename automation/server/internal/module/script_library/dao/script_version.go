@@ -3,9 +3,11 @@ package dao
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
 )
 
@@ -67,10 +69,11 @@ WHERE s.id = ?
 		return &model.ScriptVersionResponse{}, fmt.Errorf("解析版本失败: %w", err)
 	}
 
+	script_type, _ := strconv.Atoi(row.ScriptType)
 	resp := &model.ScriptVersionResponse{
 		ID:             row.ScriptID,
 		Name:           row.Name,
-		ScriptType:     row.ScriptType,
+		ScriptType:     script.ScriptTypeMap[script_type],
 		Description:    row.Description,
 		Tag:            tag,
 		ScriptVersions: scriptVersions,
@@ -111,4 +114,12 @@ func DeleteScriptVersion(id int, scriptId string) error {
 
 		return nil
 	})
+}
+
+func GetLatestScriptVersion(scriptId string) (string, error) {
+	var sv model.ScriptVersion
+	if err := global.App.MySQL.Model(&model.ScriptVersion{}).Where("script_id = ?", scriptId).Order("id DESC").First(&sv).Error; err != nil {
+		return "", err
+	}
+	return sv.Version, nil
 }
