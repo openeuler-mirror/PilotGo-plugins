@@ -7,6 +7,7 @@ import (
 	"gitee.com/openeuler/PilotGo/sdk/logger"
 	"github.com/gin-gonic/gin"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
 	dangerousrule "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/dangerous_rule"
 	jobworkflow "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/job_workflow"
 	scriptlibrary "openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library"
@@ -34,6 +35,7 @@ func initRouters() *gin.Engine {
 	scriptlibrary.ScriptLibraryHandler(api)
 	dangerousrule.DangerousRuleHandler(api)
 	jobworkflow.WorkflowHandler(api)
+	enum.EnumHandler(api)
 	return Router
 }
 

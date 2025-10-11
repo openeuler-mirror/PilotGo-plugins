@@ -5,77 +5,84 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
+	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/common"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
-type ScriptVersionStatus int
+type ScriptPublishStatus int
 
 const (
-	Develop   ScriptVersionStatus = 1
-	Published ScriptVersionStatus = 2
+	Develop   ScriptPublishStatus = 1
+	Published ScriptPublishStatus = 2
 )
 
-var ScriptVersionStatusMap = enum.EnumMap{
+var ScriptPublishStatusMap = common.EnumMap{
 	int(Develop):   "开发中",
 	int(Published): "已发布",
 }
 
-func (p ScriptVersionStatus) String() string {
-	return ScriptVersionStatusMap.String(int(p))
+func (p ScriptPublishStatus) String() string {
+	return ScriptPublishStatusMap.String(int(p))
 }
-func ParseScriptVersionStatus(s string) ScriptVersionStatus {
-	for k, v := range ScriptVersionStatusMap {
+func ParseScriptPublishStatus(s string) ScriptPublishStatus {
+	for k, v := range ScriptPublishStatusMap {
 		if v == s {
-			return ScriptVersionStatus(k)
+			return ScriptPublishStatus(k)
 		}
 	}
 	return 0
 }
 
-func (p ScriptVersionStatus) MarshalJSON() ([]byte, error) {
-	return json.Marshal(ScriptVersionStatusMap[int(p)])
+func (p ScriptPublishStatus) MarshalJSON() ([]byte, error) {
+	return json.Marshal(ScriptPublishStatusMap[int(p)])
 }
 
-func (p *ScriptVersionStatus) UnmarshalJSON(data []byte) error {
+func (p *ScriptPublishStatus) UnmarshalJSON(data []byte) error {
 	var s string
 	if err := json.Unmarshal(data, &s); err == nil {
-		for k, v := range ScriptVersionStatusMap {
+		for k, v := range ScriptPublishStatusMap {
 			if v == s {
-				*p = ScriptVersionStatus(k)
+				*p = ScriptPublishStatus(k)
 				return nil
 			}
 		}
-		return fmt.Errorf("invalid ScriptVersionStatus: '%s', allowed: %v", s, ScriptVersionStatusMap)
+		return fmt.Errorf("invalid ScriptPublishStatus: '%s', allowed: %v", s, ScriptPublishStatusMap)
 	}
 
 	var num int
 	if err := json.Unmarshal(data, &num); err == nil {
-		if _, exists := ScriptVersionStatusMap[num]; exists {
-			*p = ScriptVersionStatus(num)
+		if _, exists := ScriptPublishStatusMap[num]; exists {
+			*p = ScriptPublishStatus(num)
 			return nil
 		}
-		return fmt.Errorf("invalid ScriptVersionStatus: %d, allowed: %v", num, ScriptVersionStatusMap)
+		return fmt.Errorf("invalid ScriptPublishStatus: %d, allowed: %v", num, ScriptPublishStatusMap)
 	}
 
-	return fmt.Errorf("invalid ScriptVersionStatus, must be string or number")
+	return fmt.Errorf("invalid ScriptPublishStatus, must be string or number")
 }
 
-func (p ScriptVersionStatus) Value() (driver.Value, error) {
+func (p ScriptPublishStatus) Value() (driver.Value, error) {
 	return int64(p), nil
 }
 
-func (p *ScriptVersionStatus) Scan(value interface{}) error {
+func (p *ScriptPublishStatus) Scan(value interface{}) error {
 	if value == nil {
 		*p = 0
 		return nil
 	}
 	if v, ok := value.(int64); ok {
-		*p = ScriptVersionStatus(int(v))
+		*p = ScriptPublishStatus(int(v))
 		return nil
 	}
 	return nil
 }
 
-func GetScriptVersionStatus() []enum.Item {
-	return ScriptVersionStatusMap.ToItems()
+func getScriptPublishStatus() []common.Item {
+	return ScriptPublishStatusMap.ToItems()
+}
+
+func ScriptPublishStatusListHandler(c *gin.Context) {
+	status := getScriptPublishStatus()
+	response.Success(c, status, "success")
 }

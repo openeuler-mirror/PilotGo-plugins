@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
+	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/common"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 type StepType int
@@ -16,7 +18,7 @@ const (
 	ProcessControl StepType = 3
 )
 
-var StepTypeMap = enum.EnumMap{
+var StepTypeMap = common.EnumMap{
 	int(ExecTask):       "任务",
 	int(ManualReview):   "人工处理",
 	int(ProcessControl): "流程控制",
@@ -66,4 +68,13 @@ func (p *StepType) Scan(value interface{}) error {
 		return nil
 	}
 	return nil
+}
+
+func getStepType() []common.Item {
+	return StepTypeMap.ToItems()
+}
+
+func StepTypeListHandler(c *gin.Context) {
+	stepTypes := getStepType()
+	response.Success(c, stepTypes, "success")
 }

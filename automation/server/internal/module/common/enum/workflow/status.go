@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
+	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/common"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 type PublishStatus int
@@ -15,7 +17,7 @@ const (
 	Published PublishStatus = 2
 )
 
-var PublishStatusMap = enum.EnumMap{
+var PublishStatusMap = common.EnumMap{
 	int(Develop):   "开发中",
 	int(Published): "已发布",
 }
@@ -64,4 +66,13 @@ func (p *PublishStatus) Scan(value interface{}) error {
 		return nil
 	}
 	return nil
+}
+
+func getPublishStatus() []common.Item {
+	return PublishStatusMap.ToItems()
+}
+
+func WorkflowPublishStatusListHandler(c *gin.Context) {
+	status := getPublishStatus()
+	response.Success(c, status, "success")
 }

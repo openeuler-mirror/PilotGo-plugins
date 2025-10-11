@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
+	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/common"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 type ScriptType int
@@ -17,7 +19,7 @@ const (
 	SQL    ScriptType = 4
 )
 
-var ScriptTypeMap = enum.EnumMap{
+var ScriptTypeMap = common.EnumMap{
 	int(Shell):  "Shell",
 	int(Perl):   "Perl",
 	int(Python): "Python",
@@ -71,6 +73,11 @@ func (p *ScriptType) Scan(value interface{}) error {
 	return nil
 }
 
-func GetScriptType() []enum.Item {
+func getScriptType() []common.Item {
 	return ScriptTypeMap.ToItems()
+}
+
+func ScriptTypeListHandler(c *gin.Context) {
+	scriptTypes := getScriptType()
+	response.Success(c, scriptTypes, "success")
 }
