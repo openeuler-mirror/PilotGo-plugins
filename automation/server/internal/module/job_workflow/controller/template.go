@@ -72,3 +72,19 @@ func GetTemplateById(c *gin.Context) {
 	}
 	response.Success(c, info, "success")
 }
+
+func PublishTemplate(c *gin.Context) {
+	var id struct {
+		ID        int    `json:"id"`
+		NewStatus string `json:"new_status"`
+	}
+	if err := c.ShouldBindJSON(&id); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.PublishTemplate(id.ID, id.NewStatus); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}

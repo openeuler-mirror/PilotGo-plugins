@@ -42,3 +42,7 @@ func GetTemplateById(id string) (interface{}, error) {
 	}
 	return info, nil
 }
+
+func PublishTemplate(id int, newStatus string) error {
+	return dao.PublishTemplate(id, newStatus)
+}

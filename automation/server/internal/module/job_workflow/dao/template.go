@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/gorm"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/job_workflow/model"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
@@ -265,4 +266,13 @@ func GetTemplateById(id string) (interface{}, error) {
 	data["output_params"] = output_params
 	data["steps"] = steps
 	return data, nil
+}
+
+func PublishTemplate(id int, newStatus string) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.TaskTemplate{}).Where("id = ?", id).Update("publish_status", script.ParseScriptPublishStatus(newStatus)).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
