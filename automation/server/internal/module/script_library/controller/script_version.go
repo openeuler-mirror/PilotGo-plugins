@@ -66,3 +66,21 @@ func DeleteScriptVersionHandler(c *gin.Context) {
 	}
 	response.Success(c, nil, "success")
 }
+
+func PublishScriptVersionHandler(c *gin.Context) {
+	script_id := c.Param("script_id")
+
+	var id struct {
+		ID        int    `json:"id"`
+		NewStatus string `json:"new_status"`
+	}
+	if err := c.ShouldBindJSON(&id); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	if err := service.PublishScriptVersion(id.ID, script_id, id.NewStatus); err != nil {
+		response.Fail(c, nil, err.Error())
+		return
+	}
+	response.Success(c, nil, "success")
+}

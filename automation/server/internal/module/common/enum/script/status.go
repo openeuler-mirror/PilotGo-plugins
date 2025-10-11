@@ -62,7 +62,15 @@ func (p *ScriptPublishStatus) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("invalid ScriptPublishStatus, must be string or number")
 }
 
+func (p ScriptPublishStatus) IsValid() bool {
+	_, exists := ScriptPublishStatusMap[int(p)]
+	return exists
+}
+
 func (p ScriptPublishStatus) Value() (driver.Value, error) {
+	if !p.IsValid() {
+		return nil, fmt.Errorf("invalid ScriptPublishStatus: %d, allowed: %v", int(p), ScriptPublishStatusMap)
+	}
 	return int64(p), nil
 }
 
@@ -72,7 +80,11 @@ func (p *ScriptPublishStatus) Scan(value interface{}) error {
 		return nil
 	}
 	if v, ok := value.(int64); ok {
-		*p = ScriptPublishStatus(int(v))
+		status := ScriptPublishStatus(int(v))
+		if !status.IsValid() {
+			return fmt.Errorf("invalid ScriptPublishStatus: %d, allowed: %v", int(v), ScriptPublishStatusMap)
+		}
+		*p = status
 		return nil
 	}
 	return nil

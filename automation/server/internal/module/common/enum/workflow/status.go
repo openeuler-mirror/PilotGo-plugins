@@ -52,7 +52,15 @@ func (p *PublishStatus) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("invalid PublishStatus: '%s', allowed: %v", s, PublishStatusMap)
 }
 
+func (p PublishStatus) IsValid() bool {
+	_, exists := PublishStatusMap[int(p)]
+	return exists
+}
+
 func (p PublishStatus) Value() (driver.Value, error) {
+	if !p.IsValid() {
+		return nil, fmt.Errorf("invalid PublishStatus: %d, allowed: %v", int(p), PublishStatusMap)
+	}
 	return int64(p), nil
 }
 
@@ -62,7 +70,11 @@ func (p *PublishStatus) Scan(value interface{}) error {
 		return nil
 	}
 	if v, ok := value.(int64); ok {
-		*p = PublishStatus(int(v))
+		status := PublishStatus(int(v))
+		if !status.IsValid() {
+			return fmt.Errorf("invalid PublishStatus: %d, allowed: %v", int(v), PublishStatusMap)
+		}
+		*p = status
 		return nil
 	}
 	return nil

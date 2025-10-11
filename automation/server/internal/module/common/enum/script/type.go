@@ -57,7 +57,15 @@ func (p *ScriptType) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("invalid ScriptType: '%s', allowed: %v", s, ScriptTypeMap)
 }
 
+func (p ScriptType) IsValid() bool {
+	_, exists := ScriptTypeMap[int(p)]
+	return exists
+}
+
 func (p ScriptType) Value() (driver.Value, error) {
+	if !p.IsValid() {
+		return nil, fmt.Errorf("invalid ScriptType: %d, allowed: %v", int(p), ScriptTypeMap)
+	}
 	return int64(p), nil
 }
 
@@ -67,7 +75,11 @@ func (p *ScriptType) Scan(value interface{}) error {
 		return nil
 	}
 	if v, ok := value.(int64); ok {
-		*p = ScriptType(int(v))
+		status := ScriptType(int(v))
+		if !status.IsValid() {
+			return fmt.Errorf("invalid ScriptType: %d, allowed: %v", int(v), ScriptTypeMap)
+		}
+		*p = status
 		return nil
 	}
 	return nil
