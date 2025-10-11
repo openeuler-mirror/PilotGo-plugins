@@ -53,7 +53,15 @@ func (p *ActionType) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("invalid ActionType: '%s', allowed: %v", s, ActionMap)
 }
 
+func (p ActionType) IsValid() bool {
+	_, exists := ActionMap[int(p)]
+	return exists
+}
+
 func (p ActionType) Value() (driver.Value, error) {
+	if !p.IsValid() {
+		return nil, fmt.Errorf("invalid ActionType: %d, allowed: %v", int(p), ActionMap)
+	}
 	return int64(p), nil
 }
 
@@ -63,7 +71,11 @@ func (p *ActionType) Scan(value interface{}) error {
 		return nil
 	}
 	if v, ok := value.(int64); ok {
-		*p = ActionType(int(v))
+		status := ActionType(int(v))
+		if !status.IsValid() {
+			return fmt.Errorf("invalid ActionType: %d, allowed: %v", int(v), ActionMap)
+		}
+		*p = status
 		return nil
 	}
 	return nil

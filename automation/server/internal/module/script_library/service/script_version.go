@@ -41,6 +41,10 @@ func DeleteScriptVersion(id int, scriptId string) error {
 	return dao.DeleteScriptVersion(id, scriptId)
 }
 
+func PublishScriptVersion(id int, scriptId string, newStatus string) error {
+	return dao.PublishScriptVersion(id, scriptId, newStatus)
+}
+
 func nextVersion(scriptId string) string {
 	currentVersion, err := dao.GetLatestScriptVersion(scriptId)
 	if err != nil {

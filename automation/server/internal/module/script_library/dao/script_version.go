@@ -92,7 +92,12 @@ func AddScriptVersion(sv *model.ScriptVersion) error {
 }
 
 func UpdateScriptVersion(id int, scriptId string, sv *model.ScriptVersion) error {
-	return global.App.MySQL.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Updates(sv).Error
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Updates(sv).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }
 
 func DeleteScriptVersion(id int, scriptId string) error {
@@ -110,6 +115,22 @@ func DeleteScriptVersion(id int, scriptId string) error {
 			if err := tx.Where("id = ?", scriptId).Delete(&model.Script{}).Error; err != nil {
 				return err
 			}
+		}
+
+		return nil
+	})
+}
+
+func PublishScriptVersion(id int, scriptId string, newStatus string) error {
+	return global.App.MySQL.Transaction(func(tx *gorm.DB) error {
+		if newStatus == script.Published.String() {
+			if err := tx.Model(&model.ScriptVersion{}).Where("script_id = ?", scriptId).Update("status", script.Develop).Error; err != nil {
+				return err
+			}
+		}
+
+		if err := tx.Model(&model.ScriptVersion{}).Where("id = ? AND script_id = ?", id, scriptId).Update("status", script.ParseScriptPublishStatus(newStatus)).Error; err != nil {
+			return err
 		}
 
 		return nil

@@ -19,6 +19,7 @@ func ScriptLibraryHandler(router *gin.RouterGroup) {
 			versionGroup.POST("/add", controller.AddScriptVersionHandler)
 			versionGroup.PUT("/update", controller.UpdateScriptVersionHandler)
 			versionGroup.DELETE("/delete", controller.DeleteScriptVersionHandler)
+			versionGroup.POST("/publish", controller.PublishScriptVersionHandler)
 		}
 	}
 

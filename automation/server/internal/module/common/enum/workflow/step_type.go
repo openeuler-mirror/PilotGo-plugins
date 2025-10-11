@@ -54,7 +54,15 @@ func (p *StepType) UnmarshalJSON(data []byte) error {
 	return fmt.Errorf("invalid StepType: '%s', allowed: %v", s, StepTypeMap)
 }
 
+func (p StepType) IsValid() bool {
+	_, exists := StepTypeMap[int(p)]
+	return exists
+}
+
 func (p StepType) Value() (driver.Value, error) {
+	if !p.IsValid() {
+		return nil, fmt.Errorf("invalid StepType: %d, allowed: %v", int(p), StepTypeMap)
+	}
 	return int64(p), nil
 }
 
@@ -63,8 +71,13 @@ func (p *StepType) Scan(value interface{}) error {
 		*p = 0
 		return nil
 	}
+
 	if v, ok := value.(int64); ok {
-		*p = StepType(int(v))
+		status := StepType(int(v))
+		if !status.IsValid() {
+			return fmt.Errorf("invalid StepType: %d, allowed: %v", int(v), StepTypeMap)
+		}
+		*p = status
 		return nil
 	}
 	return nil

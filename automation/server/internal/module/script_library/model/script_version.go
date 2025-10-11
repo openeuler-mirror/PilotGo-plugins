@@ -20,7 +20,7 @@ type ScriptVersion struct {
 	Params      json.RawMessage            `json:"params" gorm:"type:json;comment:脚本执行参数"` // 存 ScriptParam 数组
 	Content     string                     `json:"content" gorm:"type:text;not null;comment:脚本内容"`
 	Version     string                     `json:"version" gorm:"type:varchar(50);not null;uniqueIndex:uniq_script_version;comment:脚本版本号"`
-	VersionDesc string                     `json:"version_desc" gorm:"type:varchar(500);uniqueIndex:uniq_script_version;comment:脚本版本描述"`
+	VersionDesc string                     `json:"version_desc" gorm:"type:varchar(500);comment:脚本版本描述"`
 	Status      script.ScriptPublishStatus `json:"status" gorm:"default:1;comment:脚本版本状态"`
 	ModifyUser  string                     `json:"modify_user" gorm:"type:varchar(100);not null;comment:最后修改者"`
 	ModifyTime  string                     `json:"modify_time" gorm:"comment:最后修改时间"`
