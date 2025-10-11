@@ -28,7 +28,7 @@ SELECT
                 'params', sv.params,
                 'version', sv.version,
                 'version_desc', sv.version_desc,
-                'status', sv.status = 1,
+                'status', sv.status,
                 'modify_user', sv.modify_user,
                 'modify_time', sv.modify_time
             )
