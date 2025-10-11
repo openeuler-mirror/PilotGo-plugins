@@ -13,6 +13,10 @@ func generateScriptId() string {
 	return uuid.NewString()
 }
 
+func generateFirstVersion() string {
+	return "V1"
+}
+
 func AddScript(s *model.AddScriptDTO) error {
 	scriptId := generateScriptId()
 
@@ -37,7 +41,7 @@ func AddScript(s *model.AddScriptDTO) error {
 		// Content:  decodedContent,
 		Content:     s.FirstVersion.Content,
 		Params:      s.FirstVersion.Params,
-		Version:     s.FirstVersion.Version,
+		Version:     generateFirstVersion(),
 		VersionDesc: s.FirstVersion.VersionDesc,
 		ModifyUser:  s.Script.ModifyUser,
 		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),

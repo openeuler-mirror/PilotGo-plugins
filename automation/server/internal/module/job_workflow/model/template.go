@@ -3,6 +3,7 @@ package model
 import (
 	"encoding/json"
 
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/workflow"
 )
 
@@ -47,16 +48,16 @@ type TaskTemplateStep struct {
 }
 
 type TaskTemplateStepScript struct {
-	ID                  int             `json:"id" gorm:"primaryKey;autoIncrement"`
-	TemplateId          int             `json:"template_id" gorm:"comment:作业编排Id"`
-	StepNum             int             `json:"step_num" gorm:"comment:作业编排步骤Id"`
-	ScriptType          string          `json:"script_type"  gorm:"comment:脚本类型"`
-	ScriptId            string          `json:"script_id"  gorm:"comment:引用脚本Id"`
-	ScriptVersionId     string          `json:"script_version_id"  gorm:"comment:引用脚本版本Id"`
-	ScriptContent       string          `json:"script_content"  gorm:"comment:脚本内容"`
-	ScriptParam         string          `json:"script_param"  gorm:"comment:脚本执行参数"`
-	ScriptTimeout       int             `json:"script_timeout"  gorm:"comment:脚本超时"`
-	DestinationHostList json.RawMessage `json:"destination_host_list" gorm:"comment:远程执行主机列表"`
+	ID                  int               `json:"id" gorm:"primaryKey;autoIncrement"`
+	TemplateId          int               `json:"template_id" gorm:"comment:作业编排Id"`
+	StepNum             int               `json:"step_num" gorm:"comment:作业编排步骤Id"`
+	ScriptType          script.ScriptType `json:"script_type"  gorm:"comment:脚本类型"`
+	ScriptId            string            `json:"script_id"  gorm:"comment:引用脚本Id"`
+	ScriptVersionId     string            `json:"script_version_id"  gorm:"comment:引用脚本版本Id"`
+	ScriptContent       string            `json:"script_content"  gorm:"comment:脚本内容"`
+	ScriptParam         string            `json:"script_param"  gorm:"comment:脚本执行参数"`
+	ScriptTimeout       int               `json:"script_timeout"  gorm:"comment:脚本超时"`
+	DestinationHostList json.RawMessage   `json:"destination_host_list" gorm:"comment:远程执行主机列表"`
 }
 
 type TaskTemplateDTO struct {

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/dao"
@@ -16,7 +18,7 @@ func AddScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 		ScriptID:    scriptId,
 		Content:     sv.Content,
 		Params:      sv.Params,
-		Version:     sv.Version,
+		Version:     nextVersion(scriptId),
 		VersionDesc: sv.VersionDesc,
 		ModifyUser:  sv.ModifyUser,
 		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
@@ -28,7 +30,6 @@ func UpdateScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 	scriptVersion := &model.ScriptVersion{
 		Content:     sv.Content,
 		Params:      sv.Params,
-		Version:     sv.Version,
 		VersionDesc: sv.VersionDesc,
 		ModifyUser:  sv.ModifyUser,
 		ModifyTime:  time.Now().Format("2006-01-02 15:04:05"),
@@ -38,4 +39,13 @@ func UpdateScriptVersion(scriptId string, sv *model.ScriptVersion) error {
 
 func DeleteScriptVersion(id int, scriptId string) error {
 	return dao.DeleteScriptVersion(id, scriptId)
+}
+
+func nextVersion(scriptId string) string {
+	currentVersion, err := dao.GetLatestScriptVersion(scriptId)
+	if err != nil {
+		return generateFirstVersion()
+	}
+	versionNum, _ := strconv.Atoi(currentVersion[1:])
+	return fmt.Sprintf("V%d", versionNum+1)
 }
