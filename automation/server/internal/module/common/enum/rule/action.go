@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum"
+	"github.com/gin-gonic/gin"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/common"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/response"
 )
 
 type ActionType int
@@ -15,7 +17,7 @@ const (
 	Warning ActionType = 2
 )
 
-var ActionMap = enum.EnumMap{
+var ActionMap = common.EnumMap{
 	int(Block):   "拦截",
 	int(Warning): "警告",
 }
@@ -67,6 +69,11 @@ func (p *ActionType) Scan(value interface{}) error {
 	return nil
 }
 
-func GetActions() []enum.Item {
+func getRuleActions() []common.Item {
 	return ActionMap.ToItems()
+}
+
+func RuleActionListHandler(c *gin.Context) {
+	actions := getRuleActions()
+	response.Success(c, actions, "success")
 }

@@ -16,9 +16,4 @@ func DangerousRuleHandler(router *gin.RouterGroup) {
 		api.POST("/detectRule", controller.DetectRealtimelyHandler)
 	}
 
-	enumApi := router.Group("/enum")
-	{
-		enumApi.GET("/scriptType", controller.ScriptTypeListHandler)
-		enumApi.GET("/action", controller.ActionListHandler)
-	}
 }
