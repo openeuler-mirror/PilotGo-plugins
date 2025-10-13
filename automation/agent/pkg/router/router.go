@@ -1,6 +1,7 @@
 package router
 
 import (
+	execscript "ant-agent/exec-script"
 	"ant-agent/pkg/global"
 
 	"gitee.com/openeuler/PilotGo/sdk/logger"
@@ -22,6 +23,7 @@ func initRouters() *gin.Engine {
 	Router.Use(logger.RequestLogger([]string{}))
 
 	// 注册各自的路由模块
-	// api := Router.Group("/plugin/automation")
+	api := Router.Group("/plugin/automation")
+	execscript.ExecScriptHandler(api)
 	return Router
 }
