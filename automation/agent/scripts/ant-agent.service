@@ -1,0 +1,15 @@
+[Unit]
+Description= automation ant-agent
+
+[Service]
+Type=simple
+Restart=on-failure      
+RestartSec=5s           
+StartLimitInterval=30s  
+StartLimitBurst=3
+
+WorkingDirectory=/opt/PilotGo/plugin/automation/agent
+ExecStart=/opt/PilotGo/plugin/automation/server/ant-agent
+
+[Install]
+WantedBy=multi-user.target

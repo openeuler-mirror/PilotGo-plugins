@@ -1,0 +1,9 @@
+http_server:
+    addr: localhost:8277
+log:
+    level: debug
+    # 可选stdout和file.stdout:输出到终端控制台;file:输出到path下的指定文件。
+    driver: stdout
+    path: ./log/ant-agent.log
+    max_file: 1
+    max_size: 10485760
