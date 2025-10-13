@@ -1,8 +1,7 @@
-go 1.23.0
-
-toolchain go1.23.7
+go 1.23.7
 
 use (
+	./automation/agent
 	./automation/server
 	./configmanage/server
 	./container/server
