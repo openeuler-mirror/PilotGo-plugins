@@ -1,15 +1,15 @@
 %define         debug_package %{nil}
 
-Name:           PilotGo-plugin-automation
+Name:           ismp-automation
 Version:        3.0.0
 Release:        1
 Summary:        PilotGo automation plugin provides script execution and orchestration.
 License:        MulanPSL-2.0
 URL:            https://gitee.com/openeuler/PilotGo-plugins/automation
-Source0:        PilotGo-plugin-automation.tar.gz
+Source0:        ismp-automation.tar.gz
 
 BuildRequires:  systemd
-Provides:       pilotgo-plugin-automation = %{version}-%{release}
+Provides:       ismp-automation = %{version}-%{release}
 
 %description
 PilotGo automation plugin provides script execution and orchestration.
@@ -19,7 +19,7 @@ PilotGo automation plugin provides script execution and orchestration.
 
 %build
 pushd server
-GO111MODULE=on go build -o PilotGo-plugin-automation ./cmd/main.go
+CGO_ENABLED=0 GO111MODULE=on go build -o ismp-automation ./cmd/main.go
 popd
 
 pushd web
@@ -29,19 +29,19 @@ popd
 
 %install
 mkdir -p %{buildroot}/opt/PilotGo/plugin/automation/{server/log,web/dist}
-install -D -m 0755 server/PilotGo-plugin-automation %{buildroot}/opt/PilotGo/plugin/automation/server
-install -D -m 0644 server/automation.yml %{buildroot}/opt/PilotGo/plugin/automation/server/automation.yml
-install -D -m 0644 server/scripts/PilotGo-plugin-automation.service %{buildroot}%{_unitdir}/PilotGo-plugin-automation.service
+install -D -m 0755 server/ismp-automation %{buildroot}/opt/PilotGo/plugin/automation/server
+install -D -m 0644 server/automation.yaml %{buildroot}/opt/PilotGo/plugin/automation/server/automation.yaml
+install -D -m 0644 server/scripts/ismp-automation.service %{buildroot}%{_unitdir}/ismp-automation.service
 cp -rf web/dist %{buildroot}/opt/PilotGo/plugin/automation/web
 
 %post
-%systemd_post PilotGo-plugin-automation.service
+%systemd_post ismp-automation.service
 
 %preun
-%systemd_preun PilotGo-plugin-automation.service
+%systemd_preun ismp-automation.service
 
 %postun
-%systemd_postun PilotGo-plugin-automation.service
+%systemd_postun ismp-automation.service
 
 %files
 %dir /opt/PilotGo
@@ -49,9 +49,9 @@ cp -rf web/dist %{buildroot}/opt/PilotGo/plugin/automation/web
 %dir /opt/PilotGo/plugin/automation
 %dir /opt/PilotGo/plugin/automation/server
 %dir /opt/PilotGo/plugin/automation/server/log
-/opt/PilotGo/plugin/automation/server/PilotGo-plugin-automation
-/opt/PilotGo/plugin/automation/server/automation.yml
-%{_unitdir}/PilotGo-plugin-automation.service
+/opt/PilotGo/plugin/automation/server/ismp-automation
+/opt/PilotGo/plugin/automation/server/automation.yaml
+%{_unitdir}/ismp-automation.service
 /opt/PilotGo/plugin/automation/web/dist
 
 

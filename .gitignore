@@ -6,5 +6,6 @@ topology/pkg/
 topology/build
 *.yaml
 !automation.yaml
+!ant-agent.yaml
 # python build cache
 __pycache__
