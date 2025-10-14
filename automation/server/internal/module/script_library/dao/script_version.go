@@ -9,6 +9,7 @@ import (
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/global"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/common/enum/script"
 	"openeuler.org/PilotGo/PilotGo-plugin-automation/internal/module/script_library/model"
+	"openeuler.org/PilotGo/PilotGo-plugin-automation/pkg/utils"
 )
 
 func GetScriptVersions(scriptId string) (*model.ScriptVersionResponse, error) {
@@ -143,4 +144,16 @@ func GetLatestScriptVersion(scriptId string) (string, error) {
 		return "", err
 	}
 	return sv.Version, nil
+}
+
+func GetPublishedScriptByScriptId(scriptId string) (string, string, error) {
+	var s model.Script
+	if err := global.App.MySQL.Model(&model.Script{}).Where("script_id = ?", scriptId).First(&s).Error; err != nil {
+		return "", "", err
+	}
+	var sv model.ScriptVersion
+	if err := global.App.MySQL.Model(&model.ScriptVersion{}).Where("script_id = ? AND status = ?", scriptId, script.Published).First(&sv).Error; err != nil {
+		return s.ScriptType.String(), "", err
+	}
+	return s.ScriptType.String(), utils.EncodeScriptContent(sv.Content), nil
 }
