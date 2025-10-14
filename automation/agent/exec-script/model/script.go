@@ -7,6 +7,7 @@ type CmdResult struct {
 }
 
 type ScriptsRun struct {
+	JobId         string
 	ScriptType    string
 	ScriptContent string
 	Params        string
